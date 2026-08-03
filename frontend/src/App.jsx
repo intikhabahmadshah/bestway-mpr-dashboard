@@ -1,0 +1,248 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers } from 'react-icons/fi';
+import './App.css';
+import Header from './components/Header';
+import KPICards from './components/KPICards';
+import ProgressChart from './components/ProgressChart';
+import MonthlyBarChart from './components/MonthlyBarChart';
+import VarianceChart from './components/VarianceChart';
+import GaugeChart from './components/GaugeChart';
+import DataTable from './components/DataTable';
+import UploadDataset from './components/UploadDataset';
+
+const FALLBACK_DATA = [
+  { month: '3/26/2026', month_ending: '3/31/2026', duration: 6, monthly_planned: 0, monthly_actual: 0, accumulative_planned: 0, accumulative_actual: 0 },
+  { month: '4/26/2026', month_ending: '4/30/2026', duration: 36, monthly_planned: 0.04112, monthly_actual: 0.02832, accumulative_planned: 0.04112, accumulative_actual: 0.02832 },
+  { month: '5/26/2026', month_ending: '5/31/2026', duration: 67, monthly_planned: 0.02096, monthly_actual: 0.0328, accumulative_planned: 0.06208, accumulative_actual: 0.06112 },
+  { month: '6/26/2026', month_ending: '6/30/2026', duration: 97, monthly_planned: 0.07312, monthly_actual: 0.07988, accumulative_planned: 0.1352, accumulative_actual: 0.141 },
+  { month: '7/26/2026', month_ending: '7/31/2026', duration: 128, monthly_planned: 0.0528, monthly_actual: 0.053, accumulative_planned: 0.188, accumulative_actual: 0.194 },
+  { month: '8/26/2026', month_ending: '8/31/2026', duration: 159, monthly_planned: 0.067161905, monthly_actual: null, accumulative_planned: 0.255161905, accumulative_actual: null },
+  { month: '9/26/2026', month_ending: '9/30/2026', duration: 189, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.30887619, accumulative_actual: null },
+  { month: '10/26/2026', month_ending: '10/31/2026', duration: 220, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.364380952, accumulative_actual: null },
+  { month: '11/26/2026', month_ending: '11/30/2026', duration: 250, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.418095238, accumulative_actual: null },
+  { month: '12/26/2026', month_ending: '12/31/2026', duration: 281, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.4736, accumulative_actual: null },
+  { month: '1/27/2026', month_ending: '1/31/2027', duration: 312, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.529104762, accumulative_actual: null },
+  { month: '2/27/2026', month_ending: '2/28/2027', duration: 340, monthly_planned: 0.050133333, monthly_actual: null, accumulative_planned: 0.579238095, accumulative_actual: null },
+  { month: '3/27/2026', month_ending: '3/31/2027', duration: 371, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.634742857, accumulative_actual: null },
+  { month: '4/27/2026', month_ending: '4/30/2027', duration: 401, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.688457143, accumulative_actual: null },
+  { month: '5/27/2026', month_ending: '5/31/2027', duration: 432, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.743961905, accumulative_actual: null },
+  { month: '6/27/2026', month_ending: '6/30/2027', duration: 462, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.79767619, accumulative_actual: null },
+  { month: '7/27/2026', month_ending: '7/31/2027', duration: 493, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.853180952, accumulative_actual: null },
+  { month: '8/27/2026', month_ending: '8/31/2027', duration: 524, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.908685714, accumulative_actual: null },
+  { month: '9/27/2026', month_ending: '9/30/2027', duration: 554, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.9624, accumulative_actual: null },
+  { month: '10/27/2026', month_ending: '10/31/2027', duration: 585, monthly_planned: 0.0376, monthly_actual: null, accumulative_planned: 1, accumulative_actual: null }
+];
+
+function App() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [toasts, setToasts] = useState([]);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('mpr-theme') || 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('mpr-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
+  const showToast = useCallback((message, type = 'info') => {
+    const id = `${Date.now()}-${Math.random()}`;
+    // Replace previous toast so they don't stack up
+    setToasts([{ id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 2000); // Auto-hide after 2 seconds
+  }, []);
+
+  const normalizeData = (rows) => {
+    // Sort chronologically by duration or date
+    const sorted = [...rows].sort((a, b) => (Number(a.duration) || 0) - (Number(b.duration) || 0));
+    return sorted.map((row, idx) => ({
+      ...row,
+      id: idx + 1,
+      duration: Number(row.duration) || 0,
+      monthly_planned: row.monthly_planned !== null && row.monthly_planned !== undefined ? parseFloat(row.monthly_planned) : null,
+      monthly_actual: row.monthly_actual !== null && row.monthly_actual !== undefined ? parseFloat(row.monthly_actual) : null,
+      accumulative_planned: row.accumulative_planned !== null && row.accumulative_planned !== undefined ? parseFloat(row.accumulative_planned) : null,
+      accumulative_actual: row.accumulative_actual !== null && row.accumulative_actual !== undefined ? parseFloat(row.accumulative_actual) : null,
+    }));
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/api/mpr');
+      const apiData = response.data.data || response.data;
+      if (Array.isArray(apiData) && apiData.length > 0) {
+        setData(normalizeData(apiData));
+        showToast('Data loaded from database', 'success');
+      } else {
+        setData(normalizeData(FALLBACK_DATA));
+        showToast('No data in database, using local dataset', 'info');
+      }
+    } catch (error) {
+      console.warn('Backend not running or failed. Using fallback data.', error);
+      setData(normalizeData(FALLBACK_DATA));
+      showToast('Using fallback local data', 'info');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleUploadSuccess = () => {
+    setShowUploadModal(false);
+    setSelectedMonth(null);
+    fetchData();
+  };
+
+  const handleSelectMonth = (row) => {
+    setSelectedMonth(row);
+    const monthStr = new Date(row.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' });
+    const valStr = row.accumulative_actual !== null ? `${(row.accumulative_actual * 100).toFixed(2)}%` : 'Pending';
+    showToast(`Inspecting ${monthStr} (Accum Actual: ${valStr})`, 'info');
+  };
+
+  return (
+    <>
+      <Header theme={theme} toggleTheme={toggleTheme} />
+      
+      <div className="toast-container">
+        {toasts.map((toast) => (
+          <div 
+            key={toast.id} 
+            className={`toast ${toast.type}`}
+            onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+            style={{ cursor: 'pointer' }}
+            title="Click to close notification"
+          >
+            {toast.type === 'success' && <FiCheck />}
+            {toast.type === 'error' && <FiAlertCircle />}
+            {toast.type === 'info' && <FiInfo />}
+            <span style={{ flex: 1 }}>{toast.message}</span>
+          </div>
+        ))}
+      </div>
+
+      <main className="dashboard">
+        <div className="dashboard-toolbar">
+          <div className="dashboard-info">
+            <h2>Project Overview</h2>
+            <p>Performance metrics and schedule tracking</p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <button className="btn-upload" onClick={() => setShowUploadModal(true)}>
+              <FiUploadCloud size={18} />
+              Update Data
+            </button>
+          </div>
+        </div>
+
+        {selectedMonth && (
+          <div className="active-filter-bar">
+            <div className="filter-bar-info">
+              <FiFilter className="filter-icon" />
+              <span>
+                <strong>Interactive Inspection Mode:</strong> Viewing metrics for{' '}
+                <mark>{new Date(selectedMonth.month_ending).toLocaleDateString('default', { month: 'long', year: 'numeric' })}</mark>{' '}
+                (Accum. Planned: <strong>{(selectedMonth.accumulative_planned * 100).toFixed(2)}%</strong>
+                {selectedMonth.accumulative_actual !== null && `, Accum. Actual: `}
+                {selectedMonth.accumulative_actual !== null && <strong>{(selectedMonth.accumulative_actual * 100).toFixed(2)}%</strong>})
+              </span>
+            </div>
+            <button className="btn-clear-filter" onClick={() => setSelectedMonth(null)}>
+              <FiXCircle size={16} />
+              Reset View
+            </button>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="loading-container">
+            <div className="spinner"></div>
+            <div className="loading-text">Loading dashboard data...</div>
+          </div>
+        ) : (
+          <>
+            <KPICards data={data} selectedMonth={selectedMonth} />
+            
+            <div className="charts-grid">
+              <div className="chart-card full-width">
+                <div className="chart-card-header">
+                  <h3 className="chart-card-title">S-Curve: Cumulative Progress</h3>
+                  <span className="chart-card-badge" style={{ cursor: 'pointer' }} title="Click any data label or point on chart to inspect">
+                    <FiLayers style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Interactive Click Enabled
+                  </span>
+                </div>
+                <ProgressChart 
+                  data={data} 
+                  theme={theme} 
+                  selectedMonth={selectedMonth}
+                  onSelectMonth={handleSelectMonth}
+                />
+              </div>
+              
+              <div className="chart-card">
+                <div className="chart-card-header">
+                  <h3 className="chart-card-title">Monthly Progress Comparison</h3>
+                  <span className="chart-card-badge">Monthly</span>
+                </div>
+                <MonthlyBarChart data={data} theme={theme} />
+              </div>
+              
+              <div className="chart-card">
+                <div className="chart-card-header">
+                  <h3 className="chart-card-title">Overall Completion</h3>
+                  <span className="chart-card-badge">
+                    {selectedMonth ? new Date(selectedMonth.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' }) : 'Status'}
+                  </span>
+                </div>
+                <GaugeChart data={data} theme={theme} selectedMonth={selectedMonth} />
+              </div>
+
+              <div className="chart-card full-width">
+                <div className="chart-card-header">
+                  <h3 className="chart-card-title">Schedule Variance Analysis</h3>
+                  <span className="chart-card-badge">Variance</span>
+                </div>
+                <VarianceChart data={data} theme={theme} />
+              </div>
+            </div>
+
+            <DataTable 
+              data={data} 
+              selectedMonth={selectedMonth}
+              onSelectMonth={handleSelectMonth}
+            />
+          </>
+        )}
+      </main>
+
+      <footer className="footer">
+        <p>Construction of Bestway Tower at F-9/G-9, Islamabad &copy; 2026 | Developed by Timeline Consultants</p>
+      </footer>
+
+      {showUploadModal && (
+        <UploadDataset 
+          isOpen={showUploadModal} 
+          onClose={() => setShowUploadModal(false)}
+          onUploadSuccess={handleUploadSuccess}
+          showToast={showToast}
+        />
+      )}
+    </>
+  );
+}
+
+export default App;
