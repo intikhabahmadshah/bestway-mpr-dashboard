@@ -76,6 +76,24 @@ function App() {
     }));
   };
 
+  const loadLocalStorageOrFallback = () => {
+    const saved = localStorage.getItem('mpr_custom_data');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setData(normalizeData(parsed));
+          showToast('Loaded custom uploaded dataset', 'success');
+          return;
+        }
+      } catch (e) {
+        console.error('Failed to parse saved dataset', e);
+      }
+    }
+    setData(normalizeData(FALLBACK_DATA));
+    showToast('Loaded default project dataset', 'info');
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -85,13 +103,11 @@ function App() {
         setData(normalizeData(apiData));
         showToast('Data loaded from database', 'success');
       } else {
-        setData(normalizeData(FALLBACK_DATA));
-        showToast('No data in database, using local dataset', 'info');
+        loadLocalStorageOrFallback();
       }
     } catch (error) {
-      console.warn('Backend not running or failed. Using fallback data.', error);
-      setData(normalizeData(FALLBACK_DATA));
-      showToast('Using fallback local data', 'info');
+      console.warn('Backend API not reachable. Loading client-side dataset...', error);
+      loadLocalStorageOrFallback();
     } finally {
       setLoading(false);
     }
@@ -101,10 +117,21 @@ function App() {
     fetchData();
   }, []);
 
-  const handleUploadSuccess = () => {
+  const handleUploadSuccess = (newRows) => {
     setShowUploadModal(false);
     setSelectedMonth(null);
-    fetchData();
+    if (newRows && Array.isArray(newRows)) {
+      setData(normalizeData(newRows));
+    } else {
+      fetchData();
+    }
+  };
+
+  const resetToDefaultDataset = () => {
+    localStorage.removeItem('mpr_custom_data');
+    setSelectedMonth(null);
+    setData(normalizeData(FALLBACK_DATA));
+    showToast('Reset to original dataset', 'info');
   };
 
   const handleSelectMonth = (row) => {
@@ -142,6 +169,11 @@ function App() {
             <p>Performance metrics and schedule tracking</p>
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            {localStorage.getItem('mpr_custom_data') && (
+              <button className="btn-cancel" onClick={resetToDefaultDataset} title="Restore original project CSV dataset">
+                Reset to Original Data
+              </button>
+            )}
             <button className="btn-upload" onClick={() => setShowUploadModal(true)}>
               <FiUploadCloud size={18} />
               Update Data
