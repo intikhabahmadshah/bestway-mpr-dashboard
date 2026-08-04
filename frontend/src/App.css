@@ -288,14 +288,14 @@
 
 .data-table thead th {
   background: rgba(46, 196, 182, 0.12);
-  color: var(--accent-blue-light);
-  font-weight: 600;
+  color: var(--text-primary);
+  font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.8px;
   padding: 14px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 2px solid var(--border-color);
   position: sticky;
   top: 0;
   white-space: nowrap;
@@ -698,7 +698,8 @@
 
 /* ===== LIGHT MODE TABLE ===== */
 [data-theme="light"] .data-table thead th {
-  background: rgba(46, 196, 182, 0.08);
+  background: rgba(46, 196, 182, 0.15);
+  color: #1e293b;
 }
 [data-theme="light"] .data-table tbody tr:hover {
   background: rgba(46, 196, 182, 0.04);
