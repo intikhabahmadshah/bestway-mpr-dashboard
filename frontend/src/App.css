@@ -334,12 +334,34 @@
 }
 .status-badge.on-track {
   background: rgba(255, 209, 102, 0.35);
-  color: #B45309;
+  color: #92400E;
 }
 .status-badge.pending {
   background: rgba(100, 116, 139, 0.25);
-  color: var(--text-muted);
+  color: #475569;
 }
+
+/* Dark mode badge overrides */
+[data-theme="dark"] .status-badge.ahead,
+:root .status-badge.ahead {
+  color: #5EEAD4;
+}
+[data-theme="dark"] .status-badge.behind,
+:root .status-badge.behind {
+  color: #FDA4AF;
+}
+[data-theme="dark"] .status-badge.on-track,
+:root .status-badge.on-track {
+  color: #FFD166;
+}
+[data-theme="dark"] .status-badge.pending,
+:root .status-badge.pending {
+  color: #94a3b8;
+}
+[data-theme="light"] .status-badge.ahead { color: #0D9488; }
+[data-theme="light"] .status-badge.behind { color: #E11D48; }
+[data-theme="light"] .status-badge.on-track { color: #92400E; }
+[data-theme="light"] .status-badge.pending { color: #475569; }
 
 /* ===== UPLOAD MODAL ===== */
 .modal-overlay {
@@ -434,8 +456,8 @@
   align-items: center;
   gap: 12px;
   padding: 16px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: rgba(46, 196, 182, 0.1);
+  border: 1px solid rgba(46, 196, 182, 0.25);
   border-radius: var(--radius-md);
   margin-top: 16px;
 }
@@ -564,18 +586,18 @@
   min-width: 280px;
 }
 .toast.success {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(46, 196, 182, 0.2);
+  border: 1px solid rgba(46, 196, 182, 0.4);
   color: var(--accent-green-light);
 }
 .toast.error {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 71, 111, 0.2);
+  border: 1px solid rgba(239, 71, 111, 0.4);
   color: var(--accent-red);
 }
 .toast.info {
-  background: rgba(17, 138, 178, 0.15);
-  border: 1px solid rgba(17, 138, 178, 0.3);
+  background: rgba(17, 138, 178, 0.2);
+  border: 1px solid rgba(17, 138, 178, 0.4);
   color: var(--accent-blue-light);
 }
 
@@ -694,11 +716,21 @@
   color: var(--text-primary);
 }
 .filter-bar-info mark {
-  background: rgba(245, 158, 11, 0.2);
-  color: var(--accent-amber);
-  padding: 2px 8px;
-  border-radius: 4px;
+  background: #073B4C;
+  color: #FFD166;
+  padding: 3px 10px;
+  border-radius: 6px;
   font-weight: 700;
+}
+[data-theme="light"] .filter-bar-info mark {
+  background: #073B4C;
+  color: #FFD166;
+}
+[data-theme="light"] .filter-bar-info {
+  color: #073B4C;
+}
+[data-theme="light"] .filter-icon {
+  color: #0F766E;
 }
 .filter-icon {
   color: var(--accent-blue-light);
