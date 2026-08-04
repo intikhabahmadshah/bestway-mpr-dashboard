@@ -553,18 +553,24 @@
 .btn-confirm {
   padding: 10px 24px;
   background: var(--gradient-primary);
-  color: white;
+  color: #ffffff;
   border: none;
-  border-radius: var(--radius-md);
-  font-size: 0.85rem;
-  font-weight: 600;
+  border-radius: 30px;
+  font-size: 0.88rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Poppins', sans-serif;
+  box-shadow: 0 4px 15px rgba(46, 196, 182, 0.3);
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .btn-confirm:hover {
-  box-shadow: 0 4px 20px rgba(46, 196, 182, 0.4);
-  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(46, 196, 182, 0.5);
+  transform: translateY(-1.5px);
 }
 .btn-confirm:disabled {
   opacity: 0.5;

@@ -31,8 +31,8 @@ const Header = ({ theme, toggleTheme, currentView, onNavigate }) => {
         <img src="/logo.webp" alt="Timeline Consultants Logo" className="header-logo logo-right" />
         
         {currentView !== 'home' && (
-          <button className="btn-nav-home" onClick={() => onNavigate('home')} title="Return to Portal Homepage">
-            <FiHome size={16} /> Home
+          <button className="btn-confirm" onClick={() => onNavigate('home')} title="Return to Portal Homepage">
+            Return to Portal Home
           </button>
         )}
 

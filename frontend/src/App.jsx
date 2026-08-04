@@ -198,8 +198,8 @@ function App() {
       {currentView === 'grey_structure' && (
         <main className="dashboard">
           <div className="page-navigation-bar" style={{ marginBottom: '20px' }}>
-            <button className="btn-back" onClick={() => navigateTo('home')}>
-              <FiArrowLeft /> Return to Homepage
+            <button className="btn-confirm" onClick={() => navigateTo('home')}>
+              Return to Portal Home
             </button>
           </div>
 
@@ -212,8 +212,8 @@ function App() {
               <p>Performance metrics and schedule tracking for Grey Structure Construction</p>
             </div>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button className="btn-back" onClick={() => navigateTo('home')} title="Return to Portal Homepage">
-                <FiHome /> Home
+              <button className="btn-confirm" onClick={() => navigateTo('home')} title="Return to Portal Homepage">
+                Return to Portal Home
               </button>
               {localStorage.getItem('mpr_custom_data') && (
                 <button className="btn-cancel" onClick={resetToDefaultDataset} title="Restore original project CSV dataset">

@@ -8,8 +8,8 @@ const BillsDataPage = ({ onNavigate, theme }) => {
     <div className="bills-page-container">
       {/* Top Breadcrumb Bar */}
       <div className="page-navigation-bar">
-        <button className="btn-back" onClick={() => onNavigate('home')}>
-          <FiArrowLeft /> Back to Home
+        <button className="btn-confirm" onClick={() => onNavigate('home')}>
+          Return to Portal Home
         </button>
         <button className="btn-shortcut" onClick={() => onNavigate('grey_structure')}>
           <FiBarChart2 /> Grey Structure Dashboard
