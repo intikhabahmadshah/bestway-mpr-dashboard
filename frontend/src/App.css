@@ -578,6 +578,56 @@
   transform: none;
 }
 
+/* ===== EXPORT MODAL OPTION CARDS ===== */
+.export-option-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: 'Poppins', sans-serif;
+  text-align: left;
+  width: 100%;
+}
+.export-option-card:hover {
+  border-color: var(--accent-teal);
+  background: rgba(46, 196, 182, 0.08);
+}
+.export-option-card.selected {
+  border-color: #2EC4B6;
+  background: rgba(46, 196, 182, 0.16);
+  box-shadow: 0 0 12px rgba(46, 196, 182, 0.25);
+}
+.export-option-card .option-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(46, 196, 182, 0.15);
+  color: #2EC4B6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.export-option-card.selected .option-icon {
+  background: #2EC4B6;
+  color: #ffffff;
+}
+.export-option-card .option-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.export-option-card .option-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
 .upload-progress {
   margin-top: 16px;
 }

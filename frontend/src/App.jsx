@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers, FiArrowLeft, FiHome } from 'react-icons/fi';
+import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers, FiArrowLeft, FiHome, FiDownload, FiPrinter } from 'react-icons/fi';
 import './App.css';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
 import BillsDataPage from './components/BillsDataPage';
+import ExportDashboardModal from './components/ExportDashboardModal';
 import KPICards from './components/KPICards';
 import ProgressChart from './components/ProgressChart';
 import MonthlyBarChart from './components/MonthlyBarChart';
@@ -40,6 +41,7 @@ function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [toasts, setToasts] = useState([]);
   const [theme, setTheme] = useState(() => {
@@ -196,7 +198,7 @@ function App() {
       )}
 
       {currentView === 'grey_structure' && (
-        <main className="dashboard">
+        <main className="dashboard" id="grey-structure-dashboard-container">
           <div className="page-navigation-bar" style={{ marginBottom: '20px' }}>
             <button className="btn-confirm" onClick={() => navigateTo('home')}>
               Return to Portal Home
@@ -211,9 +213,12 @@ function App() {
               </div>
               <p>Performance metrics and schedule tracking for Grey Structure Construction</p>
             </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
               <button className="btn-confirm" onClick={() => navigateTo('home')} title="Return to Portal Homepage">
                 Return to Portal Home
+              </button>
+              <button className="btn-confirm" onClick={() => setShowExportModal(true)} style={{ background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)' }} title="Export high-res A4 PDF or PNG formatted for reports">
+                <FiDownload size={18} /> Download this Dashboard
               </button>
               {localStorage.getItem('mpr_custom_data') && (
                 <button className="btn-cancel" onClick={resetToDefaultDataset} title="Restore original project CSV dataset">
@@ -317,6 +322,16 @@ function App() {
           isOpen={showUploadModal} 
           onClose={() => setShowUploadModal(false)}
           onUploadSuccess={handleUploadSuccess}
+          showToast={showToast}
+        />
+      )}
+
+      {showExportModal && (
+        <ExportDashboardModal 
+          isOpen={showExportModal} 
+          onClose={() => setShowExportModal(false)}
+          targetId="grey-structure-dashboard-container"
+          theme={theme}
           showToast={showToast}
         />
       )}
