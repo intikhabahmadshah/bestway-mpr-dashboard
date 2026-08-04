@@ -225,22 +225,22 @@ function App() {
                 />
               </div>
               
-              <div className="chart-card">
+              <div className="chart-card full-width">
                 <div className="chart-card-header">
-                  <h3 className="chart-card-title">Monthly Progress Comparison</h3>
-                  <span className="chart-card-badge">Monthly</span>
-                </div>
-                <MonthlyBarChart data={data} theme={theme} />
-              </div>
-              
-              <div className="chart-card">
-                <div className="chart-card-header">
-                  <h3 className="chart-card-title">Overall Completion</h3>
+                  <h3 className="chart-card-title">Overall Completion & Target Status</h3>
                   <span className="chart-card-badge">
                     {selectedMonth ? new Date(selectedMonth.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' }) : 'Status'}
                   </span>
                 </div>
                 <GaugeChart data={data} theme={theme} selectedMonth={selectedMonth} />
+              </div>
+
+              <div className="chart-card full-width">
+                <div className="chart-card-header">
+                  <h3 className="chart-card-title">Monthly Progress Comparison</h3>
+                  <span className="chart-card-badge">Monthly</span>
+                </div>
+                <MonthlyBarChart data={data} theme={theme} />
               </div>
 
               <div className="chart-card full-width">
