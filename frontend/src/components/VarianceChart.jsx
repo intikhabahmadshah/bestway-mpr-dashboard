@@ -93,7 +93,8 @@ const VarianceChart = ({ data, theme }) => {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    devicePixelRatio: Math.max(window.devicePixelRatio || 1, 3),
+    devicePixelRatio: Math.max((window.devicePixelRatio || 1) * 2.5, 4),
+    resizeDelay: 0,
     layout: {
       padding: {
         top: 30,

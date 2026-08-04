@@ -126,6 +126,11 @@ body::before {
   z-index: 1;
 }
 
+canvas {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
