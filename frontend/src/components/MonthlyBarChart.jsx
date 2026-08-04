@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -8,7 +8,6 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(
@@ -17,8 +16,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend,
-  ChartDataLabels
+  Legend
 );
 
 const MonthlyBarChart = ({ data, theme }) => {
@@ -38,10 +36,57 @@ const MonthlyBarChart = ({ data, theme }) => {
       : null
   );
 
-  // Dynamic Y-axis max with headroom for data labels
+  // Dynamic Y-axis max with headroom for stacked labels
   const allVals = [...plannedData, ...actualData.filter(v => v !== null)];
   const yMaxVal = Math.max(...allVals, 1);
-  const yMax = Math.ceil(yMaxVal + Math.max(yMaxVal * 0.25, 3)); // 25% headroom or at least +3
+  const yMax = Math.ceil(yMaxVal + Math.max(yMaxVal * 0.35, 4));
+
+  // Custom plugin: draw both labels centered above each bar group
+  const centeredLabelsPlugin = useMemo(() => ({
+    id: 'centeredLabels',
+    afterDatasetsDraw(chart) {
+      const { ctx, data: chartData } = chart;
+      const meta0 = chart.getDatasetMeta(0); // Planned (blue)
+      const meta1 = chart.getDatasetMeta(1); // Actual (green)
+
+      for (let i = 0; i < chartData.labels.length; i++) {
+        const bar0 = meta0.data[i];
+        const bar1 = meta1.data[i];
+        if (!bar0) continue;
+
+        const val0 = chartData.datasets[0].data[i];
+        const val1 = bar1 ? chartData.datasets[1].data[i] : null;
+        const hasPlanned = val0 !== null && val0 > 0.05;
+        const hasActual = val1 !== null && val1 > 0.05;
+
+        // Center X between the two bars (or just bar0 if no bar1)
+        const centerX = bar1 ? (bar0.x + bar1.x) / 2 : bar0.x;
+
+        // Highest bar top Y
+        const topY = bar1 ? Math.min(bar0.y, bar1.y) : bar0.y;
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.font = '700 8.5px Poppins, sans-serif';
+
+        // Blue label (Planned) — bottom row, just above bars
+        if (hasPlanned) {
+          ctx.fillStyle = isDark ? '#c7d2fe' : '#4338ca';
+          ctx.fillText(val0.toFixed(1) + '%', centerX, topY - 4);
+        }
+
+        // Green label (Actual) — top row, above blue label
+        if (hasActual) {
+          ctx.fillStyle = isDark ? '#6ee7b7' : '#047857';
+          const greenY = hasPlanned ? topY - 17 : topY - 4;
+          ctx.fillText(val1.toFixed(1) + '%', centerX, greenY);
+        }
+
+        ctx.restore();
+      }
+    }
+  }), [isDark]);
 
   const chartData = {
     labels,
@@ -61,17 +106,6 @@ const MonthlyBarChart = ({ data, theme }) => {
         borderSkipped: 'bottom',
         barPercentage: 0.7,
         categoryPercentage: 0.55,
-        datalabels: {
-          display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0.05,
-          clip: false,
-          color: isDark ? '#c7d2fe' : '#4338ca',
-          anchor: 'end',
-          align: 305,
-          offset: 10,
-          textAlign: 'center',
-          font: { family: 'Poppins', size: 8.5, weight: 700 },
-          formatter: (val) => val.toFixed(1) + '%',
-        },
       },
       {
         label: 'Monthly Actual %',
@@ -88,19 +122,6 @@ const MonthlyBarChart = ({ data, theme }) => {
         borderSkipped: 'bottom',
         barPercentage: 0.7,
         categoryPercentage: 0.55,
-        datalabels: {
-          display: (ctx) =>
-            ctx.dataset.data[ctx.dataIndex] !== null &&
-            ctx.dataset.data[ctx.dataIndex] > 0.05,
-          clip: false,
-          color: isDark ? '#6ee7b7' : '#047857',
-          anchor: 'end',
-          align: 235,
-          offset: 22,
-          textAlign: 'center',
-          font: { family: 'Poppins', size: 8.5, weight: 700 },
-          formatter: (val) => (val !== null ? val.toFixed(1) + '%' : ''),
-        },
       },
     ],
   };
@@ -151,6 +172,9 @@ const MonthlyBarChart = ({ data, theme }) => {
             `${context.dataset.label}: ${context.parsed.y !== null ? context.parsed.y.toFixed(2) : '—'}%`,
         },
       },
+      datalabels: {
+        display: false,
+      },
     },
     scales: {
       y: {
@@ -200,7 +224,7 @@ const MonthlyBarChart = ({ data, theme }) => {
 
   return (
     <div style={{ height: '360px' }}>
-      <Bar data={chartData} options={options} />
+      <Bar data={chartData} options={options} plugins={[centeredLabelsPlugin]} />
     </div>
   );
 };
