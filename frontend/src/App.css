@@ -62,6 +62,37 @@
   letter-spacing: 2.5px;
   text-transform: uppercase;
 }
+.header-phase-badge {
+  background: rgba(255, 209, 102, 0.2);
+  color: #FFD166;
+  border: 1px solid rgba(255, 209, 102, 0.4);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  backdrop-filter: blur(4px);
+}
+
+.phase-pill {
+  background: rgba(46, 196, 182, 0.18);
+  color: var(--accent-teal);
+  border: 1px solid rgba(46, 196, 182, 0.35);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+[data-theme="light"] .phase-pill {
+  background: rgba(7, 59, 76, 0.1);
+  color: #073B4C;
+  border: 1px solid rgba(7, 59, 76, 0.25);
+}
 
 /* ===== MAIN LAYOUT ===== */
 .dashboard {

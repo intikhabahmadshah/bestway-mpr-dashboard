@@ -165,8 +165,11 @@ function App() {
       <main className="dashboard">
         <div className="dashboard-toolbar">
           <div className="dashboard-info">
-            <h2>Project Overview</h2>
-            <p>Performance metrics and schedule tracking</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <h2>Project Overview</h2>
+              <span className="phase-pill">Grey Structure Phase</span>
+            </div>
+            <p>Performance metrics and schedule tracking for Grey Structure Construction</p>
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             {localStorage.getItem('mpr_custom_data') && (
