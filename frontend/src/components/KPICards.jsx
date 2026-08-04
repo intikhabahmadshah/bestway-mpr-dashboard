@@ -87,10 +87,10 @@ const KPICards = ({ data, selectedMonth }) => {
         <div className="kpi-icon cyan">
           <FiClock />
         </div>
-        <div className="kpi-label">Project Duration</div>
+        <div className="kpi-label">Grey Structure - Time Elapsed</div>
         <div className="kpi-value">{duration} Days</div>
         <div className="kpi-sub">
-          <span>Timeline up to {monthLabel}</span>
+          <span>Time elapsed up to {monthLabel}</span>
         </div>
       </div>
     </div>
