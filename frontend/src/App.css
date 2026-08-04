@@ -254,12 +254,21 @@
   color: var(--text-primary);
 }
 .chart-card-badge {
-  font-size: 0.7rem;
-  padding: 4px 10px;
+  font-size: 0.72rem;
+  padding: 5px 12px;
   border-radius: 20px;
-  font-weight: 600;
-  background: rgba(46, 196, 182, 0.15);
-  color: var(--accent-blue-light);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: rgba(46, 196, 182, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(46, 196, 182, 0.35);
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] .chart-card-badge {
+  background: rgba(7, 59, 76, 0.1);
+  color: #000000;
+  border: 1px solid rgba(7, 59, 76, 0.2);
 }
 
 /* ===== DATA TABLE ===== */
