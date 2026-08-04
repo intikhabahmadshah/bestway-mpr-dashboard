@@ -46,8 +46,8 @@ const MonthlyBarChart = ({ data, theme }) => {
     id: 'centeredLabels',
     afterDatasetsDraw(chart) {
       const { ctx, data: chartData } = chart;
-      const meta0 = chart.getDatasetMeta(0); // Planned (blue)
-      const meta1 = chart.getDatasetMeta(1); // Actual (green)
+      const meta0 = chart.getDatasetMeta(0);
+      const meta1 = chart.getDatasetMeta(1);
 
       for (let i = 0; i < chartData.labels.length; i++) {
         const bar0 = meta0.data[i];
@@ -59,10 +59,7 @@ const MonthlyBarChart = ({ data, theme }) => {
         const hasPlanned = val0 !== null && val0 > 0.05;
         const hasActual = val1 !== null && val1 > 0.05;
 
-        // Center X between the two bars (or just bar0 if no bar1)
         const centerX = bar1 ? (bar0.x + bar1.x) / 2 : bar0.x;
-
-        // Highest bar top Y
         const topY = bar1 ? Math.min(bar0.y, bar1.y) : bar0.y;
 
         ctx.save();
@@ -70,15 +67,15 @@ const MonthlyBarChart = ({ data, theme }) => {
         ctx.textBaseline = 'bottom';
         ctx.font = '700 8.5px Poppins, sans-serif';
 
-        // Blue label (Planned) — bottom row, just above bars
+        // Teal label (Planned) — bottom row
         if (hasPlanned) {
-          ctx.fillStyle = isDark ? '#c7d2fe' : '#4338ca';
+          ctx.fillStyle = isDark ? '#5EEAD4' : '#0F766E';
           ctx.fillText(val0.toFixed(1) + '%', centerX, topY - 4);
         }
 
-        // Green label (Actual) — top row, above blue label
+        // Coral label (Actual) — top row
         if (hasActual) {
-          ctx.fillStyle = isDark ? '#6ee7b7' : '#047857';
+          ctx.fillStyle = isDark ? '#FDA4AF' : '#BE123C';
           const greenY = hasPlanned ? topY - 17 : topY - 4;
           ctx.fillText(val1.toFixed(1) + '%', centerX, greenY);
         }
@@ -95,12 +92,12 @@ const MonthlyBarChart = ({ data, theme }) => {
         label: 'Monthly Planned %',
         data: plannedData,
         backgroundColor: isDark
-          ? 'rgba(99, 102, 241, 0.75)'
-          : 'rgba(79, 70, 229, 0.65)',
+          ? 'rgba(46, 196, 182, 0.75)'
+          : 'rgba(46, 196, 182, 0.7)',
         hoverBackgroundColor: isDark
-          ? 'rgba(129, 140, 248, 0.9)'
-          : 'rgba(99, 102, 241, 0.85)',
-        borderColor: isDark ? '#818cf8' : '#6366f1',
+          ? 'rgba(46, 196, 182, 0.95)'
+          : 'rgba(46, 196, 182, 0.9)',
+        borderColor: '#2EC4B6',
         borderWidth: 1.5,
         borderRadius: 5,
         borderSkipped: 'bottom',
@@ -111,12 +108,12 @@ const MonthlyBarChart = ({ data, theme }) => {
         label: 'Monthly Actual %',
         data: actualData,
         backgroundColor: isDark
-          ? 'rgba(16, 185, 129, 0.75)'
-          : 'rgba(5, 150, 105, 0.6)',
+          ? 'rgba(239, 71, 111, 0.75)'
+          : 'rgba(239, 71, 111, 0.65)',
         hoverBackgroundColor: isDark
-          ? 'rgba(52, 211, 153, 0.9)'
-          : 'rgba(16, 185, 129, 0.85)',
-        borderColor: isDark ? '#34d399' : '#10b981',
+          ? 'rgba(239, 71, 111, 0.95)'
+          : 'rgba(239, 71, 111, 0.9)',
+        borderColor: '#EF476F',
         borderWidth: 1.5,
         borderRadius: 5,
         borderSkipped: 'bottom',
@@ -142,7 +139,7 @@ const MonthlyBarChart = ({ data, theme }) => {
         position: 'top',
         align: 'center',
         labels: {
-          color: isDark ? '#e2e8f0' : '#1e293b',
+          color: isDark ? '#e2e8f0' : '#073B4C',
           font: { family: 'Poppins', size: 11, weight: 600 },
           usePointStyle: true,
           pointStyle: 'rectRounded',
@@ -153,13 +150,13 @@ const MonthlyBarChart = ({ data, theme }) => {
       },
       tooltip: {
         backgroundColor: isDark
-          ? 'rgba(15, 23, 42, 0.96)'
+          ? 'rgba(7, 59, 76, 0.96)'
           : 'rgba(255, 255, 255, 0.96)',
-        titleColor: isDark ? '#f1f5f9' : '#0f172a',
+        titleColor: isDark ? '#f1f5f9' : '#073B4C',
         bodyColor: isDark ? '#94a3b8' : '#475569',
         borderColor: isDark
-          ? 'rgba(129, 140, 248, 0.3)'
-          : 'rgba(99, 102, 241, 0.25)',
+          ? 'rgba(46, 196, 182, 0.3)'
+          : 'rgba(46, 196, 182, 0.25)',
         borderWidth: 1,
         padding: 14,
         cornerRadius: 8,
@@ -182,13 +179,11 @@ const MonthlyBarChart = ({ data, theme }) => {
         max: yMax,
         grid: {
           color: isDark
-            ? 'rgba(99, 102, 241, 0.08)'
-            : 'rgba(99, 102, 241, 0.1)',
+            ? 'rgba(46, 196, 182, 0.08)'
+            : 'rgba(7, 59, 76, 0.08)',
           drawBorder: false,
         },
-        border: {
-          display: false,
-        },
+        border: { display: false },
         ticks: {
           color: isDark ? '#64748b' : '#475569',
           font: { family: 'Poppins', size: 10, weight: 500 },
@@ -197,12 +192,8 @@ const MonthlyBarChart = ({ data, theme }) => {
         },
       },
       x: {
-        grid: {
-          display: false,
-        },
-        border: {
-          display: false,
-        },
+        grid: { display: false },
+        border: { display: false },
         ticks: {
           color: isDark ? '#94a3b8' : '#475569',
           font: { family: 'Poppins', size: 9, weight: 500 },
@@ -212,14 +203,8 @@ const MonthlyBarChart = ({ data, theme }) => {
         },
       },
     },
-    interaction: {
-      mode: 'index',
-      intersect: false,
-    },
-    animation: {
-      duration: 600,
-      easing: 'easeOutQuart',
-    },
+    interaction: { mode: 'index', intersect: false },
+    animation: { duration: 600, easing: 'easeOutQuart' },
   };
 
   return (

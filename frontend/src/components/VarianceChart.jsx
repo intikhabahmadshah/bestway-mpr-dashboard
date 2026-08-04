@@ -26,7 +26,6 @@ const VarianceChart = ({ data, theme }) => {
 
   const isDark = theme === 'dark';
 
-  // Filter to only include months with actual data
   const validData = data.filter(d => d.accumulative_actual !== null && d.accumulative_actual !== undefined);
   
   const labels = validData.map(d => {
@@ -36,23 +35,21 @@ const VarianceChart = ({ data, theme }) => {
 
   const variances = validData.map(d => (d.accumulative_actual - d.accumulative_planned) * 100);
   
-  // Calculate dynamic min and max for Y-axis scale to ensure 0% line is nicely centered with head room
   const minVal = Math.min(...variances, 0);
   const maxVal = Math.max(...variances, 0);
-  
   const yMin = Math.floor(minVal - 1.5);
-  const yMax = Math.max(Math.ceil(maxVal + 2.0), 2.5); // Ensure at least +2.5% headroom so 0.00% is never at the top edge
+  const yMax = Math.max(Math.ceil(maxVal + 2.0), 2.5);
 
   const backgroundColors = variances.map(v => {
-    if (Math.abs(v) < 0.001) return isDark ? 'rgba(245, 158, 11, 0.8)' : 'rgba(245, 158, 11, 0.7)'; // Amber for 0%
+    if (Math.abs(v) < 0.001) return isDark ? 'rgba(255, 209, 102, 0.8)' : 'rgba(255, 209, 102, 0.7)';
     return v > 0 
-      ? (isDark ? 'rgba(16, 185, 129, 0.8)' : 'rgba(16, 185, 129, 0.75)') 
-      : (isDark ? 'rgba(239, 68, 68, 0.8)' : 'rgba(239, 68, 68, 0.75)');
+      ? (isDark ? 'rgba(46, 196, 182, 0.8)' : 'rgba(46, 196, 182, 0.75)') 
+      : (isDark ? 'rgba(239, 71, 111, 0.8)' : 'rgba(239, 71, 111, 0.75)');
   });
 
   const borderColors = variances.map(v => {
-    if (Math.abs(v) < 0.001) return '#f59e0b';
-    return v > 0 ? '#10b981' : '#ef4444';
+    if (Math.abs(v) < 0.001) return '#FFD166';
+    return v > 0 ? '#2EC4B6' : '#EF476F';
   });
 
   const chartData = {
@@ -70,9 +67,9 @@ const VarianceChart = ({ data, theme }) => {
           clip: false,
           color: (ctx) => {
             const val = ctx.dataset.data[ctx.dataIndex];
-            if (Math.abs(val) < 0.001) return isDark ? '#fbbf24' : '#d97706'; // Amber for 0.00%
-            if (isDark) return val > 0 ? '#6ee7b7' : '#fca5a5';
-            return val > 0 ? '#047857' : '#b91c1c';
+            if (Math.abs(val) < 0.001) return isDark ? '#FFD166' : '#B45309';
+            if (isDark) return val > 0 ? '#5EEAD4' : '#FDA4AF';
+            return val > 0 ? '#0F766E' : '#BE123C';
           },
           anchor: (ctx) => {
             const val = ctx.dataset.data[ctx.dataIndex];
@@ -98,7 +95,7 @@ const VarianceChart = ({ data, theme }) => {
     maintainAspectRatio: false,
     layout: {
       padding: {
-        top: 30, // Room for datalabels above 0%
+        top: 30,
         bottom: 20
       }
     },
@@ -107,10 +104,10 @@ const VarianceChart = ({ data, theme }) => {
         display: false
       },
       tooltip: {
-        backgroundColor: isDark ? 'rgba(17,24,39,0.95)' : 'rgba(255,255,255,0.95)',
-        titleColor: isDark ? '#f1f5f9' : '#1e293b',
+        backgroundColor: isDark ? 'rgba(7,59,76,0.95)' : 'rgba(255,255,255,0.95)',
+        titleColor: isDark ? '#f1f5f9' : '#073B4C',
         bodyColor: isDark ? '#94a3b8' : '#475569',
-        borderColor: 'rgba(99,102,241,0.2)',
+        borderColor: 'rgba(46,196,182,0.3)',
         borderWidth: 1,
         padding: 12,
         titleFont: { family: 'Poppins', weight: 600 },
@@ -129,7 +126,7 @@ const VarianceChart = ({ data, theme }) => {
         min: yMin,
         max: yMax,
         grid: {
-          color: (ctx) => (ctx.tick.value === 0 ? (isDark ? '#818cf8' : '#6366f1') : (isDark ? 'rgba(99,102,241,0.1)' : 'rgba(99,102,241,0.12)')),
+          color: (ctx) => (ctx.tick.value === 0 ? (isDark ? '#2EC4B6' : '#2EC4B6') : (isDark ? 'rgba(46,196,182,0.08)' : 'rgba(7,59,76,0.08)')),
           lineWidth: (ctx) => (ctx.tick.value === 0 ? 2 : 1),
         },
         ticks: {
@@ -139,7 +136,7 @@ const VarianceChart = ({ data, theme }) => {
         }
       },
       x: {
-        grid: { color: isDark ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.1)' },
+        grid: { color: isDark ? 'rgba(46,196,182,0.06)' : 'rgba(7,59,76,0.06)' },
         ticks: {
           color: isDark ? '#64748b' : '#475569',
           font: { family: 'Poppins', size: 11, weight: 600 },

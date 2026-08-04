@@ -26,7 +26,7 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
       {
         data: [value, Math.max(0, 100 - value)],
         backgroundColor: [
-          '#6366f1',
+          '#2EC4B6',
           isDark ? 'rgba(30, 41, 59, 0.8)' : 'rgba(226, 232, 240, 0.6)'
         ],
         borderWidth: 0,
@@ -48,10 +48,10 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
         display: false
       },
       tooltip: {
-        backgroundColor: isDark ? 'rgba(17,24,39,0.95)' : 'rgba(255,255,255,0.95)',
-        titleColor: isDark ? '#f1f5f9' : '#1e293b',
+        backgroundColor: isDark ? 'rgba(7,59,76,0.95)' : 'rgba(255,255,255,0.95)',
+        titleColor: isDark ? '#f1f5f9' : '#073B4C',
         bodyColor: isDark ? '#94a3b8' : '#475569',
-        borderColor: 'rgba(99,102,241,0.2)',
+        borderColor: 'rgba(46,196,182,0.3)',
         borderWidth: 1,
         padding: 12,
         titleFont: { family: 'Poppins', weight: 600 },

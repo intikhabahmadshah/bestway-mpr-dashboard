@@ -43,20 +43,20 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
       {
         label: 'Accumulative Planned %',
         data: data.map(d => (d.accumulative_planned || 0) * 100),
-        borderColor: '#6366f1',
-        backgroundColor: 'rgba(99, 102, 241, 0.06)',
+        borderColor: '#2EC4B6',
+        backgroundColor: 'rgba(46, 196, 182, 0.06)',
         borderDash: [6, 4],
         tension: 0.25,
         pointRadius: (ctx) => (ctx.dataIndex === selectedIndex ? 8 : 4),
         pointHoverRadius: 8,
-        pointBackgroundColor: (ctx) => (ctx.dataIndex === selectedIndex ? '#fbbf24' : '#6366f1'),
+        pointBackgroundColor: (ctx) => (ctx.dataIndex === selectedIndex ? '#FFD166' : '#2EC4B6'),
         pointBorderColor: isDark ? '#111827' : '#ffffff',
         pointBorderWidth: 2,
         fill: true,
         datalabels: {
           display: true,
           clip: false,
-          color: isDark ? '#a5b4fc' : '#4338ca',
+          color: isDark ? '#5EEAD4' : '#0F766E',
           anchor: 'end',
           align: 'top',
           offset: 6,
@@ -72,12 +72,12 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
       {
         label: 'Accumulative Actual %',
         data: data.map(d => (d.accumulative_actual !== null && d.accumulative_actual !== undefined ? d.accumulative_actual * 100 : null)),
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.08)',
+        borderColor: '#EF476F',
+        backgroundColor: 'rgba(239, 71, 111, 0.06)',
         tension: 0.25,
         pointRadius: (ctx) => (ctx.dataIndex === selectedIndex ? 10 : 6),
         pointHoverRadius: 9,
-        pointBackgroundColor: (ctx) => (ctx.dataIndex === selectedIndex ? '#f59e0b' : '#10b981'),
+        pointBackgroundColor: (ctx) => (ctx.dataIndex === selectedIndex ? '#FFD166' : '#EF476F'),
         pointBorderColor: (ctx) => (ctx.dataIndex === selectedIndex ? '#ffffff' : (isDark ? '#111827' : '#ffffff')),
         pointBorderWidth: 2,
         borderWidth: 3,
@@ -85,7 +85,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         datalabels: {
           display: true,
           clip: false,
-          color: (ctx) => (ctx.dataIndex === selectedIndex ? (isDark ? '#fbbf24' : '#d97706') : (isDark ? '#6ee7b7' : '#047857')),
+          color: (ctx) => (ctx.dataIndex === selectedIndex ? (isDark ? '#FFD166' : '#B45309') : (isDark ? '#FDA4AF' : '#BE123C')),
           anchor: 'end',
           align: 'bottom',
           offset: 6,
@@ -129,7 +129,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
       legend: {
         position: 'top',
         labels: {
-          color: isDark ? '#f1f5f9' : '#1e293b',
+          color: isDark ? '#f1f5f9' : '#073B4C',
           font: { family: 'Poppins', size: 12, weight: 500 },
           usePointStyle: true,
           pointStyle: 'circle',
@@ -137,10 +137,10 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         }
       },
       tooltip: {
-        backgroundColor: isDark ? 'rgba(17,24,39,0.95)' : 'rgba(255,255,255,0.95)',
-        titleColor: isDark ? '#f1f5f9' : '#1e293b',
+        backgroundColor: isDark ? 'rgba(7,59,76,0.95)' : 'rgba(255,255,255,0.95)',
+        titleColor: isDark ? '#f1f5f9' : '#073B4C',
         bodyColor: isDark ? '#94a3b8' : '#475569',
-        borderColor: 'rgba(99,102,241,0.2)',
+        borderColor: 'rgba(46,196,182,0.3)',
         borderWidth: 1,
         padding: 12,
         titleFont: { family: 'Poppins', weight: 600 },
@@ -152,21 +152,21 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     },
     scales: {
       y: {
-        min: -2, // Distance/gap below 0% so points at 0% don't touch the bottom line
-        max: 104, // Headroom for top labels
+        min: -2,
+        max: 104,
         grid: {
-          color: (ctx) => (ctx.tick.value === 0 ? (isDark ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.3)') : (isDark ? 'rgba(99,102,241,0.1)' : 'rgba(99,102,241,0.12)')),
+          color: (ctx) => (ctx.tick.value === 0 ? (isDark ? 'rgba(46,196,182,0.25)' : 'rgba(46,196,182,0.3)') : (isDark ? 'rgba(46,196,182,0.08)' : 'rgba(7,59,76,0.08)')),
         },
         ticks: {
           color: isDark ? '#64748b' : '#475569',
           font: { family: 'Poppins', size: 11 },
           padding: 8,
-          callback: (value) => (value >= 0 ? value + '%' : '') // Hide negative ticks
+          callback: (value) => (value >= 0 ? value + '%' : '')
         }
       },
       x: {
-        offset: true, // Distance/offset from left Y-axis line for first point
-        grid: { color: isDark ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.1)' },
+        offset: true,
+        grid: { color: isDark ? 'rgba(46,196,182,0.06)' : 'rgba(7,59,76,0.06)' },
         ticks: {
           color: isDark ? '#64748b' : '#475569',
           font: { family: 'Poppins', size: 10 },
