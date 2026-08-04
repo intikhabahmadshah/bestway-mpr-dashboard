@@ -325,19 +325,19 @@
   display: inline-block;
 }
 .status-badge.ahead {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--accent-green-light);
+  background: rgba(46, 196, 182, 0.3);
+  color: #0D9488;
 }
 .status-badge.behind {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--accent-red);
+  background: rgba(239, 71, 111, 0.3);
+  color: #E11D48;
 }
 .status-badge.on-track {
-  background: rgba(245, 158, 11, 0.15);
-  color: var(--accent-amber);
+  background: rgba(255, 209, 102, 0.35);
+  color: #B45309;
 }
 .status-badge.pending {
-  background: rgba(100, 116, 139, 0.15);
+  background: rgba(100, 116, 139, 0.25);
   color: var(--text-muted);
 }
 
