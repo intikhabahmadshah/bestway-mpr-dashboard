@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers } from 'react-icons/fi';
+import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers, FiArrowLeft, FiHome } from 'react-icons/fi';
 import './App.css';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
@@ -197,26 +197,35 @@ function App() {
 
       {currentView === 'grey_structure' && (
         <main className="dashboard">
-        <div className="dashboard-toolbar">
-          <div className="dashboard-info">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <h2>Project Overview</h2>
-              <span className="phase-pill">Grey Structure Phase</span>
-            </div>
-            <p>Performance metrics and schedule tracking for Grey Structure Construction</p>
-          </div>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            {localStorage.getItem('mpr_custom_data') && (
-              <button className="btn-cancel" onClick={resetToDefaultDataset} title="Restore original project CSV dataset">
-                Reset to Original Data
-              </button>
-            )}
-            <button className="btn-upload" onClick={() => setShowUploadModal(true)}>
-              <FiUploadCloud size={18} />
-              Update Data
+          <div className="page-navigation-bar" style={{ marginBottom: '20px' }}>
+            <button className="btn-back" onClick={() => navigateTo('home')}>
+              <FiArrowLeft /> Return to Homepage
             </button>
           </div>
-        </div>
+
+          <div className="dashboard-toolbar">
+            <div className="dashboard-info">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <h2>Project Overview</h2>
+                <span className="phase-pill">Grey Structure Phase</span>
+              </div>
+              <p>Performance metrics and schedule tracking for Grey Structure Construction</p>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <button className="btn-back" onClick={() => navigateTo('home')} title="Return to Portal Homepage">
+                <FiHome /> Home
+              </button>
+              {localStorage.getItem('mpr_custom_data') && (
+                <button className="btn-cancel" onClick={resetToDefaultDataset} title="Restore original project CSV dataset">
+                  Reset to Original Data
+                </button>
+              )}
+              <button className="btn-upload" onClick={() => setShowUploadModal(true)}>
+                <FiUploadCloud size={18} />
+                Update Data
+              </button>
+            </div>
+          </div>
 
         {selectedMonth && (
           <div className="active-filter-bar">
