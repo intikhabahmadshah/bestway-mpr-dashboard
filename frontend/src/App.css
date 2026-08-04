@@ -184,11 +184,11 @@
 .kpi-icon.cyan { background: rgba(46, 196, 182, 0.2); color: #2EC4B6; }
 
 /* Dark mode: brighter icon colors */
-[data-theme="dark"] .kpi-icon.blue { background: rgba(17, 138, 178, 0.25); color: #56CFE1; }
+[data-theme="dark"] .kpi-icon.blue { background: rgba(17, 138, 178, 0.25); color: #ffffff; }
 [data-theme="dark"] .kpi-icon.green { background: rgba(46, 196, 182, 0.25); color: #5EEAD4; }
 [data-theme="dark"] .kpi-icon.amber { background: rgba(255, 209, 102, 0.2); color: #FFD166; }
 [data-theme="dark"] .kpi-icon.red { background: rgba(239, 71, 111, 0.25); color: #FDA4AF; }
-[data-theme="dark"] .kpi-icon.purple { background: rgba(17, 138, 178, 0.25); color: #56CFE1; }
+[data-theme="dark"] .kpi-icon.purple { background: rgba(17, 138, 178, 0.25); color: #ffffff; }
 [data-theme="dark"] .kpi-icon.cyan { background: rgba(46, 196, 182, 0.25); color: #5EEAD4; }
 
 .kpi-label {
