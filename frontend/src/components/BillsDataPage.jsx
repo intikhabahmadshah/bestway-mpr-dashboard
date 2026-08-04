@@ -9,7 +9,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
       {/* Top Breadcrumb Bar */}
       <div className="page-navigation-bar">
         <button className="btn-confirm" onClick={() => onNavigate('home')}>
-          Return to Portal Home
+          Return to Portal
         </button>
         <button className="btn-shortcut" onClick={() => onNavigate('grey_structure')}>
           <FiBarChart2 /> Grey Structure Dashboard
@@ -71,7 +71,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
         <FiClock size={20} style={{ color: '#FFD166' }} />
         <span>This section will be fully developed for log file management in the next phase.</span>
         <button className="btn-confirm" onClick={() => onNavigate('home')} style={{ marginLeft: 'auto' }}>
-          Return to Portal Home
+          Return to Portal
         </button>
       </div>
     </div>

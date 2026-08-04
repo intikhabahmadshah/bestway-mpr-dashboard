@@ -29,12 +29,6 @@ const Header = ({ theme, toggleTheme, currentView, onNavigate }) => {
       </div>
       <div className="header-right">
         <img src="/logo.webp" alt="Timeline Consultants Logo" className="header-logo logo-right" />
-        
-        {currentView !== 'home' && (
-          <button className="btn-confirm" onClick={() => onNavigate('home')} title="Return to Portal Homepage">
-            Return to Portal Home
-          </button>
-        )}
 
         <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
           {theme === 'dark' ? <FiSun /> : <FiMoon />}
