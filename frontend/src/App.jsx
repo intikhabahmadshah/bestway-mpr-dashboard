@@ -3,6 +3,8 @@ import axios from 'axios';
 import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers } from 'react-icons/fi';
 import './App.css';
 import Header from './components/Header';
+import HomePage from './components/HomePage';
+import BillsDataPage from './components/BillsDataPage';
 import KPICards from './components/KPICards';
 import ProgressChart from './components/ProgressChart';
 import MonthlyBarChart from './components/MonthlyBarChart';
@@ -43,6 +45,29 @@ function App() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('mpr-theme') || 'dark';
   });
+
+  const [currentView, setCurrentView] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (['home', 'grey_structure', 'bills_data'].includes(hash)) return hash;
+    return 'home';
+  });
+
+  const navigateTo = (viewName) => {
+    setCurrentView(viewName);
+    window.location.hash = viewName;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (['home', 'grey_structure', 'bills_data'].includes(hash)) {
+        setCurrentView(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -143,7 +168,7 @@ function App() {
 
   return (
     <>
-      <Header theme={theme} toggleTheme={toggleTheme} />
+      <Header theme={theme} toggleTheme={toggleTheme} currentView={currentView} onNavigate={navigateTo} />
       
       <div className="toast-container">
         {toasts.map((toast) => (
@@ -162,7 +187,16 @@ function App() {
         ))}
       </div>
 
-      <main className="dashboard">
+      {currentView === 'home' && (
+        <HomePage onNavigate={navigateTo} theme={theme} />
+      )}
+
+      {currentView === 'bills_data' && (
+        <BillsDataPage onNavigate={navigateTo} theme={theme} />
+      )}
+
+      {currentView === 'grey_structure' && (
+        <main className="dashboard">
         <div className="dashboard-toolbar">
           <div className="dashboard-info">
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -263,6 +297,7 @@ function App() {
           </>
         )}
       </main>
+      )}
 
       <footer className="footer">
         <p>Construction of Bestway Tower at F-9/G-9, Islamabad &copy; 2026 | Developed by Timeline Consultants</p>
