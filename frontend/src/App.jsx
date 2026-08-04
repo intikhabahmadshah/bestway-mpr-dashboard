@@ -199,12 +199,6 @@ function App() {
 
       {currentView === 'grey_structure' && (
         <main className="dashboard" id="grey-structure-dashboard-container">
-          <div className="page-navigation-bar" style={{ marginBottom: '20px' }}>
-            <button className="btn-confirm" onClick={() => navigateTo('home')}>
-              Return to Portal
-            </button>
-          </div>
-
           <div className="dashboard-toolbar">
             <div className="dashboard-info">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -214,6 +208,9 @@ function App() {
               <p>Performance metrics and schedule tracking for Grey Structure Construction</p>
             </div>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button className="btn-confirm" onClick={() => navigateTo('home')} title="Return to Portal Homepage">
+                Return to Portal
+              </button>
               <button className="btn-confirm" onClick={() => setShowExportModal(true)} style={{ background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)' }} title="Export high-res A4 PDF or PNG formatted for reports">
                 <FiDownload size={18} /> Download this Dashboard
               </button>
