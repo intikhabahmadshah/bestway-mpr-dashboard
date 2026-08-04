@@ -42,6 +42,7 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    devicePixelRatio: Math.max(window.devicePixelRatio || 1, 3),
     cutout: '78%',
     plugins: {
       legend: {
