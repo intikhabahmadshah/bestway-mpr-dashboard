@@ -668,6 +668,12 @@
 }
 
 /* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .dual-gauge-wrapper {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+}
 @media (max-width: 1200px) {
   .charts-grid { grid-template-columns: 1fr; }
 }
