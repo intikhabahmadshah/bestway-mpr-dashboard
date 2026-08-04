@@ -58,63 +58,51 @@ const UploadDataset = ({ isOpen, onClose, onUploadSuccess, showToast }) => {
     setUploading(true);
     setProgress(30);
 
-    const formData = new FormData();
-    formData.append('file', file);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const csvText = e.target.result;
+        const parsedRows = parseCSVClientSide(csvText);
 
-    const progressInterval = setInterval(() => {
-      setProgress(prev => (prev >= 90 ? 90 : prev + 15));
-    }, 100);
-
-    try {
-      await axios.post('/api/mpr/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      
-      clearInterval(progressInterval);
-      setProgress(100);
-      setSuccess(true);
-      showToast('Dataset updated in database successfully', 'success');
-      
-      setTimeout(() => {
-        onUploadSuccess();
-      }, 1200);
-      
-    } catch (error) {
-      console.warn('Backend server not reachable online, processing CSV client-side fallback...', error);
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        clearInterval(progressInterval);
-        try {
-          const csvText = e.target.result;
-          const parsedRows = parseCSVClientSide(csvText);
-          
-          if (parsedRows.length > 0) {
-            localStorage.setItem('mpr_custom_data', JSON.stringify(parsedRows));
-            setProgress(100);
-            setSuccess(true);
-            showToast('Dataset updated successfully!', 'success');
-            
-            setTimeout(() => {
-              onUploadSuccess(parsedRows);
-            }, 1200);
-          } else {
-            showToast('Invalid CSV format. Please upload a valid MPR CSV file.', 'error');
-            setUploading(false);
-          }
-        } catch (err) {
-          console.error('CSV Parse Error:', err);
-          showToast('Failed to parse CSV file.', 'error');
+        if (parsedRows.length === 0) {
+          showToast('Invalid CSV format. Please upload a valid MPR CSV file.', 'error');
           setUploading(false);
+          return;
         }
-      };
-      reader.onerror = () => {
-        clearInterval(progressInterval);
-        showToast('Failed to read file.', 'error');
+
+        setProgress(60);
+
+        try {
+          // Post directly to Aiven MySQL via Vercel serverless function /api/mpr
+          await axios.post('/api/mpr', { rows: parsedRows });
+          setProgress(100);
+          setSuccess(true);
+          showToast('Dataset uploaded to Aiven MySQL successfully!', 'success');
+          
+          setTimeout(() => {
+            onUploadSuccess(parsedRows);
+          }, 1200);
+        } catch (apiError) {
+          console.warn('Database upload warning, using fallback local sync:', apiError);
+          localStorage.setItem('mpr_custom_data', JSON.stringify(parsedRows));
+          setProgress(100);
+          setSuccess(true);
+          showToast('Dataset updated locally!', 'info');
+          setTimeout(() => {
+            onUploadSuccess(parsedRows);
+          }, 1200);
+        }
+      } catch (err) {
+        console.error('Upload Error:', err);
+        showToast('Failed to process CSV file.', 'error');
         setUploading(false);
-      };
-      reader.readAsText(file);
-    }
+      }
+    };
+    reader.onerror = () => {
+      showToast('Failed to read file.', 'error');
+      setUploading(false);
+    };
+    reader.readAsText(file);
   };
 
   if (!isOpen) return null;
@@ -155,7 +143,7 @@ const UploadDataset = ({ isOpen, onClose, onUploadSuccess, showToast }) => {
                 <div className="progress-bar">
                   <div className="progress-fill" style={{ width: `${progress}%` }}></div>
                 </div>
-                <div className="progress-text">Uploading & Processing... {progress}%</div>
+                <div className="progress-text">Uploading to Aiven MySQL... {progress}%</div>
               </div>
             )}
 
@@ -176,7 +164,7 @@ const UploadDataset = ({ isOpen, onClose, onUploadSuccess, showToast }) => {
           <div className="upload-success">
             <FiCheckCircle className="success-icon" />
             <div className="success-text">Upload Complete!</div>
-            <div className="success-detail">The dashboard will now refresh with the new data.</div>
+            <div className="success-detail">Aiven MySQL and Dashboard refreshed with new data.</div>
           </div>
         )}
       </div>

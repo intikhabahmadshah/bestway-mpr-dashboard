@@ -2,24 +2,22 @@ const mysql = require('mysql2/promise');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
+const isCloud = (process.env.DB_HOST && process.env.DB_HOST.includes('aivencloud.com')) || process.env.DB_PORT !== '3306';
+
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || 'admin',
-    port: process.env.DB_PORT || 3306
+    port: parseInt(process.env.DB_PORT, 10) || 3306,
+    ssl: isCloud ? { rejectUnauthorized: false } : undefined
 };
 
-const dbName = process.env.DB_NAME || 'bestway_project';
+const dbName = process.env.DB_NAME || 'defaultdb';
 
 let pool;
 
 async function initDatabase() {
-    // Connect without database to create it if it doesn't exist
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
-    await connection.end();
-
-    // Now create pool with database selected
+    // Create pool with Aiven database selected directly
     pool = mysql.createPool({
         ...dbConfig,
         database: dbName,
@@ -43,7 +41,7 @@ async function initDatabase() {
         );
     `;
     await pool.query(createTableQuery);
-    console.log('Database and MPR table initialized successfully.');
+    console.log('Database connection established and MPR table initialized successfully.');
 }
 
 async function getAllMPRData() {
