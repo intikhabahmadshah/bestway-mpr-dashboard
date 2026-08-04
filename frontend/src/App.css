@@ -1311,3 +1311,73 @@
   color: var(--text-secondary);
   flex-wrap: wrap;
 }
+
+/* ===== EXPORT CAPTURE STYLES (HIGH-CONTRAST OPAQUE PRINT RENDERING) ===== */
+body.is-exporting-mode {
+  background: #ffffff !important;
+  color: #073B4C !important;
+}
+
+body.is-exporting-mode .page-navigation-bar,
+body.is-exporting-mode .dashboard-toolbar button {
+  display: none !important;
+}
+
+body.is-exporting-mode .dashboard {
+  background: #ffffff !important;
+  padding: 20px !important;
+}
+
+body.is-exporting-mode .chart-card,
+body.is-exporting-mode .table-card,
+body.is-exporting-mode .kpi-card,
+body.is-exporting-mode .active-filter-bar {
+  backdrop-filter: none !important;
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+  opacity: 1 !important;
+  color: #073B4C !important;
+}
+
+body.is-exporting-mode .chart-card-title,
+body.is-exporting-mode .kpi-value,
+body.is-exporting-mode .dashboard-info h2 {
+  color: #073B4C !important;
+  opacity: 1 !important;
+  font-weight: 800 !important;
+}
+
+body.is-exporting-mode .kpi-label,
+body.is-exporting-mode .dashboard-info p,
+body.is-exporting-mode .kpi-sub {
+  color: #334155 !important;
+  opacity: 1 !important;
+  font-weight: 600 !important;
+}
+
+body.is-exporting-mode .data-table {
+  background: #ffffff !important;
+}
+
+body.is-exporting-mode .data-table thead th {
+  background: #e2e8f0 !important;
+  color: #073B4C !important;
+  font-weight: 800 !important;
+  font-size: 0.78rem !important;
+  border-bottom: 2px solid #94a3b8 !important;
+}
+
+body.is-exporting-mode .data-table tbody td {
+  border-bottom: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+}
+
+body.is-exporting-mode .chart-card-badge {
+  background: #073B4C !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 700 !important;
+}

@@ -11,8 +11,6 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
 
   if (!isOpen) return null;
 
-  const isDark = theme === 'dark';
-
   const handleExport = async () => {
     const targetElement = document.getElementById(targetId);
     if (!targetElement) {
@@ -21,17 +19,22 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
     }
 
     setIsExporting(true);
-    setProgressMsg('Rendering high-resolution 300 DPI canvas...');
+    setProgressMsg('Applying high-contrast report layout...');
+
+    // Apply high-contrast print mode to body for html2canvas
+    document.body.classList.add('is-exporting-mode');
 
     try {
-      // Small delay to ensure any UI states settle
-      await new Promise(r => setTimeout(r, 200));
+      // Small delay to ensure styles and Chart.js re-render in high-contrast mode
+      await new Promise(r => setTimeout(r, 400));
+
+      setProgressMsg('Rendering high-resolution 300 DPI canvas...');
 
       const canvas = await html2canvas(targetElement, {
-        scale: 2.5, // 2.5x Ultra HD resolution for crisp text & data labels
+        scale: 2.5, // 2.5x Ultra HD resolution
         useCORS: true,
         allowTaint: true,
-        backgroundColor: isDark ? '#0a0e1a' : '#f0f4f8',
+        backgroundColor: '#ffffff', // Solid white background for official report
         logging: false,
         windowWidth: targetElement.scrollWidth,
         windowHeight: targetElement.scrollHeight,
@@ -41,7 +44,7 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
       const filename = `Bestway_Tower_Grey_Structure_Dashboard_A4_${orientation.toUpperCase()}_${dateStr}`;
 
       if (fileFormat === 'png') {
-        setProgressMsg('Preparing high-quality PNG image...');
+        setProgressMsg('Generating crisp PNG image...');
         const imageUri = canvas.toDataURL('image/png', 1.0);
         const link = document.createElement('a');
         link.download = `${filename}.png`;
@@ -49,7 +52,7 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
         link.click();
         showToast('High-resolution PNG Dashboard downloaded successfully!', 'success');
       } else {
-        setProgressMsg('Generating A4 PDF report document...');
+        setProgressMsg('Building A4 PDF report document...');
 
         const isLandscape = orientation === 'landscape';
         const pdf = new jsPDF({
@@ -69,28 +72,27 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
         const imgWidth = canvas.width;
         const imgHeight = canvas.height;
 
-        // Calculate scaled height on A4 page
-        const scaledImgHeight = (imgHeight * printWidth) / imgWidth;
-
+        // Total scaled height of dashboard in mm
+        const totalScaledHeight = (imgHeight * printWidth) / imgWidth;
         const imgData = canvas.toDataURL('image/png', 1.0);
 
-        if (scaledImgHeight <= printHeight) {
+        if (totalScaledHeight <= printHeight) {
           // Fits on single page
-          pdf.addImage(imgData, 'PNG', marginX, marginY, printWidth, scaledImgHeight, undefined, 'FAST');
+          pdf.addImage(imgData, 'PNG', marginX, marginY, printWidth, totalScaledHeight, undefined, 'FAST');
         } else {
-          // Spans across multiple A4 pages cleanly
-          let heightLeft = scaledImgHeight;
+          // Multi-page A4 document
+          let heightLeft = totalScaledHeight;
           let positionY = marginY;
 
-          // First page
-          pdf.addImage(imgData, 'PNG', marginX, positionY, printWidth, scaledImgHeight, undefined, 'FAST');
+          // Page 1
+          pdf.addImage(imgData, 'PNG', marginX, positionY, printWidth, totalScaledHeight, undefined, 'FAST');
           heightLeft -= printHeight;
 
-          // Subsequent pages
+          // Additional Pages
           while (heightLeft > 0) {
             positionY = positionY - printHeight;
             pdf.addPage('a4', isLandscape ? 'landscape' : 'portrait');
-            pdf.addImage(imgData, 'PNG', marginX, positionY, printWidth, scaledImgHeight, undefined, 'FAST');
+            pdf.addImage(imgData, 'PNG', marginX, positionY, printWidth, totalScaledHeight, undefined, 'FAST');
             heightLeft -= printHeight;
           }
         }
@@ -102,6 +104,7 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
       console.error('Export failed:', err);
       showToast('Failed to generate dashboard download', 'error');
     } finally {
+      document.body.classList.remove('is-exporting-mode');
       setIsExporting(false);
       setProgressMsg('');
       onClose();
@@ -210,7 +213,7 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
           }}>
             <FiCheckCircle size={18} style={{ color: '#2EC4B6', flexShrink: 0 }} />
             <span>
-              Export is rendered at <strong>2.5x Ultra HD resolution</strong> so all chart curves, bars, and data labels remain crystal clear.
+              Report automatically applies <strong>High-Contrast Crisp Print Mode</strong> so text, values, and charts remain bold & crystal-clear.
             </span>
           </div>
 
