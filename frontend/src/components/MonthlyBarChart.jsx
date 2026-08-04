@@ -95,7 +95,7 @@ const MonthlyBarChart = ({ data, theme }) => {
           color: isDark ? '#6ee7b7' : '#047857',
           anchor: 'end',
           align: 'top',
-          offset: 18,
+          offset: 4,
           font: { family: 'Poppins', size: 8.5, weight: 700 },
           formatter: (val) => (val !== null ? val.toFixed(1) + '%' : ''),
         },
