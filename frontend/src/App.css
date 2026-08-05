@@ -144,6 +144,82 @@
   transform: translateY(0);
 }
 
+/* ===== PROJECT KEY DATES BAR ===== */
+.project-dates-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 16px 28px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  gap: 20px;
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.date-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.date-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.date-icon.blue { background: rgba(17, 138, 178, 0.18); color: #118AB2; }
+.date-icon.green { background: rgba(46, 196, 182, 0.18); color: #2EC4B6; }
+.date-icon.amber { background: rgba(255, 209, 102, 0.22); color: #D97706; }
+
+[data-theme="dark"] .date-icon.blue { background: rgba(17, 138, 178, 0.25); color: #56CFE1; }
+[data-theme="dark"] .date-icon.green { background: rgba(46, 196, 182, 0.25); color: #5EEAD4; }
+[data-theme="dark"] .date-icon.amber { background: rgba(255, 209, 102, 0.2); color: #FFD166; }
+
+.date-content {
+  display: flex;
+  flex-direction: column;
+}
+.date-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+.date-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+.date-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .project-dates-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .date-divider {
+    display: none;
+  }
+}
+
 /* ===== KPI GRID ===== */
 .kpi-grid {
   display: grid;
@@ -1331,6 +1407,7 @@ body.is-exporting-mode .dashboard {
 body.is-exporting-mode .chart-card,
 body.is-exporting-mode .table-card,
 body.is-exporting-mode .kpi-card,
+body.is-exporting-mode .project-dates-bar,
 body.is-exporting-mode .active-filter-bar {
   backdrop-filter: none !important;
   background: #ffffff !important;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers, FiArrowLeft, FiHome, FiDownload, FiPrinter } from 'react-icons/fi';
+import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers, FiArrowLeft, FiHome, FiDownload, FiPrinter, FiCalendar, FiPlayCircle, FiCheckSquare } from 'react-icons/fi';
 import './App.css';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
@@ -252,6 +252,45 @@ function App() {
           </div>
         ) : (
           <>
+            {/* Project Key Dates Bar */}
+            <div className="project-dates-bar">
+              <div className="date-item">
+                <div className="date-icon blue"><FiCalendar /></div>
+                <div className="date-content">
+                  <span className="date-label">Today Date</span>
+                  <span className="date-value">{new Date().toLocaleDateString('default', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                </div>
+              </div>
+              
+              <div className="date-divider"></div>
+
+              <div className="date-item">
+                <div className="date-icon green"><FiPlayCircle /></div>
+                <div className="date-content">
+                  <span className="date-label">Grey Structure Start Date</span>
+                  <span className="date-value">
+                    {data && data.length > 0 && data[0].month
+                      ? new Date(data[0].month).toLocaleDateString('default', { day: '2-digit', month: 'short', year: 'numeric' })
+                      : '26 Mar 2026'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="date-divider"></div>
+
+              <div className="date-item">
+                <div className="date-icon amber"><FiCheckSquare /></div>
+                <div className="date-content">
+                  <span className="date-label">Grey Structure Finish Date</span>
+                  <span className="date-value">
+                    {data && data.length > 0 && data[data.length - 1].month_ending
+                      ? new Date(data[data.length - 1].month_ending).toLocaleDateString('default', { day: '2-digit', month: 'short', year: 'numeric' })
+                      : '31 Oct 2027'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <KPICards data={data} selectedMonth={selectedMonth} />
             
             <div className="charts-grid">
