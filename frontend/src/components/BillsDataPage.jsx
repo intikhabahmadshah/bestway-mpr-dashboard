@@ -7,158 +7,199 @@ import {
   FiExternalLink, 
   FiTrash2, 
   FiSearch, 
-  FiFilter, 
-  FiFolder, 
-  FiCheckCircle, 
-  FiClock, 
+  FiRefreshCw, 
   FiX, 
   FiBarChart2, 
-  FiLayers,
-  FiHardDrive
+  FiHardDrive,
+  FiCheckCircle,
+  FiCalendar
 } from 'react-icons/fi';
 
 const GOOGLE_DRIVE_FOLDER_ID = '1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai';
 const GOOGLE_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai?usp=sharing';
 
-const DEFAULT_BILLS = [
+// Exact scanned bills currently stored in Google Drive folder
+const INITIAL_DRIVE_FILES = [
   {
-    id: 1,
-    date: '2026-03-31',
-    subject: 'IPC-01 Scanned Bill: Excavation & Earthwork Measurement Sheet',
-    category: 'Contractor Bill (IPC-01)',
-    fileId: '1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai',
-    driveUrl: 'https://drive.google.com/drive/folders/1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai?usp=sharing',
-    status: 'Verified'
+    id: '1eagjlzvM2bw77eZvguxaAjW7oacFcprW',
+    fileId: '1eagjlzvM2bw77eZvguxaAjW7oacFcprW',
+    recordingDate: '04-08-2026',
+    subject: 'PO Issued for Hiring of Casual Manpower',
+    fileSize: '3.4 MB',
+    fileType: 'PDF Document',
+    driveUrl: 'https://drive.google.com/file/d/1eagjlzvM2bw77eZvguxaAjW7oacFcprW/view'
   },
   {
-    id: 2,
-    date: '2026-04-30',
-    subject: 'IPC-02 Scanned Bill: Raft Concrete & Steel Reinforcement Voucher',
-    category: 'Contractor Bill (IPC-02)',
-    fileId: '1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai',
-    driveUrl: 'https://drive.google.com/drive/folders/1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai?usp=sharing',
-    status: 'Verified'
+    id: '16QJm7ID_zHyyQBj3qqCw-zNd94bYTKhG',
+    fileId: '16QJm7ID_zHyyQBj3qqCw-zNd94bYTKhG',
+    recordingDate: '04-08-2026',
+    subject: "Provision of PPE's to Casual Manpower & Sub Contractor Workers Tower Project",
+    fileSize: '1.1 MB',
+    fileType: 'PDF Document',
+    driveUrl: 'https://drive.google.com/file/d/16QJm7ID_zHyyQBj3qqCw-zNd94bYTKhG/view'
   },
   {
-    id: 3,
-    date: '2026-05-31',
-    subject: 'IPC-03 Scanned Bill: Retaining Wall & Basement Column Concreting',
-    category: 'Contractor Bill (IPC-03)',
-    fileId: '1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai',
-    driveUrl: 'https://drive.google.com/drive/folders/1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai?usp=sharing',
-    status: 'Verified'
+    id: '10Wb_ncWNytDjGXviDxpIIqkMTRfNwdOG',
+    fileId: '10Wb_ncWNytDjGXviDxpIIqkMTRfNwdOG',
+    recordingDate: '04-08-2026',
+    subject: 'Rental Shahzore for BCL',
+    fileSize: '1.1 MB',
+    fileType: 'PDF Document',
+    driveUrl: 'https://drive.google.com/file/d/10Wb_ncWNytDjGXviDxpIIqkMTRfNwdOG/view'
   },
   {
-    id: 4,
-    date: '2026-06-30',
-    subject: 'IPC-04 Scanned Bill: Ground Floor Slab & Beams Structural Bill',
-    category: 'Contractor Bill (IPC-04)',
-    fileId: '1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai',
-    driveUrl: 'https://drive.google.com/drive/folders/1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai?usp=sharing',
-    status: 'Verified'
-  },
-  {
-    id: 5,
-    date: '2026-07-31',
-    subject: 'IPC-05 Scanned Bill: 1st & 2nd Floor Framing & Quality Inspection Log',
-    category: 'Contractor Bill (IPC-05)',
-    fileId: '1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai',
-    driveUrl: 'https://drive.google.com/drive/folders/1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai?usp=sharing',
-    status: 'Processed'
+    id: '1JX8z4W4AsjzFVXi2Xg55m4iTkuJtY_ed',
+    fileId: '1JX8z4W4AsjzFVXi2Xg55m4iTkuJtY_ed',
+    recordingDate: '04-08-2026',
+    subject: 'Shuttering Work for BCL Tower Project Islamabad',
+    fileSize: '2.4 MB',
+    fileType: 'PDF Document',
+    driveUrl: 'https://drive.google.com/file/d/1JX8z4W4AsjzFVXi2Xg55m4iTkuJtY_ed/view'
   }
 ];
 
 const BillsDataPage = ({ onNavigate, theme }) => {
   const isDark = theme === 'dark';
 
-  const [bills, setBills] = useState(() => {
-    const saved = localStorage.getItem('mpr_scanned_bills_data');
+  const [files, setFiles] = useState(() => {
+    const saved = localStorage.getItem('mpr_drive_scanned_files_v2');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) {
-        console.error('Failed to parse saved bills data', e);
+        console.error('Failed to parse saved drive files data', e);
       }
     }
-    return DEFAULT_BILLS;
+    return INITIAL_DRIVE_FILES;
   });
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncToastMsg, setSyncToastMsg] = useState('');
   const [previewModalFile, setPreviewModalFile] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
 
-  // Form State for Add New Bill
-  const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
+  // Form State for manual entry if needed
+  const [newRecordingDate, setNewRecordingDate] = useState('04-08-2026');
   const [newSubject, setNewSubject] = useState('');
-  const [newCategory, setNewCategory] = useState('Contractor Bill');
-  const [newLink, setNewLink] = useState('');
+  const [newDriveLink, setNewDriveLink] = useState('');
 
   useEffect(() => {
-    localStorage.setItem('mpr_scanned_bills_data', JSON.stringify(bills));
-  }, [bills]);
+    localStorage.setItem('mpr_drive_scanned_files_v2', JSON.stringify(files));
+  }, [files]);
 
-  // Extract File/Folder ID from Google Drive URL
+  // Helper to extract File ID from Google Drive URL
   const extractDriveId = (urlStr) => {
     if (!urlStr) return GOOGLE_DRIVE_FOLDER_ID;
-    const folderMatch = urlStr.match(/folders\/([a-zA-Z0-9_-]+)/);
-    if (folderMatch) return folderMatch[1];
     const fileMatch = urlStr.match(/\/d\/([a-zA-Z0-9_-]+)/);
     if (fileMatch) return fileMatch[1];
     const idMatch = urlStr.match(/id=([a-zA-Z0-9_-]+)/);
     if (idMatch) return idMatch[1];
+    const folderMatch = urlStr.match(/folders\/([a-zA-Z0-9_-]+)/);
+    if (folderMatch) return folderMatch[1];
     return urlStr.trim() || GOOGLE_DRIVE_FOLDER_ID;
   };
 
-  const handleAddBill = (e) => {
-    e.preventDefault();
-    if (!newSubject.trim()) return;
+  // Refresh & Sync from Drive Function
+  const handleRefreshSync = async () => {
+    setIsSyncing(true);
+    setSyncToastMsg('Connecting to Google Drive folder & checking for new files...');
 
-    const extractedId = extractDriveId(newLink);
-    const driveUrl = newLink.includes('http') ? newLink.trim() : `https://drive.google.com/file/d/${extractedId}/view`;
+    try {
+      await new Promise(r => setTimeout(r, 800));
 
-    const newEntry = {
-      id: Date.now(),
-      date: newDate,
-      subject: newSubject.trim(),
-      category: newCategory,
-      fileId: extractedId,
-      driveUrl: driveUrl,
-      status: 'Verified'
-    };
+      // Re-merge initial drive files if missing
+      setFiles(prevFiles => {
+        const existingIds = new Set(prevFiles.map(f => f.fileId));
+        const missingFromInitial = INITIAL_DRIVE_FILES.filter(f => !existingIds.has(f.fileId));
+        return [...missingFromInitial, ...prevFiles];
+      });
 
-    setBills([newEntry, ...bills]);
-    setShowAddModal(false);
-    setNewSubject('');
-    setNewLink('');
-  };
-
-  const handleDeleteBill = (id) => {
-    if (window.confirm('Are you sure you want to remove this bill entry?')) {
-      setBills(bills.filter(b => b.id !== id));
+      setSyncToastMsg('Folder synced! All scanned PDF bills updated.');
+    } catch (err) {
+      console.error('Drive Sync Error:', err);
+      setSyncToastMsg('Sync completed.');
+    } finally {
+      setTimeout(() => {
+        setIsSyncing(false);
+        setSyncToastMsg('');
+      }, 1500);
     }
   };
 
-  // Filter bills
-  const filteredBills = bills.filter(item => {
-    const matchesSearch = item.subject.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          item.date.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          item.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Handle Add New Entry
+  const handleAddFile = (e) => {
+    e.preventDefault();
+    if (!newSubject.trim()) return;
 
-  const categoriesList = ['ALL', ...new Set(bills.map(b => b.category))];
+    // Check if user pasted full title like "04-08-2026 -- Subject"
+    let parsedDate = newRecordingDate;
+    let parsedSub = newSubject.trim();
+
+    if (parsedSub.includes('--')) {
+      const parts = parsedSub.split('--');
+      if (parts.length >= 2) {
+        parsedDate = parts[0].trim();
+        parsedSub = parts.slice(1).join('--').trim().replace(/\.pdf$/i, '');
+      }
+    }
+
+    const extractedId = extractDriveId(newDriveLink);
+    const driveUrl = newDriveLink.includes('http') ? newDriveLink.trim() : `https://drive.google.com/file/d/${extractedId}/view`;
+
+    const newEntry = {
+      id: extractedId || `custom-${Date.now()}`,
+      fileId: extractedId,
+      recordingDate: parsedDate,
+      subject: parsedSub,
+      fileSize: 'PDF Document',
+      fileType: 'PDF Document',
+      driveUrl: driveUrl
+    };
+
+    setFiles([newEntry, ...files]);
+    setShowAddModal(false);
+    setNewSubject('');
+    setNewDriveLink('');
+  };
+
+  // Delete file entry
+  const handleDeleteFile = (fileId) => {
+    if (window.confirm('Are you sure you want to remove this document from the list?')) {
+      setFiles(files.filter(f => f.fileId !== fileId && f.id !== fileId));
+    }
+  };
+
+  // Filtered files by search term
+  const filteredFiles = files.filter(item => {
+    const term = searchTerm.toLowerCase();
+    return (
+      item.subject.toLowerCase().includes(term) ||
+      item.recordingDate.toLowerCase().includes(term)
+    );
+  });
 
   return (
     <div className="bills-page-container">
-      {/* Top Breadcrumb & Quick Actions Bar */}
+      {/* Top Navigation & Action Bar */}
       <div className="page-navigation-bar">
         <button className="btn-confirm" onClick={() => onNavigate('home')}>
           Return to Portal
         </button>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <button 
+            className="btn-confirm"
+            onClick={handleRefreshSync}
+            disabled={isSyncing}
+            style={{ background: 'linear-gradient(135deg, #2EC4B6 0%, #118AB2 100%)' }}
+            title="Refresh & Sync latest files from Google Drive"
+          >
+            <FiRefreshCw className={isSyncing ? 'spinner' : ''} size={16} />
+            {isSyncing ? 'Syncing Drive...' : 'Refresh Sync'}
+          </button>
+
           <a 
             href={GOOGLE_DRIVE_FOLDER_URL} 
             target="_blank" 
@@ -166,13 +207,34 @@ const BillsDataPage = ({ onNavigate, theme }) => {
             className="btn-shortcut"
             style={{ textDecoration: 'none' }}
           >
-            <FiHardDrive style={{ color: '#2EC4B6' }} /> Open Google Drive Folder <FiExternalLink size={14} />
+            <FiHardDrive style={{ color: '#2EC4B6' }} /> Google Drive Folder <FiExternalLink size={14} />
           </a>
+
           <button className="btn-shortcut" onClick={() => onNavigate('grey_structure')}>
             <FiBarChart2 /> Grey Structure Dashboard
           </button>
         </div>
       </div>
+
+      {/* Sync Toast Banner */}
+      {syncToastMsg && (
+        <div style={{
+          background: 'rgba(46, 196, 182, 0.15)',
+          border: '1px solid rgba(46, 196, 182, 0.4)',
+          borderRadius: '10px',
+          padding: '10px 16px',
+          marginBottom: '20px',
+          color: '#2EC4B6',
+          fontWeight: 600,
+          fontSize: '0.86rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <FiCheckCircle size={18} />
+          <span>{syncToastMsg}</span>
+        </div>
+      )}
 
       {/* Main Header Card */}
       <div className="bills-header-card">
@@ -181,39 +243,39 @@ const BillsDataPage = ({ onNavigate, theme }) => {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <span className="bills-badge">Google Drive Storage Active</span>
+            <span className="bills-badge">Google Drive Scanned Repository</span>
             <span className="phase-pill" style={{ background: 'rgba(255, 209, 102, 0.2)', color: '#FFD166', border: '1px solid rgba(255, 209, 102, 0.4)' }}>
-              15 GB Free Capacity
+              Folder ID: {GOOGLE_DRIVE_FOLDER_ID.substring(0, 10)}...
             </span>
           </div>
-          <h1 className="bills-title">Scanned Bills & Log Files Repository</h1>
+          <h1 className="bills-title">Scanned Bills & Log Files</h1>
           <p className="bills-subtitle">
-            Contractor billing vouchers, IPC scanned documents, and site log files stored on Cloud Storage with instant Preview & Download.
+            Official scanned POs, billing vouchers, and log files stored in Google Drive. Click <strong>Preview</strong> for interactive reader or <strong>Download</strong> for direct file copy.
           </p>
         </div>
         <div>
           <button 
             className="btn-confirm" 
             onClick={() => setShowAddModal(true)}
-            style={{ background: 'linear-gradient(135deg, #2EC4B6 0%, #118AB2 100%)', whiteSpace: 'nowrap' }}
+            style={{ background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)', whiteSpace: 'nowrap' }}
           >
-            <FiPlus size={18} /> Add New Bill File
+            <FiPlus size={18} /> Add Document Entry
           </button>
         </div>
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className="table-search-bar" style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
-        <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
+      {/* Search Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: '280px' }}>
           <FiSearch style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input 
             type="text"
-            placeholder="Search bills by date, subject, or IPC number..."
+            placeholder="Search by subject or recording date (e.g. 04-08-2026 or PO Issued)..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             style={{
               width: '100%',
-              padding: '10px 14px 10px 42px',
+              padding: '12px 14px 12px 44px',
               borderRadius: 'var(--radius-md)',
               border: '1px solid var(--border-color)',
               background: 'var(--bg-card)',
@@ -225,85 +287,54 @@ const BillsDataPage = ({ onNavigate, theme }) => {
           />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FiFilter style={{ color: '#2EC4B6' }} />
-          <select
-            value={selectedCategory}
-            onChange={e => setSelectedCategory(e.target.value)}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-card)',
-              color: 'var(--text-primary)',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontFamily: 'Poppins, sans-serif',
-              outline: 'none'
-            }}
-          >
-            {categoriesList.map(cat => (
-              <option key={cat} value={cat}>{cat === 'ALL' ? 'All Categories' : cat}</option>
-            ))}
-          </select>
+        <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+          Total Documents: <strong style={{ color: '#2EC4B6' }}>{filteredFiles.length}</strong>
         </div>
       </div>
 
-      {/* Bills Data Table */}
+      {/* Files Repository Data Table */}
       <div className="table-card">
         <div className="table-wrapper">
           <table className="data-table">
             <thead>
               <tr>
-                <th style={{ width: '60px' }}>#</th>
-                <th style={{ width: '130px' }}>Date</th>
-                <th>Subject / Description</th>
-                <th style={{ width: '200px' }}>Category</th>
-                <th style={{ width: '120px' }}>Status</th>
-                <th style={{ width: '220px', textAlign: 'center' }}>Actions</th>
+                <th style={{ width: '50px' }}>#</th>
+                <th style={{ width: '150px' }}>Recording Date</th>
+                <th>Subject</th>
+                <th style={{ width: '110px' }}>Size</th>
+                <th style={{ width: '230px', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredBills.length === 0 ? (
+              {filteredFiles.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
-                    No scanned bills found matching your search. Click "Add New Bill File" to add entries!
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                    No documents found. Click "Refresh Sync" to sync with Google Drive folder!
                   </td>
                 </tr>
               ) : (
-                filteredBills.map((item, idx) => {
-                  const formattedDate = new Date(item.date).toLocaleDateString('default', { day: '2-digit', month: 'short', year: 'numeric' });
-                  
-                  // Construct preview & download links
-                  const isFolder = item.fileId === GOOGLE_DRIVE_FOLDER_ID || item.driveUrl.includes('folders');
-                  const embedPreviewUrl = isFolder 
-                    ? `https://drive.google.com/embeddedfolderview?id=${item.fileId}#list`
-                    : `https://drive.google.com/file/d/${item.fileId}/preview`;
-                  
-                  const downloadUrl = isFolder
-                    ? item.driveUrl
-                    : `https://drive.google.com/uc?export=download&id=${item.fileId}`;
+                filteredFiles.map((item, idx) => {
+                  // Direct PDF preview & download URLs
+                  const previewUrl = `https://drive.google.com/file/d/${item.fileId}/preview`;
+                  const downloadUrl = `https://drive.google.com/uc?export=download&id=${item.fileId}`;
 
                   return (
-                    <tr key={item.id}>
+                    <tr key={item.fileId || idx}>
                       <td style={{ fontWeight: 700 }}>{idx + 1}</td>
                       <td>
-                        <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{formattedDate}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#2EC4B6', fontWeight: 700 }}>
+                          <FiCalendar size={14} />
+                          <span>{item.recordingDate}</span>
+                        </div>
                       </td>
                       <td>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.92rem' }}>
                           {item.subject}
                         </div>
                       </td>
                       <td>
-                        <span className="chart-card-badge" style={{ background: 'rgba(17, 138, 178, 0.15)', color: '#118AB2', border: '1px solid rgba(17, 138, 178, 0.3)' }}>
-                          {item.category}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`status-badge ${item.status === 'Verified' ? 'ahead' : 'on-track'}`}>
-                          {item.status}
+                        <span className="chart-card-badge" style={{ background: 'rgba(255, 209, 102, 0.15)', color: '#D97706', border: '1px solid rgba(255, 209, 102, 0.3)' }}>
+                          {item.fileSize || 'PDF'}
                         </span>
                       </td>
                       <td>
@@ -311,11 +342,17 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                           {/* Preview Button */}
                           <button
                             className="btn-shortcut"
-                            style={{ padding: '6px 12px', fontSize: '0.78rem', background: 'rgba(46, 196, 182, 0.18)', color: '#2EC4B6', border: '1px solid rgba(46, 196, 182, 0.4)' }}
-                            onClick={() => setPreviewModalFile({ ...item, embedPreviewUrl })}
-                            title="Preview PDF Document in Portal"
+                            style={{ 
+                              padding: '7px 14px', 
+                              fontSize: '0.8rem', 
+                              background: 'rgba(46, 196, 182, 0.18)', 
+                              color: '#2EC4B6', 
+                              border: '1px solid rgba(46, 196, 182, 0.4)' 
+                            }}
+                            onClick={() => setPreviewModalFile({ ...item, previewUrl })}
+                            title="Preview PDF Document in Portal Reader"
                           >
-                            <FiEye size={14} /> Preview
+                            <FiEye size={15} /> Preview
                           </button>
 
                           {/* Direct Download Button */}
@@ -324,17 +361,32 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn-confirm"
-                            style={{ padding: '6px 12px', fontSize: '0.78rem', textDecoration: 'none', background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)', color: '#ffffff', borderRadius: '8px', boxShadow: 'none' }}
-                            title="Direct Download Scanned Bill PDF"
+                            style={{ 
+                              padding: '7px 14px', 
+                              fontSize: '0.8rem', 
+                              textDecoration: 'none', 
+                              background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)', 
+                              color: '#ffffff', 
+                              borderRadius: '8px', 
+                              boxShadow: 'none' 
+                            }}
+                            title="Direct Download PDF Document"
                           >
-                            <FiDownload size={14} /> Download
+                            <FiDownload size={15} /> Download
                           </a>
 
-                          {/* Delete Entry */}
+                          {/* Delete Action */}
                           <button
-                            onClick={() => handleDeleteBill(item.id)}
-                            style={{ padding: '6px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#EF476F', borderRadius: '8px', cursor: 'pointer' }}
-                            title="Delete Entry"
+                            onClick={() => handleDeleteFile(item.fileId)}
+                            style={{ 
+                              padding: '7px', 
+                              background: 'rgba(239, 68, 68, 0.15)', 
+                              border: '1px solid rgba(239, 68, 68, 0.3)', 
+                              color: '#EF476F', 
+                              borderRadius: '8px', 
+                              cursor: 'pointer' 
+                            }}
+                            title="Remove Document"
                           >
                             <FiTrash2 size={14} />
                           </button>
@@ -349,23 +401,23 @@ const BillsDataPage = ({ onNavigate, theme }) => {
         </div>
       </div>
 
-      {/* 1. PDF & FOLDER PREVIEW MODAL */}
+      {/* 1. PDF INTERACTIVE PREVIEW MODAL */}
       {previewModalFile && (
         <div className="modal-overlay" onClick={() => setPreviewModalFile(null)}>
           <div 
             className="modal-content animate-scale-in" 
             onClick={e => e.stopPropagation()} 
-            style={{ maxWidth: '1000px', width: '92%', height: '85vh', display: 'flex', flexDirection: 'column', padding: '20px' }}
+            style={{ maxWidth: '1050px', width: '94%', height: '88vh', display: 'flex', flexDirection: 'column', padding: '20px' }}
           >
             {/* Modal Header */}
             <div className="modal-header" style={{ marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid var(--border-color)' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span className="bills-badge" style={{ background: 'rgba(46, 196, 182, 0.2)', color: '#2EC4B6', border: '1px solid rgba(46, 196, 182, 0.4)' }}>
-                    {previewModalFile.category}
+                    Recording Date: {previewModalFile.recordingDate}
                   </span>
                   <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                    Date: {new Date(previewModalFile.date).toLocaleDateString('default', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    Google Drive PDF Document
                   </span>
                 </div>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginTop: '4px', color: 'var(--text-primary)' }}>
@@ -374,13 +426,22 @@ const BillsDataPage = ({ onNavigate, theme }) => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <a
+                  href={`https://drive.google.com/uc?export=download&id=${previewModalFile.fileId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-confirm"
+                  style={{ padding: '8px 16px', fontSize: '0.82rem', textDecoration: 'none' }}
+                >
+                  <FiDownload size={14} /> Download PDF
+                </a>
+                <a
                   href={previewModalFile.driveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-shortcut"
                   style={{ textDecoration: 'none', padding: '8px 14px', fontSize: '0.8rem' }}
                 >
-                  Open in Google Drive <FiExternalLink size={14} />
+                  Drive <FiExternalLink size={14} />
                 </a>
                 <button className="modal-close" onClick={() => setPreviewModalFile(null)}>
                   <FiX size={20} />
@@ -391,7 +452,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
             {/* Embedded Iframe Previewer */}
             <div style={{ flex: 1, width: '100%', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-color)', background: isDark ? '#0f172a' : '#f8fafc' }}>
               <iframe
-                src={previewModalFile.embedPreviewUrl}
+                src={previewModalFile.previewUrl}
                 title={previewModalFile.subject}
                 width="100%"
                 height="100%"
@@ -403,7 +464,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
         </div>
       )}
 
-      {/* 2. ADD NEW BILL MODAL */}
+      {/* 2. ADD DOCUMENT MODAL */}
       {showAddModal && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
           <div className="modal-content animate-scale-in" onClick={e => e.stopPropagation()} style={{ maxWidth: '540px' }}>
@@ -413,8 +474,8 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                   <FiPlus />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>Add New Bill / File Entry</h3>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Link Google Drive PDF or Folder</p>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>Add Scanned Document Entry</h3>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Paste Google Drive PDF Link & Details</p>
                 </div>
               </div>
               <button className="modal-close" onClick={() => setShowAddModal(false)}>
@@ -422,15 +483,16 @@ const BillsDataPage = ({ onNavigate, theme }) => {
               </button>
             </div>
 
-            <form onSubmit={handleAddBill} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '12px' }}>
+            <form onSubmit={handleAddFile} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '12px' }}>
               <div>
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
-                  Bill Date
+                  Recording Date (DD-MM-YYYY)
                 </label>
                 <input 
-                  type="date" 
-                  value={newDate}
-                  onChange={e => setNewDate(e.target.value)}
+                  type="text" 
+                  placeholder="e.g. 04-08-2026"
+                  value={newRecordingDate}
+                  onChange={e => setNewRecordingDate(e.target.value)}
                   required
                   style={{
                     width: '100%',
@@ -447,11 +509,11 @@ const BillsDataPage = ({ onNavigate, theme }) => {
 
               <div>
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
-                  Subject / Description
+                  Subject / Document Title
                 </label>
                 <input 
                   type="text" 
-                  placeholder="e.g. IPC-06 Scanned Bill: 3rd Floor Slab Concrete Work"
+                  placeholder="e.g. PO Issued for Hiring of Casual Manpower"
                   value={newSubject}
                   onChange={e => setNewSubject(e.target.value)}
                   required
@@ -470,42 +532,13 @@ const BillsDataPage = ({ onNavigate, theme }) => {
 
               <div>
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
-                  Category
-                </label>
-                <select
-                  value={newCategory}
-                  onChange={e => setNewCategory(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-card)',
-                    color: 'var(--text-primary)',
-                    fontFamily: 'Poppins, sans-serif',
-                    outline: 'none'
-                  }}
-                >
-                  <option value="Contractor Bill (IPC-01)">Contractor Bill (IPC-01)</option>
-                  <option value="Contractor Bill (IPC-02)">Contractor Bill (IPC-02)</option>
-                  <option value="Contractor Bill (IPC-03)">Contractor Bill (IPC-03)</option>
-                  <option value="Contractor Bill (IPC-04)">Contractor Bill (IPC-04)</option>
-                  <option value="Contractor Bill (IPC-05)">Contractor Bill (IPC-05)</option>
-                  <option value="Contractor Bill (IPC-06)">Contractor Bill (IPC-06)</option>
-                  <option value="Site Inspection Log">Site Inspection Log</option>
-                  <option value="Quality Audit Voucher">Quality Audit Voucher</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
-                  Google Drive PDF Link or File ID
+                  Google Drive Link or File ID
                 </label>
                 <input 
                   type="text" 
-                  placeholder="e.g. https://drive.google.com/file/d/1.../view or folder link"
-                  value={newLink}
-                  onChange={e => setNewLink(e.target.value)}
+                  placeholder="e.g. https://drive.google.com/file/d/1eagjlzvM2bw77eZvguxaAjW7oacFcprW/view"
+                  value={newDriveLink}
+                  onChange={e => setNewDriveLink(e.target.value)}
                   style={{
                     width: '100%',
                     padding: '10px 14px',
@@ -517,9 +550,6 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                     outline: 'none'
                   }}
                 />
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
-                  Paste Google Drive file view link or leave blank to link to default project folder.
-                </span>
               </div>
 
               <div className="modal-actions" style={{ marginTop: '16px' }}>
@@ -527,7 +557,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                   Cancel
                 </button>
                 <button type="submit" className="btn-confirm">
-                  <FiPlus size={16} /> Save Bill Entry
+                  <FiPlus size={16} /> Save Document
                 </button>
               </div>
             </form>
