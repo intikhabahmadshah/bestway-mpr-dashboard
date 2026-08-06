@@ -1291,20 +1291,24 @@
   width: 72px;
   height: 72px;
   border-radius: var(--radius-lg);
-  background: rgba(255, 209, 102, 0.18);
-  color: #FFD166;
+  background: rgba(46, 196, 182, 0.18);
+  color: #118AB2;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
+[data-theme="dark"] .bills-icon-container {
+  background: rgba(46, 196, 182, 0.25);
+  color: #5EEAD4;
+}
 .bills-badge {
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  background: rgba(255, 209, 102, 0.2);
-  color: #FFD166;
-  border: 1px solid rgba(255, 209, 102, 0.4);
+  background: rgba(46, 196, 182, 0.15);
+  color: #118AB2;
+  border: 1px solid rgba(46, 196, 182, 0.35);
   padding: 3px 10px;
   border-radius: 20px;
   letter-spacing: 0.5px;

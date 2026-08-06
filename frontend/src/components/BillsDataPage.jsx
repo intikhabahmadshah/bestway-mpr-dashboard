@@ -199,20 +199,6 @@ const BillsDataPage = ({ onNavigate, theme }) => {
             <FiRefreshCw className={isSyncing ? 'spinner' : ''} size={16} />
             {isSyncing ? 'Syncing Drive...' : 'Refresh Sync'}
           </button>
-
-          <a 
-            href={GOOGLE_DRIVE_FOLDER_URL} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="btn-shortcut"
-            style={{ textDecoration: 'none' }}
-          >
-            <FiHardDrive style={{ color: '#2EC4B6' }} /> Google Drive Folder <FiExternalLink size={14} />
-          </a>
-
-          <button className="btn-shortcut" onClick={() => onNavigate('grey_structure')}>
-            <FiBarChart2 /> Grey Structure Dashboard
-          </button>
         </div>
       </div>
 
@@ -242,12 +228,6 @@ const BillsDataPage = ({ onNavigate, theme }) => {
           <FiFileText size={38} />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <span className="bills-badge">Google Drive Scanned Repository</span>
-            <span className="phase-pill" style={{ background: 'rgba(255, 209, 102, 0.2)', color: '#FFD166', border: '1px solid rgba(255, 209, 102, 0.4)' }}>
-              Folder ID: {GOOGLE_DRIVE_FOLDER_ID.substring(0, 10)}...
-            </span>
-          </div>
           <h1 className="bills-title">Scanned Bills & Log Files</h1>
           <p className="bills-subtitle">
             Official scanned POs, billing vouchers, and log files stored in Google Drive. Click <strong>Preview</strong> for interactive reader or <strong>Download</strong> for direct file copy.
@@ -333,7 +313,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                         </div>
                       </td>
                       <td>
-                        <span className="chart-card-badge" style={{ background: 'rgba(255, 209, 102, 0.15)', color: '#D97706', border: '1px solid rgba(255, 209, 102, 0.3)' }}>
+                        <span className="chart-card-badge" style={{ background: 'rgba(46, 196, 182, 0.15)', color: '#118AB2', border: '1px solid rgba(46, 196, 182, 0.35)' }}>
                           {item.fileSize || 'PDF'}
                         </span>
                       </td>
