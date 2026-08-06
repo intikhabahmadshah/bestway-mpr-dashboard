@@ -233,15 +233,6 @@ const BillsDataPage = ({ onNavigate, theme }) => {
             Official scanned POs, billing vouchers, and log files stored in Google Drive. Click <strong>Preview</strong> for interactive reader or <strong>Download</strong> for direct file copy.
           </p>
         </div>
-        <div>
-          <button 
-            className="btn-confirm" 
-            onClick={() => setShowAddModal(true)}
-            style={{ background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)', whiteSpace: 'nowrap' }}
-          >
-            <FiPlus size={18} /> Add Document Entry
-          </button>
-        </div>
       </div>
 
       {/* Search Bar */}
@@ -282,14 +273,14 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                 <th style={{ width: '150px' }}>Recording Date</th>
                 <th>Subject</th>
                 <th style={{ width: '110px' }}>Size</th>
-                <th style={{ width: '230px', textAlign: 'center' }}>Actions</th>
+                <th style={{ width: '200px', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredFiles.length === 0 ? (
                 <tr>
                   <td colSpan="5" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
-                    No documents found. Click "Refresh Sync" to sync with Google Drive folder!
+                    No documents found matching your search.
                   </td>
                 </tr>
               ) : (
@@ -323,7 +314,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                           <button
                             className="btn-shortcut"
                             style={{ 
-                              padding: '7px 14px', 
+                              padding: '7px 16px', 
                               fontSize: '0.8rem', 
                               background: 'rgba(46, 196, 182, 0.18)', 
                               color: '#2EC4B6', 
@@ -342,7 +333,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                             rel="noopener noreferrer"
                             className="btn-confirm"
                             style={{ 
-                              padding: '7px 14px', 
+                              padding: '7px 16px', 
                               fontSize: '0.8rem', 
                               textDecoration: 'none', 
                               background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)', 
@@ -354,22 +345,6 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                           >
                             <FiDownload size={15} /> Download
                           </a>
-
-                          {/* Delete Action */}
-                          <button
-                            onClick={() => handleDeleteFile(item.fileId)}
-                            style={{ 
-                              padding: '7px', 
-                              background: 'rgba(239, 68, 68, 0.15)', 
-                              border: '1px solid rgba(239, 68, 68, 0.3)', 
-                              color: '#EF476F', 
-                              borderRadius: '8px', 
-                              cursor: 'pointer' 
-                            }}
-                            title="Remove Document"
-                          >
-                            <FiTrash2 size={14} />
-                          </button>
                         </div>
                       </td>
                     </tr>
