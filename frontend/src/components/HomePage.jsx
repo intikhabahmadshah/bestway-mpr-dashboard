@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiBarChart2, FiFileText, FiArrowRight, FiLayers, FiCheckCircle, FiClock, FiGrid, FiDatabase } from 'react-icons/fi';
+import { FiBarChart2, FiFileText, FiArrowRight, FiLayers, FiCheckCircle, FiClock, FiGrid, FiDatabase, FiCalendar } from 'react-icons/fi';
 
 const HomePage = ({ onNavigate, theme }) => {
   const isDark = theme === 'dark';
