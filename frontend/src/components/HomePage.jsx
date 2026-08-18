@@ -79,19 +79,60 @@ const HomePage = ({ onNavigate, theme }) => {
                 <div className="card-icon amber">
                   <FiFileText />
                 </div>
-                <span className="status-tag upcoming">Module Setup</span>
+                <span className="status-tag active">Drive Connected</span>
               </div>
               <h3 className="card-title">Bills Data</h3>
               <p className="card-description">
-                Contractor billing records, log files, expense summaries, and verification 
-                documentation archive.
+                Contractor billing records, log files, scanned PO vouchers, and cloud document archive.
               </p>
               <div className="card-meta">
-                <span><FiClock style={{ color: '#FFD166' }} /> Logging Module</span>
-                <span><FiFileText style={{ color: '#EF476F' }} /> Verification Records</span>
+                <span><FiClock style={{ color: '#FFD166' }} /> Google Drive 15GB</span>
+                <span><FiFileText style={{ color: '#2EC4B6' }} /> Scanned PDF Copies</span>
               </div>
               <button className="btn-portal-action amber">
                 Open Bills Data <FiArrowRight />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 3: PROJECT SCHEDULE */}
+        <section className="home-section">
+          <div className="section-header">
+            <div className="section-icon-badge blue">
+              <FiCalendar />
+            </div>
+            <div>
+              <h2 className="section-title">Project Schedule</h2>
+              <p className="section-desc">MS Project WBS hierarchy & interactive Gantt timeline</p>
+            </div>
+          </div>
+
+          <div className="portal-cards-grid">
+            <div 
+              className="portal-card primary-card"
+              onClick={() => onNavigate('schedule')}
+              style={{ borderTop: '3px solid #118AB2' }}
+            >
+              <div className="portal-card-header">
+                <div className="card-icon blue">
+                  <FiCalendar />
+                </div>
+                <span className="status-tag active" style={{ background: 'rgba(17, 138, 178, 0.18)', color: '#118AB2' }}>
+                  Aiven DB Live
+                </span>
+              </div>
+              <h3 className="card-title">MS Project Schedule</h3>
+              <p className="card-description">
+                Complete construction activity breakdown with WBS hierarchy, critical path tracking, and 
+                interactive Gantt timeline covering all 265 tasks (2026 – 2028).
+              </p>
+              <div className="card-meta">
+                <span><FiCheckCircle style={{ color: '#2EC4B6' }} /> 265 Activities</span>
+                <span><FiDatabase style={{ color: '#118AB2' }} /> Aiven MySQL Sync</span>
+              </div>
+              <button className="btn-portal-action cyan" style={{ background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)' }}>
+                Open Schedule <FiArrowRight />
               </button>
             </div>
           </div>

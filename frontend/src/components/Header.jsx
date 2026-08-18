@@ -18,11 +18,16 @@ const Header = ({ theme, toggleTheme, currentView, onNavigate }) => {
         <h1 className="header-title">Construction of Bestway Tower at F-9/G-9, Islamabad</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <span className="header-subtitle">
-            {currentView === 'home' ? 'Project Management Portal' : (currentView === 'bills_data' ? 'Bills Data & Log Files' : 'Monthly Progress Report Dashboard')}
+            {currentView === 'home' ? 'Project Management Portal' : (currentView === 'bills_data' ? 'Bills Data & Log Files' : (currentView === 'schedule' ? 'MS Project Activity Schedule' : 'Monthly Progress Report Dashboard'))}
           </span>
           {currentView === 'grey_structure' && (
             <span className="header-phase-badge">
               <FiLayers size={12} /> Phase: Grey Structure
+            </span>
+          )}
+          {currentView === 'schedule' && (
+            <span className="header-phase-badge" style={{ borderColor: 'rgba(17, 138, 178, 0.4)', color: '#2EC4B6' }}>
+              <FiLayers size={12} /> 265 Activities | Aiven DB
             </span>
           )}
         </div>
