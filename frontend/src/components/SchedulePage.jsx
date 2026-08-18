@@ -5,7 +5,6 @@ import {
   FiSearch, 
   FiFilter, 
   FiLayers, 
-  FiAlertTriangle, 
   FiCheckCircle, 
   FiChevronDown, 
   FiChevronRight, 
@@ -13,13 +12,10 @@ import {
   FiFileText, 
   FiDatabase, 
   FiDownload, 
-  FiMaximize2, 
-  FiMinimize2, 
-  FiGrid, 
   FiList, 
-  FiFlag,
   FiZap,
-  FiCornerDownRight
+  FiZoomIn,
+  FiZoomOut
 } from 'react-icons/fi';
 import scheduleData from '../data/schedule_tasks.json';
 
@@ -32,6 +28,7 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
   const [viewMode, setViewMode] = useState('split'); // 'split' | 'table' | 'gantt'
   const [collapsedWBS, setCollapsedWBS] = useState(new Set());
   const [hoveredTask, setHoveredTask] = useState(null);
+  const [zoomScale, setZoomScale] = useState(130); // px per month (90, 130, 190, 260)
 
   const tasks = useMemo(() => scheduleData.tasks || [], []);
   const projectStart = new Date(scheduleData.project_start || '2026-01-01');
@@ -55,6 +52,8 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
     }
     return months;
   }, [projectStart, projectFinish]);
+
+  const totalTimelineWidth = timelineMonths.length * zoomScale;
 
   // Key KPI metrics
   const kpis = useMemo(() => {
@@ -120,21 +119,21 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
   }, [tasks, collapsedWBS, searchTerm, selectedPhase, filterType]);
 
   // Calculate Gantt bar percentage position & width
-  const getGanttBarStyle = (task) => {
-    if (!task.start || !task.finish) return { left: '0%', width: '0%' };
+  const getGanttBarMetrics = (task) => {
+    if (!task.start || !task.finish) return { leftPx: 0, widthPx: 0 };
     const taskStart = new Date(task.start);
     const taskFinish = new Date(task.finish);
 
     const startOffsetDays = Math.max(0, (taskStart - projectStart) / (1000 * 60 * 60 * 24));
     const durationDays = Math.max(1, (taskFinish - taskStart) / (1000 * 60 * 60 * 24));
 
-    const leftPercent = (startOffsetDays / totalProjectDays) * 100;
-    const widthPercent = (durationDays / totalProjectDays) * 100;
+    const leftPercent = startOffsetDays / totalProjectDays;
+    const widthPercent = durationDays / totalProjectDays;
 
-    return {
-      left: `${Math.min(100, Math.max(0, leftPercent))}%`,
-      width: `${Math.min(100 - leftPercent, Math.max(0.6, widthPercent))}%`
-    };
+    const leftPx = leftPercent * totalTimelineWidth;
+    const widthPx = Math.max(task.milestone ? 14 : 10, widthPercent * totalTimelineWidth);
+
+    return { leftPx, widthPx };
   };
 
   // Export to CSV
@@ -198,7 +197,7 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
           </div>
           <h1 className="schedule-title">Project Activity Schedule (WBS & Gantt)</h1>
           <p className="schedule-subtitle">
-            Complete construction activity breakdown with WBS hierarchy, critical path analysis, and interactive Gantt timeline tracking.
+            Complete construction activity breakdown with horizontal scrolling calendar timeline, critical path analysis, and full task labels.
           </p>
         </div>
 
@@ -309,6 +308,41 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
           </button>
         </div>
 
+        {/* Timeline Zoom Scale Controller */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg-secondary)', padding: '4px 8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            Calendar Zoom:
+          </span>
+          <button 
+            className={`btn-zoom-pill ${zoomScale === 90 ? 'active' : ''}`} 
+            onClick={() => setZoomScale(90)}
+            title="Compact View (90px/month)"
+          >
+            Compact
+          </button>
+          <button 
+            className={`btn-zoom-pill ${zoomScale === 130 ? 'active' : ''}`} 
+            onClick={() => setZoomScale(130)}
+            title="Standard View (130px/month)"
+          >
+            Standard
+          </button>
+          <button 
+            className={`btn-zoom-pill ${zoomScale === 190 ? 'active' : ''}`} 
+            onClick={() => setZoomScale(190)}
+            title="Wide View (190px/month)"
+          >
+            Wide
+          </button>
+          <button 
+            className={`btn-zoom-pill ${zoomScale === 260 ? 'active' : ''}`} 
+            onClick={() => setZoomScale(260)}
+            title="Ultra Expanded View (260px/month)"
+          >
+            Ultra
+          </button>
+        </div>
+
         {/* View Mode Switcher & Hierarchy Controls */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <div className="view-mode-group">
@@ -346,7 +380,7 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
 
       {/* Active Count Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginBottom: '12px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-        <span>Showing <strong>{visibleTasks.length}</strong> of <strong>{tasks.length}</strong> project activities</span>
+        <span>Showing <strong>{visibleTasks.length}</strong> of <strong>{tasks.length}</strong> project activities | Calendar Width: <strong>{totalTimelineWidth}px</strong> (Scroll horizontally below)</span>
         {filterType !== 'ALL' && <span style={{ color: '#EF476F', fontWeight: 600 }}>Filter Active: {filterType}</span>}
       </div>
 
@@ -436,14 +470,14 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
           </div>
         )}
 
-        {/* RIGHT PANEL: INTERACTIVE GANTT CHART */}
+        {/* RIGHT PANEL: INTERACTIVE GANTT TIMELINE WITH HORIZONTAL SCROLL */}
         {(viewMode === 'split' || viewMode === 'gantt') && (
-          <div className="schedule-gantt-panel">
+          <div className="schedule-gantt-panel custom-scrollbar">
             {/* Timeline Month Header */}
-            <div className="gantt-header-sticky">
+            <div className="gantt-header-sticky" style={{ width: `${totalTimelineWidth}px`, minWidth: `${totalTimelineWidth}px` }}>
               <div className="gantt-months-track">
                 {timelineMonths.map((m) => (
-                  <div key={m.key} className="gantt-month-cell">
+                  <div key={m.key} className="gantt-month-cell" style={{ width: `${zoomScale}px`, minWidth: `${zoomScale}px` }}>
                     <span className="gantt-month-name">{m.monthName}</span>
                     <span className="gantt-year-name">{m.year}</span>
                   </div>
@@ -452,9 +486,9 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
             </div>
 
             {/* Gantt Bars Rows */}
-            <div className="gantt-body">
+            <div className="gantt-body" style={{ width: `${totalTimelineWidth}px`, minWidth: `${totalTimelineWidth}px` }}>
               {visibleTasks.map((t) => {
-                const barStyle = getGanttBarStyle(t);
+                const { leftPx, widthPx } = getGanttBarMetrics(t);
                 const isSummary = t.summary;
                 const isCritical = t.critical;
                 const isHovered = hoveredTask && hoveredTask.id === t.id;
@@ -469,26 +503,32 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
                     {/* Background Grid Lines */}
                     <div className="gantt-grid-lines">
                       {timelineMonths.map((m) => (
-                        <div key={m.key} className="gantt-grid-column"></div>
+                        <div key={m.key} className="gantt-grid-column" style={{ width: `${zoomScale}px`, minWidth: `${zoomScale}px` }}></div>
                       ))}
                     </div>
 
-                    {/* Gantt Bar Element */}
+                    {/* Gantt Bar Wrapper with External Label for 100% Full Text Visibility */}
                     <div 
-                      className={`gantt-bar ${isSummary ? 'summary-bar' : (isCritical ? 'critical-bar' : 'normal-bar')} ${t.milestone ? 'milestone-diamond' : ''}`}
-                      style={barStyle}
-                      title={`${t.wbs} - ${t.name}\nStart: ${t.start}\nFinish: ${t.finish}\nDuration: ${t.duration_days} Days\nProgress: ${t.percent_complete}%`}
+                      className="gantt-bar-wrapper"
+                      style={{ left: `${leftPx}px`, width: `${widthPx}px` }}
+                      title={`[${t.wbs}] ${t.name}\nStart: ${t.start}\nFinish: ${t.finish}\nDuration: ${t.duration_days} Days\nProgress: ${t.percent_complete}%`}
                     >
-                      {/* Actual Progress Fill */}
-                      {!isSummary && !t.milestone && t.percent_complete > 0 && (
-                        <div 
-                          className="gantt-progress-fill" 
-                          style={{ width: `${t.percent_complete}%` }}
-                        />
-                      )}
+                      {/* Visual Graphic Bar */}
+                      <div 
+                        className={`gantt-bar ${isSummary ? 'summary-bar' : (isCritical ? 'critical-bar' : 'normal-bar')} ${t.milestone ? 'milestone-diamond' : ''}`}
+                        style={{ width: `${widthPx}px` }}
+                      >
+                        {/* Actual Progress Fill */}
+                        {!isSummary && !t.milestone && t.percent_complete > 0 && (
+                          <div 
+                            className="gantt-progress-fill" 
+                            style={{ width: `${t.percent_complete}%` }}
+                          />
+                        )}
+                      </div>
 
-                      {/* Bar Label */}
-                      <span className="gantt-bar-label">
+                      {/* External Label: Always Full Text Visible to the Right */}
+                      <span className={`gantt-external-label ${isSummary ? 'summary-label' : ''} ${isCritical ? 'critical-label' : ''}`}>
                         {isSummary ? t.name : `${t.name} (${t.duration_days}d)`}
                       </span>
                     </div>
@@ -508,6 +548,9 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
             Data synchronized from <strong>MS Project (.mpp)</strong> and stored in <strong>Aiven Cloud MySQL Database</strong> (<code>bestwaytowerproject-intikhabgillani.l.aivencloud.com:21951</code>).
           </span>
         </div>
+        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          Tip: Drag the horizontal scrollbar at the bottom of the Gantt chart to inspect all months up to 2028.
+        </span>
       </div>
     </div>
   );

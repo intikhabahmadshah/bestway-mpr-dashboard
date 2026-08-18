@@ -1735,6 +1735,29 @@ body.is-exporting-mode .chart-card-badge {
   color: #2EC4B6;
 }
 
+.btn-zoom-pill {
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Poppins', sans-serif;
+}
+.btn-zoom-pill:hover {
+  border-color: #2EC4B6;
+  color: var(--text-primary);
+}
+.btn-zoom-pill.active {
+  background: #2EC4B6;
+  color: #073B4C;
+  border-color: #2EC4B6;
+  font-weight: 700;
+}
+
 /* Gantt Timeline Panel */
 .schedule-gantt-panel {
   width: 50%;
@@ -1746,25 +1769,45 @@ body.is-exporting-mode .chart-card-badge {
   background: var(--bg-card);
 }
 
+/* Prominent Custom Scrollbar for Easy Horizontal Dragging */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 14px;
+  width: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+}
+[data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2EC4B6;
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #118AB2;
+}
+
 .gantt-header-sticky {
   position: sticky;
   top: 0;
   z-index: 15;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  min-width: 1400px;
 }
 .gantt-months-track {
   display: flex;
   width: 100%;
 }
 .gantt-month-cell {
-  flex: 1;
-  min-width: 40px;
-  padding: 6px 2px;
+  flex-shrink: 0;
+  padding: 8px 2px;
   text-align: center;
   border-right: 1px solid var(--border-color);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   display: flex;
   flex-direction: column;
 }
@@ -1773,13 +1816,12 @@ body.is-exporting-mode .chart-card-badge {
   color: var(--text-primary);
 }
 .gantt-year-name {
-  font-size: 0.62rem;
+  font-size: 0.64rem;
   color: var(--text-muted);
 }
 
 .gantt-body {
   position: relative;
-  min-width: 1400px;
 }
 .gantt-row {
   position: relative;
@@ -1804,22 +1846,29 @@ body.is-exporting-mode .chart-card-badge {
   pointer-events: none;
 }
 .gantt-grid-column {
-  flex: 1;
-  min-width: 40px;
-  border-right: 1px dashed rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  border-right: 1px dashed rgba(255, 255, 255, 0.07);
 }
 [data-theme="light"] .gantt-grid-column {
-  border-right: 1px dashed rgba(0, 0, 0, 0.05);
+  border-right: 1px dashed rgba(0, 0, 0, 0.07);
+}
+
+.gantt-bar-wrapper {
+  position: absolute;
+  top: 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  z-index: 5;
 }
 
 .gantt-bar {
-  position: absolute;
-  top: 9px;
-  height: 20px;
+  position: relative;
+  height: 18px;
   border-radius: 4px;
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
-  z-index: 2;
+  flex-shrink: 0;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -1842,7 +1891,6 @@ body.is-exporting-mode .chart-card-badge {
 .gantt-bar.summary-bar {
   background: #2EC4B6;
   height: 10px;
-  top: 14px;
   border-radius: 2px;
 }
 .gantt-bar.milestone-diamond {
@@ -1851,7 +1899,6 @@ body.is-exporting-mode .chart-card-badge {
   transform: rotate(45deg);
   background: #FFD166;
   border: 1px solid #D97706;
-  top: 12px;
 }
 
 .gantt-progress-fill {
@@ -1863,16 +1910,23 @@ body.is-exporting-mode .chart-card-badge {
   z-index: 1;
 }
 
-.gantt-bar-label {
-  position: relative;
-  z-index: 3;
-  padding: 0 8px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #ffffff;
+.gantt-external-label {
+  margin-left: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
   white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+.gantt-external-label.summary-label {
+  font-weight: 800;
+  color: #2EC4B6;
+  font-size: 0.82rem;
+}
+.gantt-external-label.critical-label {
+  color: #EF476F;
+  font-weight: 700;
 }
 
 .schedule-footer-note {
