@@ -226,7 +226,7 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
           <div className="kpi-icon blue"><FiClock /></div>
           <div className="kpi-label">Total Duration</div>
           <div className="kpi-value">990 Days</div>
-          <div className="kpi-sub"><span>01 Jan 2026 $\rightarrow$ 16 Sep 2028</span></div>
+          <div className="kpi-sub"><span>01 Jan 2026 → 16 Sep 2028</span></div>
         </div>
 
         <div className="kpi-card green">
