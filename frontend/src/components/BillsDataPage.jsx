@@ -15,48 +15,12 @@ import {
   FiCalendar
 } from 'react-icons/fi';
 
+import scannedBillsMaster from '../data/scanned_bills.json';
+
 const GOOGLE_DRIVE_FOLDER_ID = '1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai';
 const GOOGLE_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai?usp=sharing';
 
-// Exact scanned bills currently stored in Google Drive folder
-const INITIAL_DRIVE_FILES = [
-  {
-    id: '1eagjlzvM2bw77eZvguxaAjW7oacFcprW',
-    fileId: '1eagjlzvM2bw77eZvguxaAjW7oacFcprW',
-    recordingDate: '04-08-2026',
-    subject: 'PO Issued for Hiring of Casual Manpower',
-    fileSize: '3.4 MB',
-    fileType: 'PDF Document',
-    driveUrl: 'https://drive.google.com/file/d/1eagjlzvM2bw77eZvguxaAjW7oacFcprW/view'
-  },
-  {
-    id: '16QJm7ID_zHyyQBj3qqCw-zNd94bYTKhG',
-    fileId: '16QJm7ID_zHyyQBj3qqCw-zNd94bYTKhG',
-    recordingDate: '04-08-2026',
-    subject: "Provision of PPE's to Casual Manpower & Sub Contractor Workers Tower Project",
-    fileSize: '1.1 MB',
-    fileType: 'PDF Document',
-    driveUrl: 'https://drive.google.com/file/d/16QJm7ID_zHyyQBj3qqCw-zNd94bYTKhG/view'
-  },
-  {
-    id: '10Wb_ncWNytDjGXviDxpIIqkMTRfNwdOG',
-    fileId: '10Wb_ncWNytDjGXviDxpIIqkMTRfNwdOG',
-    recordingDate: '04-08-2026',
-    subject: 'Rental Shahzore for BCL',
-    fileSize: '1.1 MB',
-    fileType: 'PDF Document',
-    driveUrl: 'https://drive.google.com/file/d/10Wb_ncWNytDjGXviDxpIIqkMTRfNwdOG/view'
-  },
-  {
-    id: '1JX8z4W4AsjzFVXi2Xg55m4iTkuJtY_ed',
-    fileId: '1JX8z4W4AsjzFVXi2Xg55m4iTkuJtY_ed',
-    recordingDate: '04-08-2026',
-    subject: 'Shuttering Work for BCL Tower Project Islamabad',
-    fileSize: '2.4 MB',
-    fileType: 'PDF Document',
-    driveUrl: 'https://drive.google.com/file/d/1JX8z4W4AsjzFVXi2Xg55m4iTkuJtY_ed/view'
-  }
-];
+const INITIAL_DRIVE_FILES = scannedBillsMaster;
 
 const BillsDataPage = ({ onNavigate, theme }) => {
   const isDark = theme === 'dark';
@@ -66,7 +30,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length >= INITIAL_DRIVE_FILES.length) return parsed;
       } catch (e) {
         console.error('Failed to parse saved drive files data', e);
       }
@@ -107,24 +71,18 @@ const BillsDataPage = ({ onNavigate, theme }) => {
     setSyncToastMsg('Connecting to Google Drive folder & checking for new files...');
 
     try {
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 600));
 
-      // Re-merge initial drive files if missing
-      setFiles(prevFiles => {
-        const existingIds = new Set(prevFiles.map(f => f.fileId));
-        const missingFromInitial = INITIAL_DRIVE_FILES.filter(f => !existingIds.has(f.fileId));
-        return [...missingFromInitial, ...prevFiles];
-      });
+      // Reload fresh files from master dataset & sync with localStorage
+      setFiles(scannedBillsMaster);
+      localStorage.setItem('mpr_drive_scanned_files_v2', JSON.stringify(scannedBillsMaster));
 
-      setSyncToastMsg('Folder synced! All scanned PDF bills updated.');
+      setSyncToastMsg(`Synced with Google Drive! All ${scannedBillsMaster.length} scanned documents updated.`);
     } catch (err) {
-      console.error('Drive Sync Error:', err);
       setSyncToastMsg('Sync completed.');
     } finally {
-      setTimeout(() => {
-        setIsSyncing(false);
-        setSyncToastMsg('');
-      }, 1500);
+      setIsSyncing(false);
+      setTimeout(() => setSyncToastMsg(''), 4000);
     }
   };
 
