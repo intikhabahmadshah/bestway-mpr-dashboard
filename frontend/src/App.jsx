@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers, FiArrowLeft, FiHome, FiDownload, FiPrinter, FiCalendar, FiPlayCircle, FiCheckSquare } from 'react-icons/fi';
+import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers, FiArrowLeft, FiHome, FiDownload, FiPrinter, FiCalendar, FiPlayCircle, FiCheckSquare, FiAward, FiCode } from 'react-icons/fi';
 import './App.css';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
@@ -352,7 +352,15 @@ function App() {
       )}
 
       <footer className="footer">
-        <p>Construction of Bestway Tower at F-9/G-9, Islamabad &copy; 2026 | Developed by Timeline Consultants</p>
+        <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          <span>2026 | &copy; &amp; Developed by</span>
+          <span style={{ fontWeight: 700, color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <FiAward style={{ color: '#2EC4B6' }} size={15} /> Engineer. Intikhab Ahmad Shah
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '2px 9px', borderRadius: '12px', background: 'rgba(17, 138, 178, 0.15)', color: '#118AB2', fontSize: '0.8rem', fontWeight: 600 }}>
+            <FiCode size={13} /> (Data Analyst &amp; Software Engineer)
+          </span>
+        </p>
       </footer>
 
       {showUploadModal && (
