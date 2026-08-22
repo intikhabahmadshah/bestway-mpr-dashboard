@@ -46,7 +46,7 @@ function App() {
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [toasts, setToasts] = useState([]);
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('mpr-theme') || 'dark';
+    return localStorage.getItem('mpr-theme') || 'light';
   });
 
   const [currentView, setCurrentView] = useState(() => {
