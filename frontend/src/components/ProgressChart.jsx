@@ -142,7 +142,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     ]
   };
 
-  // Custom Plugin to draw Callout Note with Circle, Line, and Rectangle Box
+  // Custom Plugin to draw Callout Note with Enlarged Circle, Vertical Leader Line, and Dashed Rectangle Box
   const calloutPlugin = useMemo(() => {
     return {
       id: 'customCalloutNote',
@@ -162,47 +162,56 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
 
         ctx.save();
 
-        // 1. Draw Focus Circle around the active data point
+        // 1. Draw Large Highlight Focus Circle (Radius 26px / 34px)
         ctx.beginPath();
-        ctx.arc(x, y, 16, 0, Math.PI * 2);
+        ctx.arc(x, y, 26, 0, Math.PI * 2);
         ctx.strokeStyle = statusColor;
         ctx.lineWidth = 2.5;
-        ctx.setLineDash([4, 3]);
+        ctx.setLineDash([5, 4]); // Dashed circle ring
+        ctx.fillStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.08)' : 'rgba(46, 196, 182, 0.08)';
+        ctx.fill();
         ctx.stroke();
-        ctx.setLineDash([]);
+        ctx.setLineDash([]); // reset
 
-        // Outer pulse glow ring
+        // Outer secondary glowing ring
         ctx.beginPath();
-        ctx.arc(x, y, 22, 0, Math.PI * 2);
-        ctx.strokeStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.28)' : 'rgba(46, 196, 182, 0.28)';
-        ctx.lineWidth = 3.5;
+        ctx.arc(x, y, 34, 0, Math.PI * 2);
+        ctx.strokeStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.22)' : 'rgba(46, 196, 182, 0.22)';
+        ctx.lineWidth = 3;
         ctx.stroke();
 
         // Center highlight dot
         ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
         ctx.fillStyle = '#FFD166';
         ctx.fill();
 
-        // 2. Determine Rectangle Box Position with Ample Vertical & Horizontal Clearance
-        const boxWidth = 260;
+        // 2. Dynamic Auto-Adjustment for Rectangle Box Position
+        const boxWidth = 264;
         const boxHeight = 84;
 
-        // Position comfortably above the point
-        let boxY = y - 135;
-        if (boxY < 60) boxY = 60; // Keep below top legend
+        // By default, place box directly straight above the circle (seedhi line)
+        let boxX = x - boxWidth / 2;
+        let boxY = y - boxHeight - 75;
 
-        // Position slightly to the left if in right half, or centered-left to avoid crossing upcoming curve points
-        let boxX = x - boxWidth + 60;
+        // Auto-adjust if point reaches upper chart area (flip downwards if too close to top)
+        const isFlippedBelow = y < 165;
+        if (isFlippedBelow) {
+          boxY = y + 45;
+        } else if (boxY < 55) {
+          boxY = 55;
+        }
+
+        // Clamp boxX inside chart margins (if pushed against edges, leader line will naturally angle)
         if (boxX < 14) boxX = 14;
         if (boxX + boxWidth > chart.width - 14) boxX = chart.width - boxWidth - 14;
 
-        // 3. Draw Leader Line connecting Circle to Box
+        // 3. Draw Leader Line (Straight Vertical by default, angled only when edge constrained)
         ctx.beginPath();
         const lineStartX = x;
-        const lineStartY = y < boxY ? y + 22 : y - 22;
+        const lineStartY = isFlippedBelow ? y + 34 : y - 34;
         const lineTargetX = boxX + boxWidth / 2;
-        const lineTargetY = y < boxY ? boxY : boxY + boxHeight;
+        const lineTargetY = isFlippedBelow ? boxY : boxY + boxHeight;
 
         ctx.moveTo(lineStartX, lineStartY);
         ctx.lineTo(lineTargetX, lineTargetY);
@@ -210,15 +219,12 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         ctx.lineWidth = 2.2;
         ctx.stroke();
 
-        // 4. Draw Callout Box (Solid Rounded Rectangle with Crisp Shadow)
+        // 4. Draw Callout Box with DASHED / DOTTED Border
         ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(7, 59, 76, 0.16)';
         ctx.shadowBlur = 14;
         ctx.shadowOffsetY = 6;
 
         ctx.fillStyle = isDark ? '#111827' : '#ffffff';
-        ctx.strokeStyle = statusColor;
-        ctx.lineWidth = 2;
-
         ctx.beginPath();
         if (ctx.roundRect) {
           ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
@@ -226,8 +232,14 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           ctx.rect(boxX, boxY, boxWidth, boxHeight);
         }
         ctx.fill();
-        ctx.stroke();
+
+        // Apply Dashed Border
         ctx.shadowColor = 'transparent'; // reset shadow
+        ctx.strokeStyle = statusColor;
+        ctx.lineWidth = 2.2;
+        ctx.setLineDash([6, 4]); // Dashed Rectangle Border as requested!
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset line dash for crisp text
 
         // 5. Draw Content Text inside Rectangle Box
         // Line 1: Month & Status Badge
@@ -271,7 +283,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     resizeDelay: 0,
     layout: {
       padding: {
-        top: 60, // Ample space for Callout Note Box and top Legend
+        top: 55,
         bottom: 25,
         left: 20,
         right: 35
@@ -313,8 +325,8 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     },
     scales: {
       y: {
-        min: -2,
-        max: 104,
+        min: 0,
+        max: 105,
         grid: {
           color: (ctx) => (ctx.tick.value === 0 ? (isDark ? 'rgba(46,196,182,0.25)' : 'rgba(46,196,182,0.3)') : (isDark ? 'rgba(46,196,182,0.08)' : 'rgba(7,59,76,0.08)')),
         },
@@ -322,7 +334,8 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#64748b' : '#475569',
           font: { family: 'Poppins', size: 11 },
           padding: 8,
-          callback: (value) => (value >= 0 ? value + '%' : '')
+          stepSize: 20,
+          callback: (value) => (value <= 100 ? value + '%' : '')
         }
       },
       x: {
