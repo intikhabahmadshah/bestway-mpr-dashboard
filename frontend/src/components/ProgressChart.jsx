@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -35,7 +35,43 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     return date.toLocaleDateString('default', { month: 'short', year: 'numeric' });
   });
 
+  const actualDataPoints = data.filter(d => d.accumulative_actual !== null && d.accumulative_actual !== undefined);
+  const latestActualIdx = actualDataPoints.length > 0 ? data.findIndex(d => d.month === actualDataPoints[actualDataPoints.length - 1].month) : -1;
   const selectedIndex = selectedMonth ? data.findIndex(d => d.month === selectedMonth.month) : -1;
+
+  // Active focal point index (selected month or latest actual data point)
+  const activeFocusIdx = selectedIndex !== -1 ? selectedIndex : (latestActualIdx !== -1 ? latestActualIdx : 0);
+  const activePointData = data[activeFocusIdx] || data[0];
+
+  const totalProjectDuration = data && data.length > 0 ? (Number(data[data.length - 1].duration) || 585) : 585;
+
+  // Compute status & variance details for the Callout Note
+  const focusActual = activePointData.accumulative_actual !== null && activePointData.accumulative_actual !== undefined 
+    ? activePointData.accumulative_actual * 100 
+    : null;
+  const focusPlanned = (activePointData.accumulative_planned || 0) * 100;
+  const focusVariance = focusActual !== null ? (focusActual - focusPlanned) / 100 : null;
+  const focusVarianceDays = focusVariance !== null ? Math.round(focusVariance * totalProjectDuration) : null;
+
+  const focusMonthLabel = activePointData.month_ending
+    ? new Date(activePointData.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' })
+    : activePointData.month;
+
+  const statusText = focusVariance === null 
+    ? 'PLANNED' 
+    : focusVariance > 0 
+    ? 'AHEAD' 
+    : focusVariance < 0 
+    ? 'BEHIND SCHEDULE' 
+    : 'ON TRACK';
+
+  const statusColor = focusVariance === null 
+    ? '#118AB2' 
+    : focusVariance > 0 
+    ? '#2EC4B6' 
+    : focusVariance < 0 
+    ? '#EF476F' 
+    : '#118AB2';
 
   const chartData = {
     labels,
@@ -44,12 +80,13 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         label: 'Accumulative Planned %',
         data: data.map(d => (d.accumulative_planned || 0) * 100),
         borderColor: '#2EC4B6',
-        backgroundColor: 'rgba(46, 196, 182, 0.06)',
+        backgroundColor: 'rgba(46, 196, 182, 0.05)',
         borderDash: [6, 4],
+        borderWidth: 2.5,
         tension: 0.25,
-        pointRadius: (ctx) => (ctx.dataIndex === selectedIndex ? 8 : 4),
+        pointRadius: (ctx) => (ctx.dataIndex === activeFocusIdx ? 7 : 4),
         pointHoverRadius: 8,
-        pointBackgroundColor: (ctx) => (ctx.dataIndex === selectedIndex ? '#FFD166' : '#2EC4B6'),
+        pointBackgroundColor: (ctx) => (ctx.dataIndex === activeFocusIdx ? '#2EC4B6' : '#2EC4B6'),
         pointBorderColor: isDark ? '#111827' : '#ffffff',
         pointBorderWidth: 2,
         fill: true,
@@ -59,8 +96,8 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#5EEAD4' : '#0F766E',
           anchor: 'end',
           align: 'top',
-          offset: 6,
-          font: { family: 'Poppins', size: 10, weight: 600 },
+          offset: 8, // Clear vertical gap above line
+          font: { family: 'Poppins', size: 10, weight: 700 },
           formatter: (val) => val.toFixed(1) + '%',
           listeners: {
             click: (context) => {
@@ -73,26 +110,26 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         label: 'Accumulative Actual %',
         data: data.map(d => (d.accumulative_actual !== null && d.accumulative_actual !== undefined ? d.accumulative_actual * 100 : null)),
         borderColor: '#EF476F',
-        backgroundColor: 'rgba(239, 71, 111, 0.06)',
+        backgroundColor: 'rgba(239, 71, 111, 0.08)',
         tension: 0.25,
-        pointRadius: (ctx) => (ctx.dataIndex === selectedIndex ? 10 : 6),
-        pointHoverRadius: 9,
-        pointBackgroundColor: (ctx) => (ctx.dataIndex === selectedIndex ? '#FFD166' : '#EF476F'),
-        pointBorderColor: (ctx) => (ctx.dataIndex === selectedIndex ? '#ffffff' : (isDark ? '#111827' : '#ffffff')),
-        pointBorderWidth: 2,
-        borderWidth: 3,
+        pointRadius: (ctx) => (ctx.dataIndex === activeFocusIdx ? 9 : 5),
+        pointHoverRadius: 10,
+        pointBackgroundColor: (ctx) => (ctx.dataIndex === activeFocusIdx ? '#FFD166' : '#EF476F'),
+        pointBorderColor: isDark ? '#111827' : '#ffffff',
+        pointBorderWidth: 2.5,
+        borderWidth: 3.5,
         fill: true,
         datalabels: {
           display: true,
           clip: false,
-          color: (ctx) => (ctx.dataIndex === selectedIndex ? (isDark ? '#FFD166' : '#B45309') : (isDark ? '#FDA4AF' : '#BE123C')),
+          color: isDark ? '#FDA4AF' : '#BE123C',
           anchor: 'end',
           align: 'bottom',
-          offset: 6,
+          offset: 8, // Clear vertical gap below line
           font: (ctx) => ({
             family: 'Poppins',
-            size: ctx.dataIndex === selectedIndex ? 13 : 11,
-            weight: ctx.dataIndex === selectedIndex ? 800 : 700
+            size: ctx.dataIndex === activeFocusIdx ? 12 : 10.5,
+            weight: 800
           }),
           formatter: (val) => (val !== null ? val.toFixed(2) + '%' : ''),
           listeners: {
@@ -105,6 +142,117 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     ]
   };
 
+  // Custom Plugin to draw Callout Note with Circle, Line, and Rectangle Box
+  const calloutPlugin = useMemo(() => {
+    return {
+      id: 'customCalloutNote',
+      afterDatasetsDraw: (chart) => {
+        const metaActual = chart.getDatasetMeta(1);
+        const metaPlanned = chart.getDatasetMeta(0);
+        if (!metaActual || !metaActual.data || !metaActual.data[activeFocusIdx]) return;
+
+        const actualPoint = metaActual.data[activeFocusIdx];
+        const plannedPoint = metaPlanned.data[activeFocusIdx];
+        const point = (focusActual !== null && actualPoint) ? actualPoint : plannedPoint;
+        if (!point) return;
+
+        const ctx = chart.ctx;
+        const x = point.x;
+        const y = point.y;
+
+        ctx.save();
+
+        // 1. Draw Focus Circle around the active data point
+        ctx.beginPath();
+        ctx.arc(x, y, 16, 0, Math.PI * 2);
+        ctx.strokeStyle = statusColor;
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([4, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Outer pulse ring
+        ctx.beginPath();
+        ctx.arc(x, y, 22, 0, Math.PI * 2);
+        ctx.strokeStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.28)' : 'rgba(46, 196, 182, 0.28)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // 2. Determine Rectangle Box Position
+        const boxWidth = 236;
+        const boxHeight = 72;
+        let boxX = x - boxWidth / 2;
+        let boxY = y - 100; // Place above the point
+
+        // Keep inside chart boundaries
+        if (boxX < 12) boxX = 12;
+        if (boxX + boxWidth > chart.width - 12) boxX = chart.width - boxWidth - 12;
+        if (boxY < 32) boxY = y + 36; // Flip below if too close to top
+
+        // 3. Draw Leader Line connecting Circle to Box
+        ctx.beginPath();
+        const lineStartY = y < boxY ? y + 22 : y - 22;
+        const lineTargetY = y < boxY ? boxY : boxY + boxHeight;
+        ctx.moveTo(x, lineStartY);
+        ctx.lineTo(boxX + boxWidth / 2, lineTargetY);
+        ctx.strokeStyle = statusColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 4. Draw Callout Box (Solid Rounded Rectangle)
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.18)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 4;
+
+        ctx.fillStyle = isDark ? '#111827' : '#ffffff';
+        ctx.strokeStyle = statusColor;
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
+        } else {
+          ctx.rect(boxX, boxY, boxWidth, boxHeight);
+        }
+        ctx.fill();
+        ctx.stroke();
+        ctx.shadowColor = 'transparent';
+
+        // 5. Draw Content Text inside Rectangle Box
+        // Line 1: Month Label & Status Tag
+        ctx.font = 'bold 11px Poppins, sans-serif';
+        ctx.fillStyle = isDark ? '#f1f5f9' : '#073B4C';
+        ctx.fillText(`${focusMonthLabel}:`, boxX + 12, boxY + 20);
+
+        ctx.font = '800 11px Poppins, sans-serif';
+        ctx.fillStyle = statusColor;
+        ctx.fillText(statusText, boxX + 80, boxY + 20);
+
+        // Line 2: Variance (% and Days)
+        ctx.font = '600 11px Poppins, sans-serif';
+        ctx.fillStyle = isDark ? '#cbd5e1' : '#334155';
+        ctx.fillText('Variance: ', boxX + 12, boxY + 40);
+
+        ctx.font = 'bold 12px Poppins, sans-serif';
+        ctx.fillStyle = statusColor;
+        const varPercentText = focusVariance !== null ? `${focusVariance > 0 ? '+' : ''}${(focusVariance * 100).toFixed(2)}%` : '0.00%';
+        const varDaysText = focusVarianceDays !== null 
+          ? (focusVarianceDays < 0 ? `${Math.abs(focusVarianceDays)} Days Delay` : `+${focusVarianceDays} Days Ahead`)
+          : '0 Days';
+        ctx.fillText(`${varPercentText} (${varDaysText})`, boxX + 75, boxY + 40);
+
+        // Line 3: Actual vs Planned Target
+        ctx.font = '500 10.5px Poppins, sans-serif';
+        ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+        const actualStr = focusActual !== null ? `${focusActual.toFixed(2)}%` : '—';
+        const plannedStr = `${focusPlanned.toFixed(2)}%`;
+        ctx.fillText(`Actual: ${actualStr}  |  Target: ${plannedStr}`, boxX + 12, boxY + 58);
+
+        ctx.restore();
+      }
+    };
+  }, [activeFocusIdx, focusActual, focusPlanned, focusVariance, focusVarianceDays, focusMonthLabel, statusText, statusColor, isDark]);
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -112,7 +260,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     resizeDelay: 0,
     layout: {
       padding: {
-        top: 28,
+        top: 45, // Extra top padding for Callout Note Box
         bottom: 15,
         left: 20,
         right: 25
@@ -132,7 +280,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         position: 'top',
         labels: {
           color: isDark ? '#f1f5f9' : '#073B4C',
-          font: { family: 'Poppins', size: 12, weight: 500 },
+          font: { family: 'Poppins', size: 12, weight: 600 },
           usePointStyle: true,
           pointStyle: 'circle',
           padding: 20,
@@ -180,8 +328,8 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
   };
 
   return (
-    <div style={{ height: '390px' }}>
-      <Line data={chartData} options={options} />
+    <div style={{ height: '420px', position: 'relative' }}>
+      <Line data={chartData} options={options} plugins={[calloutPlugin]} />
     </div>
   );
 };
