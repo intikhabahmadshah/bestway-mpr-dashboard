@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers, FiArrowLeft, FiHome, FiDownload, FiPrinter, FiCalendar, FiPlayCircle, FiCheckSquare, FiAward, FiCode } from 'react-icons/fi';
+import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers, FiArrowLeft, FiHome, FiDownload, FiPrinter, FiCalendar, FiPlayCircle, FiCheckSquare, FiAward, FiCode, FiEdit3 } from 'react-icons/fi';
 import './App.css';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
@@ -13,7 +13,7 @@ import MonthlyBarChart from './components/MonthlyBarChart';
 import VarianceChart from './components/VarianceChart';
 import GaugeChart from './components/GaugeChart';
 import DataTable from './components/DataTable';
-import UploadDataset from './components/UploadDataset';
+import UpdateDataModal from './components/UpdateDataModal';
 
 const FALLBACK_DATA = [
   { month: '3/26/2026', month_ending: '3/31/2026', duration: 6, monthly_planned: 0, monthly_actual: 0, accumulative_planned: 0, accumulative_actual: 0 },
@@ -224,8 +224,8 @@ function App() {
                   Reset to Original Data
                 </button>
               )}
-              <button className="btn-upload" onClick={() => setShowUploadModal(true)}>
-                <FiUploadCloud size={18} />
+              <button className="btn-upload" onClick={() => setShowUploadModal(true)} title="Open form to update monthly planned & actual data">
+                <FiEdit3 size={18} />
                 Update Data
               </button>
             </div>
@@ -364,11 +364,13 @@ function App() {
       </footer>
 
       {showUploadModal && (
-        <UploadDataset 
+        <UpdateDataModal 
           isOpen={showUploadModal} 
           onClose={() => setShowUploadModal(false)}
-          onUploadSuccess={handleUploadSuccess}
+          currentData={data}
+          onUpdateSuccess={handleUploadSuccess}
           showToast={showToast}
+          theme={theme}
         />
       )}
 
