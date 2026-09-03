@@ -294,7 +294,7 @@ function App() {
             <KPICards data={data} selectedMonth={selectedMonth} />
             
             <div className="charts-grid">
-              <div className="chart-card full-width">
+              <div className="chart-card full-width" id="chart-card-scurve">
                 <div className="chart-card-header">
                   <h3 className="chart-card-title">S-Curve: Cumulative Progress</h3>
                   <span className="chart-card-badge" style={{ cursor: 'pointer' }} title="Click any data label or point on chart to inspect">
@@ -309,7 +309,7 @@ function App() {
                 />
               </div>
               
-              <div className="chart-card full-width">
+              <div className="chart-card full-width" id="chart-card-gauges">
                 <div className="chart-card-header">
                   <h3 className="chart-card-title">Overall Completion & Target Status</h3>
                   <span className="chart-card-badge">
@@ -319,7 +319,7 @@ function App() {
                 <GaugeChart data={data} theme={theme} selectedMonth={selectedMonth} />
               </div>
 
-              <div className="chart-card full-width">
+              <div className="chart-card full-width" id="chart-card-monthly">
                 <div className="chart-card-header">
                   <h3 className="chart-card-title">Monthly Progress Comparison</h3>
                   <span className="chart-card-badge">Monthly</span>
@@ -327,7 +327,7 @@ function App() {
                 <MonthlyBarChart data={data} theme={theme} />
               </div>
 
-              <div className="chart-card full-width">
+              <div className="chart-card full-width" id="chart-card-variance">
                 <div className="chart-card-header">
                   <h3 className="chart-card-title">Schedule Variance Analysis</h3>
                   <span className="chart-card-badge">Variance</span>
