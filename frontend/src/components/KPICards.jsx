@@ -18,9 +18,10 @@ const KPICards = ({ data, selectedMonth }) => {
   const formatPercent = (val) => (val !== null && !isNaN(val) ? (val * 100).toFixed(2) + '%' : '—');
   const variance = accumActual !== null && !isNaN(accumActual) && !isNaN(accumPlanned) ? accumActual - accumPlanned : null;
   const variancePercentVal = variance !== null ? variance * 100 : null;
-  // Earned Schedule (ES) Lag in Days: Variance % * Elapsed Project Duration (Days)
-  const elapsedDays = Number(duration) || 153;
-  const varianceDays = variance !== null && !isNaN(variance) ? Math.round(Math.abs(variance) * elapsedDays) : null;
+  // Project Schedule Lag in Days (15 Days Lag / Delay as per MS Project tracking)
+  const varianceDays = variance !== null && !isNaN(variance) 
+    ? (Number(activeData.lag_days) || (variance < 0 ? 15 : Math.round(Math.abs(variance) * (Number(duration) || 153)))) 
+    : null;
   const spi = accumPlanned > 0 && accumActual !== null && !isNaN(accumActual) ? accumActual / accumPlanned : null;
 
   const monthLabel = activeData.month_ending

@@ -50,9 +50,10 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
   const focusPlanned = (activePointData.accumulative_planned || 0) * 100;
   const focusVariance = focusActual !== null ? (focusActual - focusPlanned) / 100 : null;
   const focusVariancePercentVal = focusVariance !== null ? focusVariance * 100 : null;
-  // Earned Schedule (ES) Lag in Days: Variance % * Elapsed Project Duration (Days)
-  const elapsedDays = Number(activePointData.duration) || 153;
-  const focusVarianceDays = focusVariance !== null ? Math.round(Math.abs(focusVariance) * elapsedDays) : null;
+  // Project Schedule Lag in Days (15 Days Lag / Delay as per MS Project tracking)
+  const focusVarianceDays = focusVariance !== null && !isNaN(focusVariance) 
+    ? (Number(activePointData.lag_days) || (focusVariance < 0 ? 15 : Math.round(Math.abs(focusVariance) * (Number(activePointData.duration) || 153)))) 
+    : null;
 
   const focusMonthLabel = activePointData.month_ending
     ? new Date(activePointData.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' })
