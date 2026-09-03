@@ -206,18 +206,25 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         if (boxX < 14) boxX = 14;
         if (boxX + boxWidth > chart.width - 14) boxX = chart.width - boxWidth - 14;
 
-        // 3. Draw Leader Line (Straight Vertical from Circle to Box)
+        // 3. Draw DASHED ANGLED Leader Line (Tircha & Dashed to cleanly bypass 24.7% label)
         ctx.beginPath();
-        const lineStartX = x;
-        const lineStartY = isFlippedBelow ? y + 18 : y - 18;
-        const lineTargetX = boxX + boxWidth / 2;
-        const lineTargetY = isFlippedBelow ? boxY : boxY + boxHeight;
-
-        ctx.moveTo(lineStartX, lineStartY);
-        ctx.lineTo(lineTargetX, lineTargetY);
+        ctx.setLineDash([5, 4]); // Dashed leader line as requested!
         ctx.strokeStyle = statusColor;
         ctx.lineWidth = 2.2;
+
+        const lineStartX = x - 13;
+        const lineStartY = isFlippedBelow ? y + 12 : y - 8;
+        const lineTargetX = boxX + 65; // Angled to bottom-left quadrant of box
+        const lineTargetY = isFlippedBelow ? boxY : boxY + boxHeight;
+
+        // Smooth subtle curve that arches around the 24.7% label without touching it
+        const controlX = x - 35;
+        const controlY = (lineStartY + lineTargetY) / 2;
+
+        ctx.moveTo(lineStartX, lineStartY);
+        ctx.quadraticCurveTo(controlX, controlY, lineTargetX, lineTargetY);
         ctx.stroke();
+        ctx.setLineDash([]); // Reset line dash
 
         // 4. Draw Callout Box with DASHED Border
         ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(7, 59, 76, 0.16)';
