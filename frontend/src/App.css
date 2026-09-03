@@ -1463,6 +1463,30 @@ body.is-exporting-mode .chart-card-badge {
   font-weight: 700 !important;
 }
 
+/* Compact Report Dimension for Individual Graphs (Word Document Standard Margins) */
+body.is-exporting-single-graph #chart-card-scurve,
+body.is-exporting-single-graph #chart-card-gauges,
+body.is-exporting-single-graph #chart-card-monthly,
+body.is-exporting-single-graph #chart-card-variance {
+  width: 760px !important;
+  max-width: 760px !important;
+  min-width: 760px !important;
+  box-sizing: border-box !important;
+  margin: 0 auto !important;
+  padding: 22px 26px !important;
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+body.is-exporting-single-graph .charts-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
 /* ========================================================
    PROJECT ACTIVITY SCHEDULE & GANTT CHART STYLES
    ======================================================== */

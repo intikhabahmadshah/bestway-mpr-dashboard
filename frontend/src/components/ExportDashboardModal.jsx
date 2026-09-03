@@ -59,15 +59,15 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
   if (!isOpen) return null;
 
   // Helper to capture a single element to Canvas
-  const captureElementToCanvas = async (element) => {
+  const captureElementToCanvas = async (element, isCompact = false) => {
     return await html2canvas(element, {
       scale: 3.0, // 3.0x Ultra HD resolution (crisp 300 DPI for Word insertion)
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff', // 100% Solid white background
       logging: false,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
+      width: isCompact ? 760 : element.scrollWidth,
+      windowWidth: isCompact ? 800 : element.scrollWidth,
     });
   };
 
@@ -91,19 +91,19 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
 
     setIsExporting(true);
     setActiveExportingId(graph.id);
-    setProgressMsg(`Capturing ${graph.title}...`);
+    setProgressMsg(`Capturing ${graph.title} (Word Compact Size)...`);
 
-    document.body.classList.add('is-exporting-mode');
+    document.body.classList.add('is-exporting-mode', 'is-exporting-single-graph');
 
     try {
-      await new Promise(r => setTimeout(r, 300));
-      const canvas = await captureElementToCanvas(element);
+      await new Promise(r => setTimeout(r, 350));
+      const canvas = await captureElementToCanvas(element, true);
       const dateStr = new Date().toISOString().split('T')[0];
 
       if (fileFormat === 'png') {
         const imageUri = canvas.toDataURL('image/png', 1.0);
         triggerDownload(imageUri, `${graph.filename}_${dateStr}.png`);
-        if (showToast) showToast(`${graph.title} (PNG) downloaded!`, 'success');
+        if (showToast) showToast(`${graph.title} (Compact PNG) downloaded!`, 'success');
       } else {
         // PDF format
         const pdf = new jsPDF({
@@ -119,13 +119,13 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
 
         pdf.addImage(imgData, 'PNG', 10, 15, printWidth, totalScaledHeight, undefined, 'FAST');
         pdf.save(`${graph.filename}_${dateStr}.pdf`);
-        if (showToast) showToast(`${graph.title} (PDF) downloaded!`, 'success');
+        if (showToast) showToast(`${graph.title} (Compact PDF) downloaded!`, 'success');
       }
     } catch (err) {
       console.error(err);
       if (showToast) showToast(`Failed to export ${graph.title}`, 'error');
     } finally {
-      document.body.classList.remove('is-exporting-mode');
+      document.body.classList.remove('is-exporting-mode', 'is-exporting-single-graph');
       setIsExporting(false);
       setActiveExportingId(null);
       setProgressMsg('');
@@ -135,7 +135,7 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
   // Export all 4 graphs as 4 separate files in sequence
   const exportAll4Graphs = async () => {
     setIsExporting(true);
-    document.body.classList.add('is-exporting-mode');
+    document.body.classList.add('is-exporting-mode', 'is-exporting-single-graph');
 
     try {
       await new Promise(r => setTimeout(r, 400));
@@ -149,7 +149,7 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
         setActiveExportingId(graph.id);
         setProgressMsg(`Capturing Graph ${i + 1} of 4: ${graph.title}...`);
 
-        const canvas = await captureElementToCanvas(element);
+        const canvas = await captureElementToCanvas(element, true);
 
         if (fileFormat === 'png') {
           const imageUri = canvas.toDataURL('image/png', 1.0);
@@ -172,12 +172,12 @@ const ExportDashboardModal = ({ isOpen, onClose, targetId = 'grey-structure-dash
         await new Promise(r => setTimeout(r, 600));
       }
 
-      if (showToast) showToast('All 4 graphs downloaded separately! Ready for MS Word.', 'success');
+      if (showToast) showToast('All 4 compact graphs downloaded separately! Pre-adjusted for MS Word.', 'success');
     } catch (err) {
       console.error(err);
       if (showToast) showToast('Error downloading individual graphs', 'error');
     } finally {
-      document.body.classList.remove('is-exporting-mode');
+      document.body.classList.remove('is-exporting-mode', 'is-exporting-single-graph');
       setIsExporting(false);
       setActiveExportingId(null);
       setProgressMsg('');
