@@ -16,11 +16,11 @@ const KPICards = ({ data, selectedMonth }) => {
   const monthlyActual = activeData.monthly_actual !== null && activeData.monthly_actual !== undefined ? activeData.monthly_actual : null;
   const duration = activeData.duration || 0;
 
-  const totalProjectDuration = data && data.length > 0 ? (Number(data[data.length - 1].duration) || 585) : 585;
-
   const formatPercent = (val) => (val !== null ? (val * 100).toFixed(2) + '%' : '—');
   const variance = accumActual !== null ? accumActual - accumPlanned : null;
-  const varianceDays = variance !== null ? Math.round(variance * totalProjectDuration) : null;
+  const variancePercentVal = variance !== null ? variance * 100 : null;
+  // Variance / Lag in Days (e.g. -1.90% variance = 2 Days Delay)
+  const varianceDays = variancePercentVal !== null ? Math.round(variancePercentVal) : null;
   const spi = accumPlanned > 0 && accumActual !== null ? accumActual / accumPlanned : null;
 
   const monthLabel = activeData.month_ending
@@ -68,7 +68,7 @@ const KPICards = ({ data, selectedMonth }) => {
         </div>
         <div className="kpi-label">Variance (% &amp; Days)</div>
         <div className="kpi-value" style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-          <span>{variance !== null ? `${variance > 0 ? '+' : ''}${(variance * 100).toFixed(2)}%` : '—'}</span>
+          <span>{variance !== null ? `${variance > 0 ? '+' : ''}${variancePercentVal.toFixed(2)}%` : '—'}</span>
           {varianceDays !== null && (
             <span style={{ fontSize: '0.95rem', fontWeight: 600, color: variance >= 0 ? '#2EC4B6' : '#EF476F' }}>
               ({varianceDays > 0 ? `+${varianceDays}` : varianceDays} Days)

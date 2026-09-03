@@ -43,15 +43,15 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
   const activeFocusIdx = selectedIndex !== -1 ? selectedIndex : (latestActualIdx !== -1 ? latestActualIdx : 0);
   const activePointData = data[activeFocusIdx] || data[0];
 
-  const totalProjectDuration = data && data.length > 0 ? (Number(data[data.length - 1].duration) || 585) : 585;
-
   // Compute status & variance details for the Callout Note
   const focusActual = activePointData.accumulative_actual !== null && activePointData.accumulative_actual !== undefined 
     ? activePointData.accumulative_actual * 100 
     : null;
   const focusPlanned = (activePointData.accumulative_planned || 0) * 100;
   const focusVariance = focusActual !== null ? (focusActual - focusPlanned) / 100 : null;
-  const focusVarianceDays = focusVariance !== null ? Math.round(focusVariance * totalProjectDuration) : null;
+  const focusVariancePercentVal = focusVariance !== null ? focusVariance * 100 : null;
+  // Variance / Lag in Days (e.g. -1.90% variance = 2 Days Delay)
+  const focusVarianceDays = focusVariancePercentVal !== null ? Math.round(focusVariancePercentVal) : null;
 
   const focusMonthLabel = activePointData.month_ending
     ? new Date(activePointData.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' })
@@ -84,7 +84,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         borderDash: [6, 4],
         borderWidth: 2.5,
         tension: 0.25,
-        pointRadius: (ctx) => (ctx.dataIndex === activeFocusIdx ? 7 : 4),
+        pointRadius: (ctx) => (ctx.dataIndex === activeFocusIdx ? 6 : 4),
         pointHoverRadius: 8,
         pointBackgroundColor: (ctx) => (ctx.dataIndex === activeFocusIdx ? '#2EC4B6' : '#2EC4B6'),
         pointBorderColor: isDark ? '#111827' : '#ffffff',
@@ -96,7 +96,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#5EEAD4' : '#0F766E',
           anchor: 'end',
           align: 'top',
-          offset: 12, // Distinct vertical clearance above the curve
+          offset: 14, // Clear separation above the curve so text is 100% visible
           font: { family: 'Poppins', size: 10.5, weight: 700 },
           formatter: (val) => val.toFixed(1) + '%',
           listeners: {
@@ -112,11 +112,11 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         borderColor: '#EF476F',
         backgroundColor: 'rgba(239, 71, 111, 0.08)',
         tension: 0.25,
-        pointRadius: (ctx) => (ctx.dataIndex === activeFocusIdx ? 9 : 5),
-        pointHoverRadius: 10,
+        pointRadius: (ctx) => (ctx.dataIndex === activeFocusIdx ? 7.5 : 5),
+        pointHoverRadius: 9,
         pointBackgroundColor: (ctx) => (ctx.dataIndex === activeFocusIdx ? '#FFD166' : '#EF476F'),
         pointBorderColor: isDark ? '#111827' : '#ffffff',
-        pointBorderWidth: 2.5,
+        pointBorderWidth: 2,
         borderWidth: 3.5,
         fill: true,
         datalabels: {
@@ -125,7 +125,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#FDA4AF' : '#BE123C',
           anchor: 'end',
           align: 'bottom',
-          offset: 14, // Distinct vertical clearance below the curve
+          offset: 16, // Clear separation below the curve so text is 100% visible
           font: (ctx) => ({
             family: 'Poppins',
             size: ctx.dataIndex === activeFocusIdx ? 12 : 11,
@@ -142,7 +142,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     ]
   };
 
-  // Custom Plugin to draw Callout Note with Enlarged Circle, Vertical Leader Line, and Dashed Rectangle Box
+  // Custom Plugin to draw Callout Note with Compact Focus Circle, Higher Box position, and Dashed Border
   const calloutPlugin = useMemo(() => {
     return {
       id: 'customCalloutNote',
@@ -162,54 +162,54 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
 
         ctx.save();
 
-        // 1. Draw Large Highlight Focus Circle (Radius 26px / 34px)
+        // 1. Draw Compact Focus Circle (Radius 13px / 18px) that does NOT overlap the text labels
         ctx.beginPath();
-        ctx.arc(x, y, 26, 0, Math.PI * 2);
+        ctx.arc(x, y, 13, 0, Math.PI * 2);
         ctx.strokeStyle = statusColor;
-        ctx.lineWidth = 2.5;
-        ctx.setLineDash([5, 4]); // Dashed circle ring
-        ctx.fillStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.08)' : 'rgba(46, 196, 182, 0.08)';
+        ctx.lineWidth = 2.2;
+        ctx.setLineDash([4, 3]); // Dashed compact circle ring
+        ctx.fillStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.12)' : 'rgba(46, 196, 182, 0.12)';
         ctx.fill();
         ctx.stroke();
         ctx.setLineDash([]); // reset
 
-        // Outer secondary glowing ring
+        // Outer subtle highlight ring
         ctx.beginPath();
-        ctx.arc(x, y, 34, 0, Math.PI * 2);
+        ctx.arc(x, y, 18, 0, Math.PI * 2);
         ctx.strokeStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.22)' : 'rgba(46, 196, 182, 0.22)';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         // Center highlight dot
         ctx.beginPath();
-        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
         ctx.fillStyle = '#FFD166';
         ctx.fill();
 
-        // 2. Dynamic Auto-Adjustment for Rectangle Box Position
+        // 2. Position Rectangle Box Higher Up (Uncha le k jao)
         const boxWidth = 264;
         const boxHeight = 84;
 
-        // By default, place box directly straight above the circle (seedhi line)
+        // Place box higher up in the open upper grid space
         let boxX = x - boxWidth / 2;
-        let boxY = y - boxHeight - 75;
+        let boxY = y - boxHeight - 110; // Placed high up above the curve
 
         // Auto-adjust if point reaches upper chart area (flip downwards if too close to top)
         const isFlippedBelow = y < 165;
         if (isFlippedBelow) {
-          boxY = y + 45;
-        } else if (boxY < 55) {
-          boxY = 55;
+          boxY = y + 50;
+        } else if (boxY < 38) {
+          boxY = 38;
         }
 
-        // Clamp boxX inside chart margins (if pushed against edges, leader line will naturally angle)
+        // Clamp boxX inside chart margins (straight vertical line by default, naturally angled if edge constrained)
         if (boxX < 14) boxX = 14;
         if (boxX + boxWidth > chart.width - 14) boxX = chart.width - boxWidth - 14;
 
-        // 3. Draw Leader Line (Straight Vertical by default, angled only when edge constrained)
+        // 3. Draw Leader Line (Straight Vertical from Circle to Box)
         ctx.beginPath();
         const lineStartX = x;
-        const lineStartY = isFlippedBelow ? y + 34 : y - 34;
+        const lineStartY = isFlippedBelow ? y + 18 : y - 18;
         const lineTargetX = boxX + boxWidth / 2;
         const lineTargetY = isFlippedBelow ? boxY : boxY + boxHeight;
 
@@ -219,7 +219,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         ctx.lineWidth = 2.2;
         ctx.stroke();
 
-        // 4. Draw Callout Box with DASHED / DOTTED Border
+        // 4. Draw Callout Box with DASHED Border
         ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(7, 59, 76, 0.16)';
         ctx.shadowBlur = 14;
         ctx.shadowOffsetY = 6;
@@ -237,9 +237,9 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         ctx.shadowColor = 'transparent'; // reset shadow
         ctx.strokeStyle = statusColor;
         ctx.lineWidth = 2.2;
-        ctx.setLineDash([6, 4]); // Dashed Rectangle Border as requested!
+        ctx.setLineDash([6, 4]); // Dashed Rectangle Border
         ctx.stroke();
-        ctx.setLineDash([]); // Reset line dash for crisp text
+        ctx.setLineDash([]); // Reset line dash for clean text
 
         // 5. Draw Content Text inside Rectangle Box
         // Line 1: Month & Status Badge
@@ -251,14 +251,14 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         ctx.fillStyle = statusColor;
         ctx.fillText(statusText, boxX + 85, boxY + 24);
 
-        // Line 2: Variance (% and Days)
+        // Line 2: Variance (% and 2 Days Delay)
         ctx.font = '600 11.5px Poppins, sans-serif';
         ctx.fillStyle = isDark ? '#cbd5e1' : '#334155';
         ctx.fillText('Variance: ', boxX + 14, boxY + 47);
 
         ctx.font = '800 12.5px Poppins, sans-serif';
         ctx.fillStyle = statusColor;
-        const varPercentText = focusVariance !== null ? `${focusVariance > 0 ? '+' : ''}${(focusVariance * 100).toFixed(2)}%` : '0.00%';
+        const varPercentText = focusVariancePercentVal !== null ? `${focusVariancePercentVal > 0 ? '+' : ''}${focusVariancePercentVal.toFixed(2)}%` : '0.00%';
         const varDaysText = focusVarianceDays !== null 
           ? (focusVarianceDays < 0 ? `${Math.abs(focusVarianceDays)} Days Delay` : `+${focusVarianceDays} Days Ahead`)
           : '0 Days';
@@ -274,7 +274,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         ctx.restore();
       }
     };
-  }, [activeFocusIdx, focusActual, focusPlanned, focusVariance, focusVarianceDays, focusMonthLabel, statusText, statusColor, isDark]);
+  }, [activeFocusIdx, focusActual, focusPlanned, focusVariance, focusVariancePercentVal, focusVarianceDays, focusMonthLabel, statusText, statusColor, isDark]);
 
   const options = {
     responsive: true,
