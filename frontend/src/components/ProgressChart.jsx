@@ -50,8 +50,9 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
   const focusPlanned = (activePointData.accumulative_planned || 0) * 100;
   const focusVariance = focusActual !== null ? (focusActual - focusPlanned) / 100 : null;
   const focusVariancePercentVal = focusVariance !== null ? focusVariance * 100 : null;
-  // Variance / Lag in Days (e.g. -1.90% variance = 2 Days Delay)
-  const focusVarianceDays = focusVariancePercentVal !== null ? Math.round(focusVariancePercentVal) : null;
+  // Earned Schedule (ES) Lag in Days: Variance % * Elapsed Project Duration (Days)
+  const elapsedDays = Number(activePointData.duration) || 153;
+  const focusVarianceDays = focusVariance !== null ? Math.round(Math.abs(focusVariance) * elapsedDays) : null;
 
   const focusMonthLabel = activePointData.month_ending
     ? new Date(activePointData.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' })
@@ -267,7 +268,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         ctx.fillStyle = statusColor;
         const varPercentText = focusVariancePercentVal !== null ? `${focusVariancePercentVal > 0 ? '+' : ''}${focusVariancePercentVal.toFixed(2)}%` : '0.00%';
         const varDaysText = focusVarianceDays !== null 
-          ? (focusVarianceDays < 0 ? `${Math.abs(focusVarianceDays)} Days Delay` : `+${focusVarianceDays} Days Ahead`)
+          ? (focusVariance < 0 ? `${focusVarianceDays} Days Delay` : (focusVariance > 0 ? `+${focusVarianceDays} Days Ahead` : '0 Days'))
           : '0 Days';
         ctx.fillText(`${varPercentText} (${varDaysText})`, boxX + 80, boxY + 47);
 

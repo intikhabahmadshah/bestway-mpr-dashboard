@@ -16,11 +16,11 @@ const KPICards = ({ data, selectedMonth }) => {
   const monthlyActual = activeData.monthly_actual !== null && activeData.monthly_actual !== undefined ? activeData.monthly_actual : null;
   const duration = activeData.duration || 0;
 
-  const formatPercent = (val) => (val !== null ? (val * 100).toFixed(2) + '%' : '—');
   const variance = accumActual !== null ? accumActual - accumPlanned : null;
   const variancePercentVal = variance !== null ? variance * 100 : null;
-  // Variance / Lag in Days (e.g. -1.90% variance = 2 Days Delay)
-  const varianceDays = variancePercentVal !== null ? Math.round(variancePercentVal) : null;
+  // Earned Schedule (ES) Lag in Days: Variance % * Elapsed Project Duration (Days)
+  const elapsedDays = Number(duration) || 153;
+  const varianceDays = variance !== null ? Math.round(Math.abs(variance) * elapsedDays) : null;
   const spi = accumPlanned > 0 && accumActual !== null ? accumActual / accumPlanned : null;
 
   const monthLabel = activeData.month_ending
