@@ -219,11 +219,6 @@ function App() {
               <button className="btn-confirm" onClick={() => setShowExportModal(true)} style={{ background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)' }} title="Export high-res A4 PDF or PNG formatted for reports">
                 <FiDownload size={18} /> Download this Dashboard
               </button>
-              {localStorage.getItem('mpr_custom_data') && (
-                <button className="btn-cancel" onClick={resetToDefaultDataset} title="Restore original project CSV dataset">
-                  Reset to Original Data
-                </button>
-              )}
               <button className="btn-upload" onClick={() => setShowUploadModal(true)} title="Open form to update monthly planned & actual data">
                 <FiEdit3 size={18} />
                 Update Data
