@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiTrendingUp, FiTarget, FiActivity, FiClock, FiBarChart2, FiPercent } from 'react-icons/fi';
+import { FiTrendingUp, FiTarget, FiActivity, FiClock, FiBarChart2, FiCompass } from 'react-icons/fi';
 
 const KPICards = ({ data, selectedMonth }) => {
   if (!data || data.length === 0) return null;
@@ -16,8 +16,11 @@ const KPICards = ({ data, selectedMonth }) => {
   const monthlyActual = activeData.monthly_actual !== null && activeData.monthly_actual !== undefined ? activeData.monthly_actual : null;
   const duration = activeData.duration || 0;
 
+  const totalProjectDuration = data && data.length > 0 ? (Number(data[data.length - 1].duration) || 585) : 585;
+
   const formatPercent = (val) => (val !== null ? (val * 100).toFixed(2) + '%' : '—');
   const variance = accumActual !== null ? accumActual - accumPlanned : null;
+  const varianceDays = variance !== null ? Math.round(variance * totalProjectDuration) : null;
   const spi = accumPlanned > 0 && accumActual !== null ? accumActual / accumPlanned : null;
 
   const monthLabel = activeData.month_ending
@@ -63,23 +66,42 @@ const KPICards = ({ data, selectedMonth }) => {
         <div className={`kpi-icon ${variance === null ? 'amber' : (variance >= 0 ? 'green' : 'red')}`}>
           <FiActivity />
         </div>
-        <div className="kpi-label">Variance</div>
-        <div className="kpi-value">{variance !== null ? (variance > 0 ? '+' : '') + (variance * 100).toFixed(2) + '%' : '—'}</div>
+        <div className="kpi-label">Variance (% &amp; Days)</div>
+        <div className="kpi-value" style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+          <span>{variance !== null ? `${variance > 0 ? '+' : ''}${(variance * 100).toFixed(2)}%` : '—'}</span>
+          {varianceDays !== null && (
+            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: variance >= 0 ? '#2EC4B6' : '#EF476F' }}>
+              ({varianceDays > 0 ? `+${varianceDays}` : varianceDays} Days)
+            </span>
+          )}
+        </div>
         <div className="kpi-sub">
           <span className={variance === null ? '' : (variance >= 0 ? 'positive' : 'negative')}>
-            {variance === null ? 'Pending actual data' : (variance >= 0 ? 'Ahead of schedule' : 'Behind schedule')}
+            {variance === null 
+              ? 'Pending actual data' 
+              : (variance > 0 
+                ? `Ahead of schedule (+${varianceDays} Days)` 
+                : (variance < 0 
+                  ? `Behind schedule (${Math.abs(varianceDays)} Days Delay)` 
+                  : 'On Track (0 Days Variance)'))}
           </span>
         </div>
       </div>
 
       <div className={`kpi-card ${spi === null ? 'amber' : (spi >= 1 ? 'green' : 'amber')}`}>
         <div className={`kpi-icon ${spi === null ? 'amber' : (spi >= 1 ? 'green' : 'amber')}`}>
-          <FiPercent />
+          <FiCompass />
         </div>
-        <div className="kpi-label">SPI</div>
+        <div className="kpi-label">SPI (Performance Index)</div>
         <div className="kpi-value">{spi !== null ? spi.toFixed(2) : '—'}</div>
         <div className="kpi-sub">
-          <span>Schedule Performance Index ({monthLabel})</span>
+          <span className={spi === null ? '' : (spi >= 1 ? 'positive' : 'negative')}>
+            {spi === null
+              ? 'Schedule Performance Index'
+              : (spi >= 1
+                ? `Efficient (${spi.toFixed(2)} ≥ 1.0) • ${monthLabel}`
+                : `Below Target (${spi.toFixed(2)} < 1.0) • ${monthLabel}`)}
+          </span>
         </div>
       </div>
 
