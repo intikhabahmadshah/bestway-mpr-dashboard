@@ -15,13 +15,13 @@ const KPICards = ({ data, selectedMonth }) => {
   const accumPlanned = activeData.accumulative_planned || 0;
   const monthlyActual = activeData.monthly_actual !== null && activeData.monthly_actual !== undefined ? activeData.monthly_actual : null;
   const duration = activeData.duration || 0;
-
-  const variance = accumActual !== null ? accumActual - accumPlanned : null;
+  const formatPercent = (val) => (val !== null && !isNaN(val) ? (val * 100).toFixed(2) + '%' : '—');
+  const variance = accumActual !== null && !isNaN(accumActual) && !isNaN(accumPlanned) ? accumActual - accumPlanned : null;
   const variancePercentVal = variance !== null ? variance * 100 : null;
   // Earned Schedule (ES) Lag in Days: Variance % * Elapsed Project Duration (Days)
   const elapsedDays = Number(duration) || 153;
-  const varianceDays = variance !== null ? Math.round(Math.abs(variance) * elapsedDays) : null;
-  const spi = accumPlanned > 0 && accumActual !== null ? accumActual / accumPlanned : null;
+  const varianceDays = variance !== null && !isNaN(variance) ? Math.round(Math.abs(variance) * elapsedDays) : null;
+  const spi = accumPlanned > 0 && accumActual !== null && !isNaN(accumActual) ? accumActual / accumPlanned : null;
 
   const monthLabel = activeData.month_ending
     ? new Date(activeData.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' })
@@ -68,10 +68,10 @@ const KPICards = ({ data, selectedMonth }) => {
         </div>
         <div className="kpi-label">Variance (% &amp; Days)</div>
         <div className="kpi-value" style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-          <span>{variance !== null ? `${variance > 0 ? '+' : ''}${variancePercentVal.toFixed(2)}%` : '—'}</span>
-          {varianceDays !== null && (
+          <span>{variance !== null && !isNaN(variancePercentVal) ? `${variance > 0 ? '+' : ''}${variancePercentVal.toFixed(2)}%` : '—'}</span>
+          {varianceDays !== null && !isNaN(varianceDays) && (
             <span style={{ fontSize: '0.95rem', fontWeight: 600, color: variance >= 0 ? '#2EC4B6' : '#EF476F' }}>
-              ({varianceDays > 0 ? `+${varianceDays}` : varianceDays} Days)
+              ({variance < 0 ? `-${varianceDays}` : (variance > 0 ? `+${varianceDays}` : '0')} Days)
             </span>
           )}
         </div>
@@ -82,7 +82,7 @@ const KPICards = ({ data, selectedMonth }) => {
               : (variance > 0 
                 ? `Ahead of schedule (+${varianceDays} Days)` 
                 : (variance < 0 
-                  ? `Behind schedule (${Math.abs(varianceDays)} Days Delay)` 
+                  ? `Behind schedule (${varianceDays} Days Delay)` 
                   : 'On Track (0 Days Variance)'))}
           </span>
         </div>

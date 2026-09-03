@@ -97,7 +97,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#5EEAD4' : '#0F766E',
           anchor: 'end',
           align: 'top',
-          offset: 14, // Clear separation above the curve so text is 100% visible
+          offset: 14,
           font: { family: 'Poppins', size: 10.5, weight: 700 },
           formatter: (val) => val.toFixed(1) + '%',
           listeners: {
@@ -126,7 +126,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#FDA4AF' : '#BE123C',
           anchor: 'end',
           align: 'bottom',
-          offset: 16, // Clear separation below the curve so text is 100% visible
+          offset: 16,
           font: (ctx) => ({
             family: 'Poppins',
             size: ctx.dataIndex === activeFocusIdx ? 12 : 11,
@@ -143,143 +143,142 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     ]
   };
 
-  // Custom Plugin to draw Callout Note with Compact Focus Circle, Higher Box position, and Dashed Border
+  // Custom Plugin to draw Callout Note with full crash protection and finite checks
   const calloutPlugin = useMemo(() => {
     return {
       id: 'customCalloutNote',
       afterDatasetsDraw: (chart) => {
-        const metaActual = chart.getDatasetMeta(1);
-        const metaPlanned = chart.getDatasetMeta(0);
-        if (!metaActual || !metaActual.data || !metaActual.data[activeFocusIdx]) return;
+        try {
+          const metaActual = chart.getDatasetMeta(1);
+          const metaPlanned = chart.getDatasetMeta(0);
+          if (!metaActual || !metaActual.data || !metaActual.data[activeFocusIdx]) return;
 
-        const actualPoint = metaActual.data[activeFocusIdx];
-        const plannedPoint = metaPlanned.data[activeFocusIdx];
-        const point = (focusActual !== null && actualPoint) ? actualPoint : plannedPoint;
-        if (!point) return;
+          const actualPoint = metaActual.data[activeFocusIdx];
+          const plannedPoint = metaPlanned && metaPlanned.data ? metaPlanned.data[activeFocusIdx] : null;
+          const point = (focusActual !== null && actualPoint) ? actualPoint : plannedPoint;
+          if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
 
-        const ctx = chart.ctx;
-        const x = point.x;
-        const y = point.y;
+          const ctx = chart.ctx;
+          const x = point.x;
+          const y = point.y;
 
-        ctx.save();
+          ctx.save();
 
-        // 1. Draw Compact Focus Circle (Radius 13px / 18px) that does NOT overlap the text labels
-        ctx.beginPath();
-        ctx.arc(x, y, 13, 0, Math.PI * 2);
-        ctx.strokeStyle = statusColor;
-        ctx.lineWidth = 2.2;
-        ctx.setLineDash([4, 3]); // Dashed compact circle ring
-        ctx.fillStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.12)' : 'rgba(46, 196, 182, 0.12)';
-        ctx.fill();
-        ctx.stroke();
-        ctx.setLineDash([]); // reset
+          // 1. Draw Compact Focus Circle (Radius 13px / 18px)
+          ctx.beginPath();
+          ctx.arc(x, y, 13, 0, Math.PI * 2);
+          ctx.strokeStyle = statusColor;
+          ctx.lineWidth = 2.2;
+          ctx.setLineDash([4, 3]);
+          ctx.fillStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.12)' : 'rgba(46, 196, 182, 0.12)';
+          ctx.fill();
+          ctx.stroke();
+          ctx.setLineDash([]);
 
-        // Outer subtle highlight ring
-        ctx.beginPath();
-        ctx.arc(x, y, 18, 0, Math.PI * 2);
-        ctx.strokeStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.22)' : 'rgba(46, 196, 182, 0.22)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+          // Outer subtle highlight ring
+          ctx.beginPath();
+          ctx.arc(x, y, 18, 0, Math.PI * 2);
+          ctx.strokeStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.22)' : 'rgba(46, 196, 182, 0.22)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
 
-        // Center highlight dot
-        ctx.beginPath();
-        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#FFD166';
-        ctx.fill();
+          // Center highlight dot
+          ctx.beginPath();
+          ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#FFD166';
+          ctx.fill();
 
-        // 2. Position Rectangle Box Higher Up (Uncha le k jao)
-        const boxWidth = 264;
-        const boxHeight = 84;
+          // 2. Position Rectangle Box Higher Up
+          const boxWidth = 264;
+          const boxHeight = 84;
 
-        // Place box higher up in the open upper grid space
-        let boxX = x - boxWidth / 2;
-        let boxY = y - boxHeight - 110; // Placed high up above the curve
+          let boxX = x - boxWidth / 2;
+          let boxY = y - boxHeight - 110;
 
-        // Auto-adjust if point reaches upper chart area (flip downwards if too close to top)
-        const isFlippedBelow = y < 165;
-        if (isFlippedBelow) {
-          boxY = y + 50;
-        } else if (boxY < 38) {
-          boxY = 38;
+          const isFlippedBelow = y < 165;
+          if (isFlippedBelow) {
+            boxY = y + 50;
+          } else if (boxY < 38) {
+            boxY = 38;
+          }
+
+          if (boxX < 14) boxX = 14;
+          if (boxX + boxWidth > chart.width - 14) boxX = chart.width - boxWidth - 14;
+
+          // 3. Draw DASHED ANGLED Leader Line (Tircha & Dashed)
+          ctx.beginPath();
+          ctx.setLineDash([5, 4]);
+          ctx.strokeStyle = statusColor;
+          ctx.lineWidth = 2.2;
+
+          const lineStartX = x - 13;
+          const lineStartY = isFlippedBelow ? y + 12 : y - 8;
+          const lineTargetX = boxX + 65;
+          const lineTargetY = isFlippedBelow ? boxY : boxY + boxHeight;
+
+          const controlX = x - 35;
+          const controlY = (lineStartY + lineTargetY) / 2;
+
+          ctx.moveTo(lineStartX, lineStartY);
+          ctx.quadraticCurveTo(controlX, controlY, lineTargetX, lineTargetY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // 4. Draw Callout Box with DASHED Border
+          ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(7, 59, 76, 0.16)';
+          ctx.shadowBlur = 14;
+          ctx.shadowOffsetY = 6;
+
+          ctx.fillStyle = isDark ? '#111827' : '#ffffff';
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
+          } else {
+            ctx.rect(boxX, boxY, boxWidth, boxHeight);
+          }
+          ctx.fill();
+
+          ctx.shadowColor = 'transparent';
+          ctx.strokeStyle = statusColor;
+          ctx.lineWidth = 2.2;
+          ctx.setLineDash([6, 4]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // 5. Draw Content Text inside Rectangle Box
+          // Line 1: Month & Status Badge
+          ctx.font = 'bold 11.5px Poppins, sans-serif';
+          ctx.fillStyle = isDark ? '#f1f5f9' : '#073B4C';
+          ctx.fillText(`${focusMonthLabel}:`, boxX + 14, boxY + 24);
+
+          ctx.font = '800 11.5px Poppins, sans-serif';
+          ctx.fillStyle = statusColor;
+          ctx.fillText(statusText, boxX + 85, boxY + 24);
+
+          // Line 2: Variance (% and Days Delay)
+          ctx.font = '600 11.5px Poppins, sans-serif';
+          ctx.fillStyle = isDark ? '#cbd5e1' : '#334155';
+          ctx.fillText('Variance: ', boxX + 14, boxY + 47);
+
+          ctx.font = '800 12.5px Poppins, sans-serif';
+          ctx.fillStyle = statusColor;
+          const varPercentText = focusVariancePercentVal !== null ? `${focusVariancePercentVal > 0 ? '+' : ''}${focusVariancePercentVal.toFixed(2)}%` : '0.00%';
+          const varDaysText = focusVarianceDays !== null 
+            ? (focusVariance < 0 ? `${focusVarianceDays} Days Delay` : (focusVariance > 0 ? `+${focusVarianceDays} Days Ahead` : '0 Days'))
+            : '0 Days';
+          ctx.fillText(`${varPercentText} (${varDaysText})`, boxX + 80, boxY + 47);
+
+          // Line 3: Actual vs Planned Target
+          ctx.font = '500 11px Poppins, sans-serif';
+          ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+          const actualStr = focusActual !== null ? `${focusActual.toFixed(2)}%` : '—';
+          const plannedStr = `${focusPlanned.toFixed(2)}%`;
+          ctx.fillText(`Actual: ${actualStr}  |  Target: ${plannedStr}`, boxX + 14, boxY + 69);
+
+          ctx.restore();
+        } catch (e) {
+          console.warn('Callout draw error caught safely:', e);
         }
-
-        // Clamp boxX inside chart margins (straight vertical line by default, naturally angled if edge constrained)
-        if (boxX < 14) boxX = 14;
-        if (boxX + boxWidth > chart.width - 14) boxX = chart.width - boxWidth - 14;
-
-        // 3. Draw DASHED ANGLED Leader Line (Tircha & Dashed to cleanly bypass 24.7% label)
-        ctx.beginPath();
-        ctx.setLineDash([5, 4]); // Dashed leader line as requested!
-        ctx.strokeStyle = statusColor;
-        ctx.lineWidth = 2.2;
-
-        const lineStartX = x - 13;
-        const lineStartY = isFlippedBelow ? y + 12 : y - 8;
-        const lineTargetX = boxX + 65; // Angled to bottom-left quadrant of box
-        const lineTargetY = isFlippedBelow ? boxY : boxY + boxHeight;
-
-        // Smooth subtle curve that arches around the 24.7% label without touching it
-        const controlX = x - 35;
-        const controlY = (lineStartY + lineTargetY) / 2;
-
-        ctx.moveTo(lineStartX, lineStartY);
-        ctx.quadraticCurveTo(controlX, controlY, lineTargetX, lineTargetY);
-        ctx.stroke();
-        ctx.setLineDash([]); // Reset line dash
-
-        // 4. Draw Callout Box with DASHED Border
-        ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(7, 59, 76, 0.16)';
-        ctx.shadowBlur = 14;
-        ctx.shadowOffsetY = 6;
-
-        ctx.fillStyle = isDark ? '#111827' : '#ffffff';
-        ctx.beginPath();
-        if (ctx.roundRect) {
-          ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
-        } else {
-          ctx.rect(boxX, boxY, boxWidth, boxHeight);
-        }
-        ctx.fill();
-
-        // Apply Dashed Border
-        ctx.shadowColor = 'transparent'; // reset shadow
-        ctx.strokeStyle = statusColor;
-        ctx.lineWidth = 2.2;
-        ctx.setLineDash([6, 4]); // Dashed Rectangle Border
-        ctx.stroke();
-        ctx.setLineDash([]); // Reset line dash for clean text
-
-        // 5. Draw Content Text inside Rectangle Box
-        // Line 1: Month & Status Badge
-        ctx.font = 'bold 11.5px Poppins, sans-serif';
-        ctx.fillStyle = isDark ? '#f1f5f9' : '#073B4C';
-        ctx.fillText(`${focusMonthLabel}:`, boxX + 14, boxY + 24);
-
-        ctx.font = '800 11.5px Poppins, sans-serif';
-        ctx.fillStyle = statusColor;
-        ctx.fillText(statusText, boxX + 85, boxY + 24);
-
-        // Line 2: Variance (% and 2 Days Delay)
-        ctx.font = '600 11.5px Poppins, sans-serif';
-        ctx.fillStyle = isDark ? '#cbd5e1' : '#334155';
-        ctx.fillText('Variance: ', boxX + 14, boxY + 47);
-
-        ctx.font = '800 12.5px Poppins, sans-serif';
-        ctx.fillStyle = statusColor;
-        const varPercentText = focusVariancePercentVal !== null ? `${focusVariancePercentVal > 0 ? '+' : ''}${focusVariancePercentVal.toFixed(2)}%` : '0.00%';
-        const varDaysText = focusVarianceDays !== null 
-          ? (focusVariance < 0 ? `${focusVarianceDays} Days Delay` : (focusVariance > 0 ? `+${focusVarianceDays} Days Ahead` : '0 Days'))
-          : '0 Days';
-        ctx.fillText(`${varPercentText} (${varDaysText})`, boxX + 80, boxY + 47);
-
-        // Line 3: Actual vs Planned Target
-        ctx.font = '500 11px Poppins, sans-serif';
-        ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
-        const actualStr = focusActual !== null ? `${focusActual.toFixed(2)}%` : '—';
-        const plannedStr = `${focusPlanned.toFixed(2)}%`;
-        ctx.fillText(`Actual: ${actualStr}  |  Target: ${plannedStr}`, boxX + 14, boxY + 69);
-
-        ctx.restore();
       }
     };
   }, [activeFocusIdx, focusActual, focusPlanned, focusVariance, focusVariancePercentVal, focusVarianceDays, focusMonthLabel, statusText, statusColor, isDark]);
