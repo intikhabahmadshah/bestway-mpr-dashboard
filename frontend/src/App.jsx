@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { FiUploadCloud, FiCheck, FiInfo, FiAlertCircle, FiFilter, FiXCircle, FiLayers, FiArrowLeft, FiHome, FiDownload, FiPrinter, FiCalendar, FiPlayCircle, FiCheckSquare, FiAward, FiCode, FiEdit3 } from 'react-icons/fi';
 import './App.css';
+import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
 import BillsDataPage from './components/BillsDataPage';
@@ -190,20 +191,21 @@ function App() {
         ))}
       </div>
 
-      {currentView === 'home' && (
-        <HomePage onNavigate={navigateTo} theme={theme} />
-      )}
+      <ErrorBoundary>
+        {currentView === 'home' && (
+          <HomePage onNavigate={navigateTo} theme={theme} />
+        )}
 
-      {currentView === 'bills_data' && (
-        <BillsDataPage onNavigate={navigateTo} theme={theme} />
-      )}
+        {currentView === 'bills_data' && (
+          <BillsDataPage onNavigate={navigateTo} theme={theme} />
+        )}
 
-      {currentView === 'schedule' && (
-        <SchedulePage onNavigate={navigateTo} theme={theme} showToast={showToast} />
-      )}
+        {currentView === 'schedule' && (
+          <SchedulePage onNavigate={navigateTo} theme={theme} showToast={showToast} />
+        )}
 
-      {currentView === 'grey_structure' && (
-        <main className="dashboard" id="grey-structure-dashboard-container">
+        {currentView === 'grey_structure' && (
+          <main className="dashboard" id="grey-structure-dashboard-container">
           <div className="dashboard-toolbar">
             <div className="dashboard-info">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -345,6 +347,7 @@ function App() {
         )}
       </main>
       )}
+      </ErrorBoundary>
 
       <footer className="footer">
         <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexWrap: 'wrap' }}>
