@@ -99,8 +99,21 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#5EEAD4' : '#0F766E',
           anchor: 'end',
           align: 'top',
-          offset: 10,
-          font: { family: 'Poppins', size: 9.5, weight: 700 },
+          offset: (ctx) => (ctx.dataIndex === activeFocusIdx ? (ctx.chart.width < 520 ? 18 : 22) : 8),
+          font: (ctx) => ({
+            family: 'Poppins',
+            size: ctx.dataIndex === activeFocusIdx ? 10.5 : 9.5,
+            weight: ctx.dataIndex === activeFocusIdx ? 800 : 700
+          }),
+          backgroundColor: (ctx) => (ctx.dataIndex === activeFocusIdx
+            ? (isDark ? 'rgba(15, 23, 42, 0.95)' : '#ffffff')
+            : null),
+          borderColor: (ctx) => (ctx.dataIndex === activeFocusIdx
+            ? (isDark ? 'rgba(46, 196, 182, 0.6)' : 'rgba(15, 118, 110, 0.55)')
+            : null),
+          borderWidth: (ctx) => (ctx.dataIndex === activeFocusIdx ? 1.2 : 0),
+          borderRadius: 4,
+          padding: (ctx) => (ctx.dataIndex === activeFocusIdx ? { top: 2, bottom: 2, left: 6, right: 6 } : 0),
           formatter: (val) => val.toFixed(1) + '%',
           listeners: {
             click: (context) => {
@@ -128,12 +141,21 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#FDA4AF' : '#BE123C',
           anchor: 'end',
           align: 'bottom',
-          offset: 12,
+          offset: (ctx) => (ctx.dataIndex === activeFocusIdx ? (ctx.chart.width < 520 ? 20 : 25) : 10),
           font: (ctx) => ({
             family: 'Poppins',
             size: ctx.dataIndex === activeFocusIdx ? 11 : 9.5,
             weight: 800
           }),
+          backgroundColor: (ctx) => (ctx.dataIndex === activeFocusIdx
+            ? (isDark ? 'rgba(15, 23, 42, 0.95)' : '#ffffff')
+            : null),
+          borderColor: (ctx) => (ctx.dataIndex === activeFocusIdx
+            ? (isDark ? 'rgba(239, 71, 111, 0.6)' : 'rgba(190, 18, 60, 0.55)')
+            : null),
+          borderWidth: (ctx) => (ctx.dataIndex === activeFocusIdx ? 1.2 : 0),
+          borderRadius: 4,
+          padding: (ctx) => (ctx.dataIndex === activeFocusIdx ? { top: 2, bottom: 2, left: 6, right: 6 } : 0),
           formatter: (val) => (val !== null ? val.toFixed(2) + '%' : ''),
           listeners: {
             click: (context) => {
@@ -184,24 +206,16 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
 
           // 1. Draw Adaptive Focus Circle
           const circleR = isMobile ? 10 : 13;
-          const glowR = isMobile ? 14 : 18;
 
           ctx.beginPath();
           ctx.arc(x, y, circleR, 0, Math.PI * 2);
           ctx.strokeStyle = statusColor;
-          ctx.lineWidth = isMobile ? 1.8 : 2.2;
+          ctx.lineWidth = isMobile ? 1.6 : 2;
           ctx.setLineDash([3, 3]);
-          ctx.fillStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.12)' : 'rgba(46, 196, 182, 0.12)';
+          ctx.fillStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.08)' : 'rgba(46, 196, 182, 0.08)';
           ctx.fill();
           ctx.stroke();
           ctx.setLineDash([]);
-
-          // Outer subtle highlight ring
-          ctx.beginPath();
-          ctx.arc(x, y, glowR, 0, Math.PI * 2);
-          ctx.strokeStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.22)' : 'rgba(46, 196, 182, 0.22)';
-          ctx.lineWidth = 1.8;
-          ctx.stroke();
 
           // Center highlight dot
           ctx.beginPath();
@@ -234,7 +248,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           ctx.lineWidth = isMobile ? 1.8 : 2.2;
 
           const lineStartX = x - (isMobile ? 8 : 12);
-          const lineStartY = isFlippedBelow ? y + glowR : y - glowR;
+          const lineStartY = isFlippedBelow ? y + circleR + 3 : y - circleR - 3;
           const lineTargetX = boxX + (isMobile ? 35 : 55);
           const lineTargetY = isFlippedBelow ? boxY : boxY + boxHeight;
 
@@ -401,14 +415,13 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         style={{ 
           display: 'none',
           '--beacon-color': statusColor,
-          '--beacon-bg': statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.16)' : 'rgba(46, 196, 182, 0.16)'
+          '--beacon-bg': statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.08)' : 'rgba(46, 196, 182, 0.08)'
         }}
         aria-hidden="true"
       >
         <div className="signal-beacon-ring" />
         <div className="signal-radar-wave wave-1" />
         <div className="signal-radar-wave wave-2" />
-        <div className="signal-radar-wave wave-3" />
         <div className="signal-beacon-core" />
       </div>
     </div>

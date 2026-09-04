@@ -2372,7 +2372,7 @@ body.is-exporting-single-graph .charts-grid {
   justify-content: center;
 }
 
-/* Active breathing focus ring */
+/* Active subtle breathing focus ring - slow & steady (3.6s cycle) */
 .signal-beacon-ring {
   position: absolute;
   top: 0;
@@ -2380,14 +2380,14 @@ body.is-exporting-single-graph .charts-grid {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 2px solid var(--beacon-color, #EF476F);
-  background: var(--beacon-bg, rgba(239, 71, 111, 0.16));
-  animation: signalRingPulse 1.8s ease-in-out infinite;
-  will-change: transform, opacity, box-shadow;
+  border: 1.5px solid var(--beacon-color, #EF476F);
+  background: var(--beacon-bg, rgba(239, 71, 111, 0.08));
+  animation: signalRingPulse 3.6s ease-in-out infinite;
+  will-change: transform, opacity;
   box-sizing: border-box;
 }
 
-/* Concentric expanding radar signal waves (Sonar Ping) */
+/* Concentric expanding radar signal waves (Clean, Consistent, Slower 3.6s) */
 .signal-radar-wave {
   position: absolute;
   top: 50%;
@@ -2395,12 +2395,12 @@ body.is-exporting-single-graph .charts-grid {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 1.8px solid var(--beacon-color, #EF476F);
-  box-shadow: 0 0 12px var(--beacon-color, #EF476F);
+  border: 1.3px solid var(--beacon-color, #EF476F);
+  background: transparent;
   pointer-events: none;
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.8);
-  animation: signalRadarPing 2.4s cubic-bezier(0.1, 0.6, 0.3, 1) infinite;
+  transform: translate(-50%, -50%) scale(0.9);
+  animation: signalRadarPing 3.6s cubic-bezier(0.2, 0.4, 0.3, 1) infinite;
   will-change: transform, opacity;
   box-sizing: border-box;
 }
@@ -2410,14 +2410,10 @@ body.is-exporting-single-graph .charts-grid {
 }
 
 .signal-radar-wave.wave-2 {
-  animation-delay: 0.8s;
+  animation-delay: 1.8s;
 }
 
-.signal-radar-wave.wave-3 {
-  animation-delay: 1.6s;
-}
-
-/* Central glowing beacon dot with active blink / beacon flash */
+/* Central glowing beacon dot - rhythmic pulse (1.8s, exactly 1/2 cycle) */
 .signal-beacon-core {
   position: relative;
   width: 8px;
@@ -2425,10 +2421,10 @@ body.is-exporting-single-graph .charts-grid {
   border-radius: 50%;
   background-color: #FFD166;
   border: 1.5px solid #ffffff;
-  box-shadow: 0 0 6px #FFD166, 0 0 10px var(--beacon-color, #EF476F);
+  box-shadow: 0 0 5px #FFD166, 0 0 8px var(--beacon-color, #EF476F);
   z-index: 2;
-  animation: signalCoreFlash 1.2s ease-in-out infinite;
-  will-change: transform, opacity, box-shadow;
+  animation: signalCoreFlash 1.8s ease-in-out infinite;
+  will-change: transform, opacity;
   box-sizing: border-box;
 }
 
@@ -2436,48 +2432,43 @@ body.is-exporting-single-graph .charts-grid {
 @keyframes signalRingPulse {
   0%, 100% {
     transform: scale(1);
-    opacity: 0.95;
-    box-shadow: 0 0 8px var(--beacon-color, #EF476F);
+    opacity: 0.9;
   }
   50% {
-    transform: scale(1.2);
-    opacity: 0.45;
-    box-shadow: 0 0 18px var(--beacon-color, #EF476F);
+    transform: scale(1.10);
+    opacity: 0.35;
   }
 }
 
 /* Keyframes for expanding radar waves */
 @keyframes signalRadarPing {
   0% {
-    transform: translate(-50%, -50%) scale(0.8);
-    opacity: 0.9;
-    border-width: 2.2px;
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0.75;
+    border-width: 1.6px;
   }
-  35% {
-    opacity: 0.6;
-  }
-  70% {
-    opacity: 0.2;
-    border-width: 1.2px;
+  45% {
+    opacity: 0.35;
+    border-width: 1.1px;
   }
   100% {
-    transform: translate(-50%, -50%) scale(3.2);
+    transform: translate(-50%, -50%) scale(2.4);
     opacity: 0;
-    border-width: 0.6px;
+    border-width: 0.5px;
   }
 }
 
-/* Keyframes for central beacon core flash */
+/* Keyframes for central beacon core pulse */
 @keyframes signalCoreFlash {
   0%, 100% {
     transform: scale(1);
     opacity: 1;
-    box-shadow: 0 0 6px #FFD166, 0 0 10px var(--beacon-color, #EF476F);
+    filter: brightness(1);
   }
   50% {
-    transform: scale(1.45);
+    transform: scale(1.22);
     opacity: 0.75;
-    box-shadow: 0 0 14px #FFD166, 0 0 22px var(--beacon-color, #EF476F);
+    filter: brightness(1.25);
   }
 }
 
