@@ -299,8 +299,6 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    devicePixelRatio: Math.max((window.devicePixelRatio || 1) * 2, 3),
-    resizeDelay: 50,
     layout: {
       padding: {
         top: 45,
