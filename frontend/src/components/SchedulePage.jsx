@@ -539,19 +539,6 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
           </div>
         )}
       </div>
-
-      {/* Footer Info Box */}
-      <div className="schedule-footer-note">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <FiDatabase size={18} style={{ color: '#2EC4B6' }} />
-          <span>
-            Data synchronized from <strong>MS Project (.mpp)</strong> and stored in <strong>Aiven Cloud MySQL Database</strong> (<code>bestwaytowerproject-intikhabgillani.l.aivencloud.com:21951</code>).
-          </span>
-        </div>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          Tip: Drag the horizontal scrollbar at the bottom of the Gantt chart to inspect all months up to 2028.
-        </span>
-      </div>
     </div>
   );
 };
