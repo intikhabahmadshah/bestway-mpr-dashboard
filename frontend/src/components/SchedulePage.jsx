@@ -192,7 +192,7 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
               MS Project 2026-2028
             </span>
             <span className="phase-pill" style={{ background: 'rgba(17, 138, 178, 0.2)', color: '#118AB2', border: '1px solid rgba(17, 138, 178, 0.4)' }}>
-              <FiDatabase size={12} /> Aiven MySQL Cloud Sync Active
+              <FiDatabase size={12} /> Live Database Sync Active
             </span>
           </div>
           <h1 className="schedule-title">Project Activity Schedule (WBS & Gantt)</h1>

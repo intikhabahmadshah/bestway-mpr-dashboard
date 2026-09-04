@@ -29,7 +29,7 @@ const Header = ({ theme, toggleTheme, currentView, onNavigate }) => {
             )}
             {currentView === 'schedule' && (
               <span className="header-phase-badge" style={{ borderColor: 'rgba(17, 138, 178, 0.4)', color: '#2EC4B6' }}>
-                <FiLayers size={12} /> 265 Activities | Aiven DB
+                <FiLayers size={12} /> 265 Activities | Live Database
               </span>
             )}
           </div>

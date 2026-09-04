@@ -77,7 +77,7 @@ const UploadDataset = ({ isOpen, onClose, onUploadSuccess, showToast }) => {
           await axios.post('/api/mpr', { rows: parsedRows });
           setProgress(100);
           setSuccess(true);
-          showToast('Dataset uploaded to Aiven MySQL successfully!', 'success');
+          showToast('Dataset uploaded to Database successfully!', 'success');
           
           setTimeout(() => {
             onUploadSuccess(parsedRows);
@@ -143,7 +143,7 @@ const UploadDataset = ({ isOpen, onClose, onUploadSuccess, showToast }) => {
                 <div className="progress-bar">
                   <div className="progress-fill" style={{ width: `${progress}%` }}></div>
                 </div>
-                <div className="progress-text">Uploading to Aiven MySQL... {progress}%</div>
+                <div className="progress-text">Uploading to Database... {progress}%</div>
               </div>
             )}
 
@@ -164,7 +164,7 @@ const UploadDataset = ({ isOpen, onClose, onUploadSuccess, showToast }) => {
           <div className="upload-success">
             <FiCheckCircle className="success-icon" />
             <div className="success-text">Upload Complete!</div>
-            <div className="success-detail">Aiven MySQL and Dashboard refreshed with new data.</div>
+            <div className="success-detail">Database and Dashboard refreshed with new data.</div>
           </div>
         )}
       </div>

@@ -68,7 +68,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
   // Refresh & Sync from Drive Function
   const handleRefreshSync = async () => {
     setIsSyncing(true);
-    setSyncToastMsg('Connecting to Google Drive folder & checking for new files...');
+    setSyncToastMsg('Connecting to Document Repository & checking for updates...');
 
     try {
       await new Promise(r => setTimeout(r, 600));
@@ -77,7 +77,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
       setFiles(scannedBillsMaster);
       localStorage.setItem('mpr_drive_scanned_files_v2', JSON.stringify(scannedBillsMaster));
 
-      setSyncToastMsg(`Synced with Google Drive! All ${scannedBillsMaster.length} scanned documents updated.`);
+      setSyncToastMsg(`Synced with Document Archive! All ${scannedBillsMaster.length} scanned documents updated.`);
     } catch (err) {
       setSyncToastMsg('Sync completed.');
     } finally {
@@ -152,10 +152,10 @@ const BillsDataPage = ({ onNavigate, theme }) => {
             onClick={handleRefreshSync}
             disabled={isSyncing}
             style={{ background: 'linear-gradient(135deg, #2EC4B6 0%, #118AB2 100%)' }}
-            title="Refresh & Sync latest files from Google Drive"
+            title="Refresh &amp; Sync latest files from Document Archive"
           >
             <FiRefreshCw className={isSyncing ? 'spinner' : ''} size={16} />
-            {isSyncing ? 'Syncing Drive...' : 'Refresh Sync'}
+            {isSyncing ? 'Syncing...' : 'Refresh Sync'}
           </button>
         </div>
       </div>
@@ -186,9 +186,9 @@ const BillsDataPage = ({ onNavigate, theme }) => {
           <FiFileText size={38} />
         </div>
         <div style={{ flex: 1 }}>
-          <h1 className="bills-title">Scanned Bills & Log Files</h1>
+          <h1 className="bills-title">Scanned Bills &amp; Log Files</h1>
           <p className="bills-subtitle">
-            Official scanned POs, billing vouchers, and log files stored in Google Drive. Click <strong>Preview</strong> for interactive reader or <strong>Download</strong> for direct file copy.
+            Official scanned POs, billing vouchers, and log files stored in cloud document archive. Click <strong>Preview</strong> for interactive reader or <strong>Download</strong> for direct file copy.
           </p>
         </div>
       </div>
@@ -330,7 +330,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                     Recording Date: {previewModalFile.recordingDate}
                   </span>
                   <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                    Google Drive PDF Document
+                    PDF Document Archive
                   </span>
                 </div>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginTop: '4px', color: 'var(--text-primary)' }}>
@@ -354,7 +354,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                   className="btn-shortcut"
                   style={{ textDecoration: 'none', padding: '8px 14px', fontSize: '0.8rem' }}
                 >
-                  Drive <FiExternalLink size={14} />
+                  View File <FiExternalLink size={14} />
                 </a>
                 <button className="modal-close" onClick={() => setPreviewModalFile(null)}>
                   <FiX size={20} />
@@ -388,7 +388,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                 </div>
                 <div>
                   <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>Add Scanned Document Entry</h3>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Paste Google Drive PDF Link & Details</p>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Paste PDF Document Link &amp; Details</p>
                 </div>
               </div>
               <button className="modal-close" onClick={() => setShowAddModal(false)}>
@@ -445,11 +445,11 @@ const BillsDataPage = ({ onNavigate, theme }) => {
 
               <div>
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
-                  Google Drive Link or File ID
+                  Document Cloud Link or File ID
                 </label>
                 <input 
                   type="text" 
-                  placeholder="e.g. https://drive.google.com/file/d/1eagjlzvM2bw77eZvguxaAjW7oacFcprW/view"
+                  placeholder="e.g. Paste cloud document link or File ID"
                   value={newDriveLink}
                   onChange={e => setNewDriveLink(e.target.value)}
                   style={{

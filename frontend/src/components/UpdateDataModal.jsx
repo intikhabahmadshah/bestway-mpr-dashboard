@@ -261,7 +261,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
                 Update Project Data (Grey Structure)
               </h3>
               <p style={{ margin: '3px 0 0 0', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-                Directly edit month-by-month values, update actual progress, or import CSV. Changes sync with Aiven Database.
+                Directly edit month-by-month values, update actual progress, or import CSV. Changes sync with Central Database.
               </p>
             </div>
           </div>
@@ -506,7 +506,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
             <FiDatabase size={15} style={{ color: '#2EC4B6' }} />
-            <span>Updates Aiven MySQL Cloud database and updates S-Curve & Gauges</span>
+            <span>Updates Project Database and refreshes S-Curve &amp; Gauges</span>
           </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>

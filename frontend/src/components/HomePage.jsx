@@ -49,7 +49,7 @@ const HomePage = ({ onNavigate, theme }) => {
               </p>
               <div className="card-meta">
                 <span><FiCheckCircle style={{ color: '#2EC4B6' }} /> 19 Months Tracking</span>
-                <span><FiDatabase style={{ color: '#118AB2' }} /> Aiven Cloud Sync</span>
+                <span><FiDatabase style={{ color: '#118AB2' }} /> Live Database Sync</span>
               </div>
               <button className="btn-portal-action cyan">
                 Open Dashboard <FiArrowRight />
@@ -79,14 +79,14 @@ const HomePage = ({ onNavigate, theme }) => {
                 <div className="card-icon amber">
                   <FiFileText />
                 </div>
-                <span className="status-tag active">Drive Connected</span>
+                <span className="status-tag active">Repository Active</span>
               </div>
               <h3 className="card-title">Bills Data</h3>
               <p className="card-description">
                 Contractor billing records, log files, scanned PO vouchers, and cloud document archive.
               </p>
               <div className="card-meta">
-                <span><FiClock style={{ color: '#FFD166' }} /> Google Drive 15GB</span>
+                <span><FiCheckCircle style={{ color: '#FFD166' }} /> Cloud Document Archive</span>
                 <span><FiFileText style={{ color: '#2EC4B6' }} /> Scanned PDF Copies</span>
               </div>
               <button className="btn-portal-action amber">
@@ -119,7 +119,7 @@ const HomePage = ({ onNavigate, theme }) => {
                   <FiCalendar />
                 </div>
                 <span className="status-tag active" style={{ background: 'rgba(17, 138, 178, 0.18)', color: '#118AB2' }}>
-                  Aiven DB Live
+                  Live Schedule
                 </span>
               </div>
               <h3 className="card-title">MS Project Schedule</h3>
@@ -129,7 +129,7 @@ const HomePage = ({ onNavigate, theme }) => {
               </p>
               <div className="card-meta">
                 <span><FiCheckCircle style={{ color: '#2EC4B6' }} /> 265 Activities</span>
-                <span><FiDatabase style={{ color: '#118AB2' }} /> Aiven MySQL Sync</span>
+                <span><FiDatabase style={{ color: '#118AB2' }} /> Database Synchronized</span>
               </div>
               <button className="btn-portal-action cyan" style={{ background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)' }}>
                 Open Schedule <FiArrowRight />
