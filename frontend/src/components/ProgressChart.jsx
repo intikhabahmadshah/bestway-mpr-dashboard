@@ -86,10 +86,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         borderDash: [6, 4],
         borderWidth: 2.2,
         tension: 0.25,
-        pointRadius: (ctx) => {
-          const w = ctx.chart?.width || 800;
-          return ctx.dataIndex === activeFocusIdx ? (w < 500 ? 5 : 6.5) : (w < 500 ? 3 : 4);
-        },
+        pointRadius: (ctx) => (ctx.dataIndex === activeFocusIdx ? 6 : 3.5),
         pointHoverRadius: 7,
         pointBackgroundColor: (ctx) => (ctx.dataIndex === activeFocusIdx ? '#2EC4B6' : '#2EC4B6'),
         pointBorderColor: isDark ? '#111827' : '#ffffff',
@@ -101,12 +98,8 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#5EEAD4' : '#0F766E',
           anchor: 'end',
           align: 'top',
-          offset: (ctx) => ((ctx.chart?.width || 800) < 500 ? 8 : 12),
-          font: (ctx) => ({
-            family: 'Poppins',
-            size: (ctx.chart?.width || 800) < 500 ? 8.5 : 10.5,
-            weight: 700
-          }),
+          offset: 10,
+          font: { family: 'Poppins', size: 9.5, weight: 700 },
           formatter: (val) => val.toFixed(1) + '%',
           listeners: {
             click: (context) => {
@@ -121,10 +114,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         borderColor: '#EF476F',
         backgroundColor: 'rgba(239, 71, 111, 0.08)',
         tension: 0.25,
-        pointRadius: (ctx) => {
-          const w = ctx.chart?.width || 800;
-          return ctx.dataIndex === activeFocusIdx ? (w < 500 ? 6.5 : 8) : (w < 500 ? 3.5 : 4.5);
-        },
+        pointRadius: (ctx) => (ctx.dataIndex === activeFocusIdx ? 7 : 4.5),
         pointHoverRadius: 8,
         pointBackgroundColor: (ctx) => (ctx.dataIndex === activeFocusIdx ? '#FFD166' : '#EF476F'),
         pointBorderColor: isDark ? '#111827' : '#ffffff',
@@ -137,15 +127,12 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#FDA4AF' : '#BE123C',
           anchor: 'end',
           align: 'bottom',
-          offset: (ctx) => ((ctx.chart?.width || 800) < 500 ? 9 : 14),
-          font: (ctx) => {
-            const isMob = (ctx.chart?.width || 800) < 500;
-            return {
-              family: 'Poppins',
-              size: ctx.dataIndex === activeFocusIdx ? (isMob ? 10 : 12) : (isMob ? 8.5 : 10.5),
-              weight: 800
-            };
-          },
+          offset: 12,
+          font: (ctx) => ({
+            family: 'Poppins',
+            size: ctx.dataIndex === activeFocusIdx ? 11 : 9.5,
+            weight: 800
+          }),
           formatter: (val) => (val !== null ? val.toFixed(2) + '%' : ''),
           listeners: {
             click: (context) => {
@@ -211,7 +198,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           // 2. Adaptive Rectangle Box Dimensions
           const boxWidth = isMobile ? Math.min(210, chartW - 20) : (isTablet ? 240 : 264);
           const boxHeight = isMobile ? 68 : 82;
-          const verticalOffset = isMobile ? 50 : 85;
+          const verticalOffset = isMobile ? 48 : 85;
 
           let boxX = x - boxWidth / 2;
           let boxY = y - boxHeight - verticalOffset;
@@ -316,10 +303,10 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     resizeDelay: 50,
     layout: {
       padding: {
-        top: (ctx) => ((ctx.chart?.width || 800) < 500 ? 35 : 55),
-        bottom: (ctx) => ((ctx.chart?.width || 800) < 500 ? 15 : 25),
+        top: 45,
+        bottom: 20,
         left: 10,
-        right: 15
+        right: 18
       }
     },
     onHover: (event, chartElement) => {
@@ -336,14 +323,14 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         position: 'top',
         labels: {
           color: isDark ? '#f1f5f9' : '#073B4C',
-          font: (ctx) => ({
+          font: {
             family: 'Poppins',
-            size: (ctx.chart?.width || 800) < 500 ? 10 : 12,
+            size: 11,
             weight: 600
-          }),
+          },
           usePointStyle: true,
           pointStyle: 'circle',
-          padding: 12,
+          padding: 14,
         }
       },
       tooltip: {
@@ -380,14 +367,14 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         grid: { color: isDark ? 'rgba(46,196,182,0.06)' : 'rgba(7,59,76,0.06)' },
         ticks: {
           color: isDark ? '#64748b' : '#475569',
-          font: (ctx) => ({
+          font: {
             family: 'Poppins',
-            size: (ctx.chart?.width || 800) < 500 ? 8 : 10
-          }),
+            size: 9.5
+          },
           padding: 8,
           maxRotation: 45,
           autoSkip: true,
-          maxTicksLimit: 12
+          maxTicksLimit: 14
         }
       }
     }
