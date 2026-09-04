@@ -293,7 +293,9 @@ function App() {
               </div>
             </div>
 
-            <KPICards data={data} selectedMonth={selectedMonth} />
+            <ErrorBoundary name="KPICards">
+              <KPICards data={data} selectedMonth={selectedMonth} />
+            </ErrorBoundary>
             
             <div className="charts-grid">
               <div className="chart-card full-width" id="chart-card-scurve">
@@ -303,12 +305,14 @@ function App() {
                     <FiLayers style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Interactive Click Enabled
                   </span>
                 </div>
-                <ProgressChart 
-                  data={data} 
-                  theme={theme} 
-                  selectedMonth={selectedMonth}
-                  onSelectMonth={handleSelectMonth}
-                />
+                <ErrorBoundary name="ProgressChart (S-Curve)">
+                  <ProgressChart 
+                    data={data} 
+                    theme={theme} 
+                    selectedMonth={selectedMonth}
+                    onSelectMonth={handleSelectMonth}
+                  />
+                </ErrorBoundary>
               </div>
               
               <div className="chart-card full-width" id="chart-card-gauges">
@@ -318,7 +322,9 @@ function App() {
                     {selectedMonth ? new Date(selectedMonth.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' }) : 'Status'}
                   </span>
                 </div>
-                <GaugeChart data={data} theme={theme} selectedMonth={selectedMonth} />
+                <ErrorBoundary name="GaugeChart">
+                  <GaugeChart data={data} theme={theme} selectedMonth={selectedMonth} />
+                </ErrorBoundary>
               </div>
 
               <div className="chart-card full-width" id="chart-card-monthly">
@@ -326,7 +332,9 @@ function App() {
                   <h3 className="chart-card-title">Monthly Progress Comparison</h3>
                   <span className="chart-card-badge">Monthly</span>
                 </div>
-                <MonthlyBarChart data={data} theme={theme} />
+                <ErrorBoundary name="MonthlyBarChart">
+                  <MonthlyBarChart data={data} theme={theme} />
+                </ErrorBoundary>
               </div>
 
               <div className="chart-card full-width" id="chart-card-variance">
@@ -334,15 +342,19 @@ function App() {
                   <h3 className="chart-card-title">Schedule Variance Analysis</h3>
                   <span className="chart-card-badge">Variance</span>
                 </div>
-                <VarianceChart data={data} theme={theme} />
+                <ErrorBoundary name="VarianceChart">
+                  <VarianceChart data={data} theme={theme} />
+                </ErrorBoundary>
               </div>
             </div>
 
-            <DataTable 
-              data={data} 
-              selectedMonth={selectedMonth}
-              onSelectMonth={handleSelectMonth}
-            />
+            <ErrorBoundary name="DataTable">
+              <DataTable 
+                data={data} 
+                selectedMonth={selectedMonth}
+                onSelectMonth={handleSelectMonth}
+              />
+            </ErrorBoundary>
           </>
         )}
       </main>

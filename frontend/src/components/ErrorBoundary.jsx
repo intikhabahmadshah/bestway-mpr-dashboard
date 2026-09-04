@@ -32,11 +32,29 @@ class ErrorBoundary extends React.Component {
         }}>
           <FiAlertTriangle size={48} style={{ color: '#EF476F', marginBottom: '16px' }} />
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#EF476F', marginBottom: '8px' }}>
-            Component Display Error
+            {this.props.name ? `${this.props.name} Display Error` : 'Component Display Error'}
           </h2>
-          <p style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '20px' }}>
+          <p style={{ fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '14px', fontWeight: 600 }}>
             {this.state.error ? this.state.error.toString() : 'An unexpected error occurred while rendering this section.'}
           </p>
+          {this.state.error?.stack && (
+            <pre style={{
+              textAlign: 'left',
+              background: 'rgba(0, 0, 0, 0.5)',
+              padding: '12px',
+              borderRadius: '8px',
+              fontSize: '0.75rem',
+              color: '#fda4af',
+              overflowX: 'auto',
+              maxHeight: '200px',
+              marginBottom: '20px',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word'
+            }}>
+              {this.state.error.stack}
+              {this.state.errorInfo?.componentStack}
+            </pre>
+          )}
           <button
             onClick={() => {
               this.setState({ hasError: false, error: null });
