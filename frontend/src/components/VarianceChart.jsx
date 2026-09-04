@@ -149,7 +149,7 @@ const VarianceChart = ({ data, theme }) => {
   };
 
   return (
-    <div style={{ height: '320px' }}>
+    <div className="variance-chart-responsive-container">
       <Bar data={chartData} options={options} />
     </div>
   );

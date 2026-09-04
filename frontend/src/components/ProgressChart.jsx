@@ -84,13 +84,16 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         borderColor: '#2EC4B6',
         backgroundColor: 'rgba(46, 196, 182, 0.04)',
         borderDash: [6, 4],
-        borderWidth: 2.5,
+        borderWidth: 2.2,
         tension: 0.25,
-        pointRadius: (ctx) => (ctx.dataIndex === activeFocusIdx ? 6 : 4),
-        pointHoverRadius: 8,
+        pointRadius: (ctx) => {
+          const w = ctx.chart?.width || 800;
+          return ctx.dataIndex === activeFocusIdx ? (w < 500 ? 5 : 6.5) : (w < 500 ? 3 : 4);
+        },
+        pointHoverRadius: 7,
         pointBackgroundColor: (ctx) => (ctx.dataIndex === activeFocusIdx ? '#2EC4B6' : '#2EC4B6'),
         pointBorderColor: isDark ? '#111827' : '#ffffff',
-        pointBorderWidth: 2,
+        pointBorderWidth: 1.5,
         fill: true,
         datalabels: {
           display: true,
@@ -98,8 +101,12 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#5EEAD4' : '#0F766E',
           anchor: 'end',
           align: 'top',
-          offset: 14,
-          font: { family: 'Poppins', size: 10.5, weight: 700 },
+          offset: (ctx) => ((ctx.chart?.width || 800) < 500 ? 8 : 12),
+          font: (ctx) => ({
+            family: 'Poppins',
+            size: (ctx.chart?.width || 800) < 500 ? 8.5 : 10.5,
+            weight: 700
+          }),
           formatter: (val) => val.toFixed(1) + '%',
           listeners: {
             click: (context) => {
@@ -114,12 +121,15 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         borderColor: '#EF476F',
         backgroundColor: 'rgba(239, 71, 111, 0.08)',
         tension: 0.25,
-        pointRadius: (ctx) => (ctx.dataIndex === activeFocusIdx ? 7.5 : 5),
-        pointHoverRadius: 9,
+        pointRadius: (ctx) => {
+          const w = ctx.chart?.width || 800;
+          return ctx.dataIndex === activeFocusIdx ? (w < 500 ? 6.5 : 8) : (w < 500 ? 3.5 : 4.5);
+        },
+        pointHoverRadius: 8,
         pointBackgroundColor: (ctx) => (ctx.dataIndex === activeFocusIdx ? '#FFD166' : '#EF476F'),
         pointBorderColor: isDark ? '#111827' : '#ffffff',
         pointBorderWidth: 2,
-        borderWidth: 3.5,
+        borderWidth: 3,
         fill: true,
         datalabels: {
           display: true,
@@ -127,12 +137,15 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           color: isDark ? '#FDA4AF' : '#BE123C',
           anchor: 'end',
           align: 'bottom',
-          offset: 16,
-          font: (ctx) => ({
-            family: 'Poppins',
-            size: ctx.dataIndex === activeFocusIdx ? 12 : 11,
-            weight: 800
-          }),
+          offset: (ctx) => ((ctx.chart?.width || 800) < 500 ? 9 : 14),
+          font: (ctx) => {
+            const isMob = (ctx.chart?.width || 800) < 500;
+            return {
+              family: 'Poppins',
+              size: ctx.dataIndex === activeFocusIdx ? (isMob ? 10 : 12) : (isMob ? 8.5 : 10.5),
+              weight: 800
+            };
+          },
           formatter: (val) => (val !== null ? val.toFixed(2) + '%' : ''),
           listeners: {
             click: (context) => {
@@ -144,7 +157,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     ]
   };
 
-  // Custom Plugin to draw Callout Note with full crash protection and finite checks
+  // Custom Plugin: Adaptive Responsive Callout Note for Mobile, Tablet, and Desktop
   const calloutPlugin = useMemo(() => {
     return {
       id: 'customCalloutNote',
@@ -162,15 +175,21 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           const ctx = chart.ctx;
           const x = point.x;
           const y = point.y;
+          const chartW = chart.width;
+          const isMobile = chartW < 520;
+          const isTablet = chartW >= 520 && chartW < 900;
 
           ctx.save();
 
-          // 1. Draw Compact Focus Circle (Radius 13px / 18px)
+          // 1. Draw Adaptive Focus Circle
+          const circleR = isMobile ? 10 : 13;
+          const glowR = isMobile ? 14 : 18;
+
           ctx.beginPath();
-          ctx.arc(x, y, 13, 0, Math.PI * 2);
+          ctx.arc(x, y, circleR, 0, Math.PI * 2);
           ctx.strokeStyle = statusColor;
-          ctx.lineWidth = 2.2;
-          ctx.setLineDash([4, 3]);
+          ctx.lineWidth = isMobile ? 1.8 : 2.2;
+          ctx.setLineDash([3, 3]);
           ctx.fillStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.12)' : 'rgba(46, 196, 182, 0.12)';
           ctx.fill();
           ctx.stroke();
@@ -178,46 +197,47 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
 
           // Outer subtle highlight ring
           ctx.beginPath();
-          ctx.arc(x, y, 18, 0, Math.PI * 2);
+          ctx.arc(x, y, glowR, 0, Math.PI * 2);
           ctx.strokeStyle = statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.22)' : 'rgba(46, 196, 182, 0.22)';
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 1.8;
           ctx.stroke();
 
           // Center highlight dot
           ctx.beginPath();
-          ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+          ctx.arc(x, y, isMobile ? 2.5 : 3.5, 0, Math.PI * 2);
           ctx.fillStyle = '#FFD166';
           ctx.fill();
 
-          // 2. Position Rectangle Box Higher Up
-          const boxWidth = 264;
-          const boxHeight = 84;
+          // 2. Adaptive Rectangle Box Dimensions
+          const boxWidth = isMobile ? Math.min(210, chartW - 20) : (isTablet ? 240 : 264);
+          const boxHeight = isMobile ? 68 : 82;
+          const verticalOffset = isMobile ? 50 : 85;
 
           let boxX = x - boxWidth / 2;
-          let boxY = y - boxHeight - 110;
+          let boxY = y - boxHeight - verticalOffset;
 
-          const isFlippedBelow = y < 165;
+          const isFlippedBelow = y < (isMobile ? 120 : 155);
           if (isFlippedBelow) {
-            boxY = y + 50;
-          } else if (boxY < 38) {
-            boxY = 38;
+            boxY = y + (isMobile ? 35 : 45);
+          } else if (boxY < (isMobile ? 24 : 36)) {
+            boxY = isMobile ? 24 : 36;
           }
 
-          if (boxX < 14) boxX = 14;
-          if (boxX + boxWidth > chart.width - 14) boxX = chart.width - boxWidth - 14;
+          if (boxX < 10) boxX = 10;
+          if (boxX + boxWidth > chartW - 10) boxX = chartW - boxWidth - 10;
 
           // 3. Draw DASHED ANGLED Leader Line (Tircha & Dashed)
           ctx.beginPath();
-          ctx.setLineDash([5, 4]);
+          ctx.setLineDash([4, 3]);
           ctx.strokeStyle = statusColor;
-          ctx.lineWidth = 2.2;
+          ctx.lineWidth = isMobile ? 1.8 : 2.2;
 
-          const lineStartX = x - 13;
-          const lineStartY = isFlippedBelow ? y + 12 : y - 8;
-          const lineTargetX = boxX + 65;
+          const lineStartX = x - (isMobile ? 8 : 12);
+          const lineStartY = isFlippedBelow ? y + glowR : y - glowR;
+          const lineTargetX = boxX + (isMobile ? 35 : 55);
           const lineTargetY = isFlippedBelow ? boxY : boxY + boxHeight;
 
-          const controlX = x - 35;
+          const controlX = x - (isMobile ? 22 : 32);
           const controlY = (lineStartY + lineTargetY) / 2;
 
           ctx.moveTo(lineStartX, lineStartY);
@@ -227,13 +247,13 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
 
           // 4. Draw Callout Box with DASHED Border
           ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(7, 59, 76, 0.16)';
-          ctx.shadowBlur = 14;
-          ctx.shadowOffsetY = 6;
+          ctx.shadowBlur = isMobile ? 8 : 14;
+          ctx.shadowOffsetY = isMobile ? 3 : 5;
 
           ctx.fillStyle = isDark ? '#111827' : '#ffffff';
           ctx.beginPath();
           if (ctx.roundRect) {
-            ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 10);
+            ctx.roundRect(boxX, boxY, boxWidth, boxHeight, isMobile ? 8 : 10);
           } else {
             ctx.rect(boxX, boxY, boxWidth, boxHeight);
           }
@@ -241,40 +261,45 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
 
           ctx.shadowColor = 'transparent';
           ctx.strokeStyle = statusColor;
-          ctx.lineWidth = 2.2;
-          ctx.setLineDash([6, 4]);
+          ctx.lineWidth = isMobile ? 1.8 : 2.2;
+          ctx.setLineDash([5, 3]);
           ctx.stroke();
           ctx.setLineDash([]);
 
-          // 5. Draw Content Text inside Rectangle Box
-          // Line 1: Month & Status Badge
-          ctx.font = 'bold 11.5px Poppins, sans-serif';
-          ctx.fillStyle = isDark ? '#f1f5f9' : '#073B4C';
-          ctx.fillText(`${focusMonthLabel}:`, boxX + 14, boxY + 24);
+          // 5. Draw Content Text inside Rectangle Box (Responsive Fonts)
+          const padLeft = isMobile ? 10 : 14;
+          const line1Y = boxY + (isMobile ? 19 : 24);
+          const line2Y = boxY + (isMobile ? 38 : 47);
+          const line3Y = boxY + (isMobile ? 55 : 68);
 
-          ctx.font = '800 11.5px Poppins, sans-serif';
+          // Line 1: Month & Status Badge
+          ctx.font = `bold ${isMobile ? '9.5px' : '11.5px'} Poppins, sans-serif`;
+          ctx.fillStyle = isDark ? '#f1f5f9' : '#073B4C';
+          ctx.fillText(`${focusMonthLabel}:`, boxX + padLeft, line1Y);
+
+          ctx.font = `800 ${isMobile ? '9.5px' : '11.5px'} Poppins, sans-serif`;
           ctx.fillStyle = statusColor;
-          ctx.fillText(statusText, boxX + 85, boxY + 24);
+          ctx.fillText(statusText, boxX + (isMobile ? 65 : 85), line1Y);
 
           // Line 2: Variance (% and Days Delay)
-          ctx.font = '600 11.5px Poppins, sans-serif';
+          ctx.font = `600 ${isMobile ? '9.5px' : '11.5px'} Poppins, sans-serif`;
           ctx.fillStyle = isDark ? '#cbd5e1' : '#334155';
-          ctx.fillText('Variance: ', boxX + 14, boxY + 47);
+          ctx.fillText('Variance: ', boxX + padLeft, line2Y);
 
-          ctx.font = '800 12.5px Poppins, sans-serif';
+          ctx.font = `800 ${isMobile ? '10.5px' : '12.5px'} Poppins, sans-serif`;
           ctx.fillStyle = statusColor;
           const varPercentText = focusVariancePercentVal !== null ? `${focusVariancePercentVal > 0 ? '+' : ''}${focusVariancePercentVal.toFixed(2)}%` : '0.00%';
           const varDaysText = focusVarianceDays !== null 
             ? (focusVariance < 0 ? `${focusVarianceDays} Days Delay` : (focusVariance > 0 ? `+${focusVarianceDays} Days Ahead` : '0 Days'))
             : '0 Days';
-          ctx.fillText(`${varPercentText} (${varDaysText})`, boxX + 80, boxY + 47);
+          ctx.fillText(`${varPercentText} (${varDaysText})`, boxX + (isMobile ? 60 : 78), line2Y);
 
           // Line 3: Actual vs Planned Target
-          ctx.font = '500 11px Poppins, sans-serif';
+          ctx.font = `500 ${isMobile ? '9px' : '10.5px'} Poppins, sans-serif`;
           ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
           const actualStr = focusActual !== null ? `${focusActual.toFixed(2)}%` : '—';
           const plannedStr = `${focusPlanned.toFixed(2)}%`;
-          ctx.fillText(`Actual: ${actualStr}  |  Target: ${plannedStr}`, boxX + 14, boxY + 69);
+          ctx.fillText(`Actual: ${actualStr}  |  Target: ${plannedStr}`, boxX + padLeft, line3Y);
 
           ctx.restore();
         } catch (e) {
@@ -287,14 +312,14 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    devicePixelRatio: Math.max((window.devicePixelRatio || 1) * 2.5, 4),
-    resizeDelay: 0,
+    devicePixelRatio: Math.max((window.devicePixelRatio || 1) * 2, 3),
+    resizeDelay: 50,
     layout: {
       padding: {
-        top: 55,
-        bottom: 25,
-        left: 20,
-        right: 35
+        top: (ctx) => ((ctx.chart?.width || 800) < 500 ? 35 : 55),
+        bottom: (ctx) => ((ctx.chart?.width || 800) < 500 ? 15 : 25),
+        left: 10,
+        right: 15
       }
     },
     onHover: (event, chartElement) => {
@@ -311,10 +336,14 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         position: 'top',
         labels: {
           color: isDark ? '#f1f5f9' : '#073B4C',
-          font: { family: 'Poppins', size: 12.5, weight: 600 },
+          font: (ctx) => ({
+            family: 'Poppins',
+            size: (ctx.chart?.width || 800) < 500 ? 10 : 12,
+            weight: 600
+          }),
           usePointStyle: true,
           pointStyle: 'circle',
-          padding: 24,
+          padding: 12,
         }
       },
       tooltip: {
@@ -323,11 +352,11 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         bodyColor: isDark ? '#94a3b8' : '#475569',
         borderColor: 'rgba(46,196,182,0.3)',
         borderWidth: 1,
-        padding: 12,
+        padding: 10,
         titleFont: { family: 'Poppins', weight: 600 },
         bodyFont: { family: 'Poppins' },
         callbacks: {
-          label: (context) => `${context.dataset.label}: ${context.parsed.y !== null ? context.parsed.y.toFixed(2) : '—'}% (Click to inspect)`
+          label: (context) => `${context.dataset.label}: ${context.parsed.y !== null ? context.parsed.y.toFixed(2) : '—'}%`
         }
       }
     },
@@ -340,8 +369,8 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         },
         ticks: {
           color: isDark ? '#64748b' : '#475569',
-          font: { family: 'Poppins', size: 11 },
-          padding: 8,
+          font: { family: 'Poppins', size: 10 },
+          padding: 6,
           stepSize: 20,
           callback: (value) => (value <= 100 ? value + '%' : '')
         }
@@ -351,16 +380,21 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         grid: { color: isDark ? 'rgba(46,196,182,0.06)' : 'rgba(7,59,76,0.06)' },
         ticks: {
           color: isDark ? '#64748b' : '#475569',
-          font: { family: 'Poppins', size: 10.5 },
-          padding: 12,
+          font: (ctx) => ({
+            family: 'Poppins',
+            size: (ctx.chart?.width || 800) < 500 ? 8 : 10
+          }),
+          padding: 8,
           maxRotation: 45,
+          autoSkip: true,
+          maxTicksLimit: 12
         }
       }
     }
   };
 
   return (
-    <div style={{ height: '520px', position: 'relative' }}>
+    <div className="scurve-chart-responsive-container">
       <Line data={chartData} options={options} plugins={[calloutPlugin]} />
     </div>
   );

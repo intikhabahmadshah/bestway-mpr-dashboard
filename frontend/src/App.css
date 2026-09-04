@@ -2226,3 +2226,132 @@ body.is-exporting-single-graph .charts-grid {
   overscroll-behavior-x: contain;
 }
 
+/* ========================================================
+   RESPONSIVE GRAPH CONTAINERS (DESKTOP, TABLET, MOBILE)
+   ======================================================== */
+.scurve-chart-responsive-container {
+  position: relative;
+  width: 100%;
+  height: 480px;
+}
+
+.dual-gauge-responsive-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  height: 280px;
+  width: 100%;
+}
+
+.gauge-sub-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-doughnut-box {
+  position: relative;
+  width: 100%;
+  height: 210px;
+  display: flex;
+  justify-content: center;
+}
+
+.gauge-center-text {
+  position: absolute;
+  bottom: 22px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.gauge-center-text .gauge-value {
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.gauge-center-text .gauge-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.gauge-footer-text {
+  text-align: center;
+  margin-top: -8px;
+  font-size: 0.76rem;
+}
+
+.monthly-chart-responsive-container {
+  position: relative;
+  width: 100%;
+  height: 350px;
+}
+
+.variance-chart-responsive-container {
+  position: relative;
+  width: 100%;
+  height: 310px;
+}
+
+/* Tablets (576px - 991.98px) */
+@media (min-width: 576px) and (max-width: 991.98px) {
+  .scurve-chart-responsive-container {
+    height: 390px;
+  }
+  .monthly-chart-responsive-container {
+    height: 300px;
+  }
+  .variance-chart-responsive-container {
+    height: 270px;
+  }
+  .dual-gauge-responsive-wrapper {
+    height: 240px;
+  }
+  .gauge-doughnut-box {
+    height: 180px;
+  }
+}
+
+/* Mobile Phones (< 576px) */
+@media (max-width: 575.98px) {
+  .scurve-chart-responsive-container {
+    height: 310px;
+  }
+  .monthly-chart-responsive-container {
+    height: 250px;
+  }
+  .variance-chart-responsive-container {
+    height: 230px;
+  }
+  .dual-gauge-responsive-wrapper {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    gap: 20px;
+  }
+  .gauge-doughnut-box {
+    height: 170px;
+  }
+  .gauge-center-text .gauge-value {
+    font-size: 1.25rem;
+  }
+  .gauge-center-text {
+    bottom: 18px;
+  }
+  .chart-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .chart-card-title {
+    font-size: 0.88rem !important;
+  }
+  .chart-card-badge {
+    font-size: 0.65rem !important;
+  }
+}
+

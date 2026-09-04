@@ -210,7 +210,7 @@ const MonthlyBarChart = ({ data, theme }) => {
   };
 
   return (
-    <div style={{ height: '360px' }}>
+    <div className="monthly-chart-responsive-container">
       <Bar data={chartData} options={options} plugins={[centeredLabelsPlugin]} />
     </div>
   );
