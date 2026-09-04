@@ -271,7 +271,7 @@ function App() {
                 <div className="date-content">
                   <span className="date-label">Grey Structure Start Date</span>
                   <span className="date-value">
-                    {data && data.length > 0 && data[0].month
+                    {data && data.length > 0 && data[0]?.month
                       ? new Date(data[0].month).toLocaleDateString('default', { day: '2-digit', month: 'short', year: 'numeric' })
                       : '26 Mar 2026'}
                   </span>
@@ -285,7 +285,7 @@ function App() {
                 <div className="date-content">
                   <span className="date-label">Grey Structure Finish Date</span>
                   <span className="date-value">
-                    {data && data.length > 0 && data[data.length - 1].month_ending
+                    {data && data.length > 0 && data[data.length - 1]?.month_ending
                       ? new Date(data[data.length - 1].month_ending).toLocaleDateString('default', { day: '2-digit', month: 'short', year: 'numeric' })
                       : '31 Oct 2027'}
                   </span>
