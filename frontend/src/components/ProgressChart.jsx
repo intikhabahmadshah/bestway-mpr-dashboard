@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,6 +26,7 @@ ChartJS.register(
 );
 
 const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
+  const beaconRef = useRef(null);
   if (!data || data.length === 0) return null;
 
   const isDark = theme === 'dark';
@@ -152,12 +153,18 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
         try {
           const metaActual = chart.getDatasetMeta(1);
           const metaPlanned = chart.getDatasetMeta(0);
-          if (!metaActual || !metaActual.data || !metaActual.data[activeFocusIdx]) return;
+          if (!metaActual || !metaActual.data || !metaActual.data[activeFocusIdx]) {
+            if (beaconRef.current) beaconRef.current.style.display = 'none';
+            return;
+          }
 
           const actualPoint = metaActual.data[activeFocusIdx];
           const plannedPoint = metaPlanned && metaPlanned.data ? metaPlanned.data[activeFocusIdx] : null;
           const point = (focusActual !== null && actualPoint) ? actualPoint : plannedPoint;
-          if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
+          if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) {
+            if (beaconRef.current) beaconRef.current.style.display = 'none';
+            return;
+          }
 
           const ctx = chart.ctx;
           const x = point.x;
@@ -165,6 +172,13 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           const chartW = chart.width;
           const isMobile = chartW < 520;
           const isTablet = chartW >= 520 && chartW < 900;
+
+          // Reposition Signal Beacon DOM Overlay
+          if (beaconRef.current) {
+            beaconRef.current.style.display = 'flex';
+            beaconRef.current.style.left = `${x}px`;
+            beaconRef.current.style.top = `${y}px`;
+          }
 
           ctx.save();
 
@@ -379,8 +393,24 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
   };
 
   return (
-    <div className="scurve-chart-responsive-container">
+    <div className="scurve-chart-responsive-container position-relative">
       <Line data={chartData} options={options} plugins={[calloutPlugin]} />
+      <div 
+        ref={beaconRef} 
+        className="signal-beacon-wrapper" 
+        style={{ 
+          display: 'none',
+          '--beacon-color': statusColor,
+          '--beacon-bg': statusColor === '#EF476F' ? 'rgba(239, 71, 111, 0.16)' : 'rgba(46, 196, 182, 0.16)'
+        }}
+        aria-hidden="true"
+      >
+        <div className="signal-beacon-ring" />
+        <div className="signal-radar-wave wave-1" />
+        <div className="signal-radar-wave wave-2" />
+        <div className="signal-radar-wave wave-3" />
+        <div className="signal-beacon-core" />
+      </div>
     </div>
   );
 };

@@ -2355,3 +2355,142 @@ body.is-exporting-single-graph .charts-grid {
   }
 }
 
+/* ========================================================
+   PROFESSIONAL S-CURVE RADAR / SIGNAL BEACON EFFECT
+   ======================================================== */
+.signal-beacon-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 26px;
+  height: 26px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Active breathing focus ring */
+.signal-beacon-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--beacon-color, #EF476F);
+  background: var(--beacon-bg, rgba(239, 71, 111, 0.16));
+  animation: signalRingPulse 1.8s ease-in-out infinite;
+  will-change: transform, opacity, box-shadow;
+  box-sizing: border-box;
+}
+
+/* Concentric expanding radar signal waves (Sonar Ping) */
+.signal-radar-wave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.8px solid var(--beacon-color, #EF476F);
+  box-shadow: 0 0 12px var(--beacon-color, #EF476F);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+  animation: signalRadarPing 2.4s cubic-bezier(0.1, 0.6, 0.3, 1) infinite;
+  will-change: transform, opacity;
+  box-sizing: border-box;
+}
+
+.signal-radar-wave.wave-1 {
+  animation-delay: 0s;
+}
+
+.signal-radar-wave.wave-2 {
+  animation-delay: 0.8s;
+}
+
+.signal-radar-wave.wave-3 {
+  animation-delay: 1.6s;
+}
+
+/* Central glowing beacon dot with active blink / beacon flash */
+.signal-beacon-core {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #FFD166;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 0 6px #FFD166, 0 0 10px var(--beacon-color, #EF476F);
+  z-index: 2;
+  animation: signalCoreFlash 1.2s ease-in-out infinite;
+  will-change: transform, opacity, box-shadow;
+  box-sizing: border-box;
+}
+
+/* Keyframes for breathing focus ring */
+@keyframes signalRingPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.95;
+    box-shadow: 0 0 8px var(--beacon-color, #EF476F);
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.45;
+    box-shadow: 0 0 18px var(--beacon-color, #EF476F);
+  }
+}
+
+/* Keyframes for expanding radar waves */
+@keyframes signalRadarPing {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.9;
+    border-width: 2.2px;
+  }
+  35% {
+    opacity: 0.6;
+  }
+  70% {
+    opacity: 0.2;
+    border-width: 1.2px;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3.2);
+    opacity: 0;
+    border-width: 0.6px;
+  }
+}
+
+/* Keyframes for central beacon core flash */
+@keyframes signalCoreFlash {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 6px #FFD166, 0 0 10px var(--beacon-color, #EF476F);
+  }
+  50% {
+    transform: scale(1.45);
+    opacity: 0.75;
+    box-shadow: 0 0 14px #FFD166, 0 0 22px var(--beacon-color, #EF476F);
+  }
+}
+
+/* Mobile Responsiveness for Signal Beacon */
+@media (max-width: 575.98px) {
+  .signal-beacon-wrapper {
+    width: 20px;
+    height: 20px;
+  }
+  .signal-beacon-core {
+    width: 6.5px;
+    height: 6.5px;
+  }
+}
+
+
