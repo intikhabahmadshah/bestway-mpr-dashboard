@@ -425,7 +425,7 @@ const UploadMppModal = ({ isOpen, onClose, onScheduleUpdated, showToast }) => {
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <FiDatabase size={16} style={{ flexShrink: 0, color: '#118AB2' }} />
             <span>
-              Upload hotay hi tasks, WBS hierarchy, critical path flags aur Gantt chart dates <strong>Aiven Cloud MySQL</strong> database aur portal dono mein update ho jayengi.
+              Upload hotay hi tasks, WBS hierarchy, critical path flags aur Gantt chart dates <strong>Project Database</strong> aur portal dono mein update ho jayengi.
             </span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px dashed var(--border-color)', paddingTop: '6px' }}>

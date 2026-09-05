@@ -60,6 +60,19 @@ const MONTH_NAMES = [
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+// Professional Date Formatter: "25 Sep 2026"
+const formatDateDisplay = (dateStr) => {
+  if (!dateStr) return '—';
+  const parts = String(dateStr).split('-');
+  if (parts.length === 3) {
+    const [y, m, d] = parts;
+    const mIdx = parseInt(m, 10) - 1;
+    const monthShort = MONTH_NAMES[mIdx]?.slice(0, 3) || m;
+    return `${parseInt(d, 10)} ${monthShort} ${y}`;
+  }
+  return dateStr;
+};
+
 const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
   const isDark = theme === 'dark';
 
@@ -522,7 +535,7 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
         </div>
         <div className="strip-item">
           <FiDatabase size={16} className="text-blue" />
-          <span><strong>Live Cloud DB:</strong> Aiven MySQL Synchronized ({allTasks.length} total tasks)</span>
+          <span><strong>Project Database:</strong> Synchronized ({allTasks.length} total activities)</span>
         </div>
       </div>
 
@@ -866,26 +879,37 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
                   maintainAspectRatio: false,
                   interaction: { mode: 'index', intersect: false },
                   plugins: {
+                    datalabels: { display: false },
                     legend: {
                       position: 'top',
-                      labels: { color: isDark ? '#e2e8f0' : '#1e293b', font: { family: 'Poppins', size: 12 } }
+                      labels: { 
+                        color: isDark ? '#f1f5f9' : '#0f172a', 
+                        font: { family: 'Poppins', size: 12, weight: '600' },
+                        usePointStyle: true,
+                        boxWidth: 8
+                      }
                     },
                     tooltip: {
+                      backgroundColor: 'rgba(7, 59, 76, 0.95)',
+                      titleFont: { family: 'Poppins', size: 13, weight: '700' },
+                      bodyFont: { family: 'Poppins', size: 12 },
+                      padding: 12,
+                      cornerRadius: 8,
                       callbacks: {
                         title: (items) => `Day ${items[0].label} (${monthInfo.label})`,
-                        label: (item) => `${item.dataset.label}: ${item.raw} tasks`
+                        label: (item) => ` ${item.dataset.label}: ${item.raw} tasks`
                       }
                     }
                   },
                   scales: {
                     x: {
                       grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
-                      ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 11 } }
+                      ticks: { color: isDark ? '#cbd5e1' : '#475569', font: { family: 'Poppins', size: 11, weight: '500' } }
                     },
                     y: {
                       beginAtZero: true,
                       grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
-                      ticks: { precision: 0, color: isDark ? '#94a3b8' : '#64748b' }
+                      ticks: { precision: 0, color: isDark ? '#cbd5e1' : '#475569', font: { family: 'Poppins', size: 11, weight: '600' } }
                     }
                   }
                 }}
@@ -903,21 +927,53 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
                 <p className="card-subheading">Breakdown by initiation, completion &amp; continuous work</p>
               </div>
             </div>
-            <div style={{ height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ height: '230px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Doughnut 
                 data={lifecycleChartData}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
                   plugins: {
+                    datalabels: { display: false },
                     legend: {
                       position: 'right',
-                      labels: { color: isDark ? '#e2e8f0' : '#1e293b', font: { family: 'Poppins', size: 11 } }
+                      labels: { 
+                        color: isDark ? '#f1f5f9' : '#0f172a', 
+                        font: { family: 'Poppins', size: 12, weight: '600' },
+                        padding: 14,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                      }
+                    },
+                    tooltip: {
+                      backgroundColor: 'rgba(7, 59, 76, 0.95)',
+                      titleFont: { family: 'Poppins', size: 13, weight: '700' },
+                      bodyFont: { family: 'Poppins', size: 12 },
+                      padding: 12,
+                      cornerRadius: 8,
+                      callbacks: {
+                        label: (item) => ` ${item.label}: ${item.raw} activities`
+                      }
                     }
                   },
-                  cutout: '68%'
+                  cutout: '72%'
                 }}
               />
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '32%',
+                transform: 'translate(-50%, -50%)',
+                textAlign: 'center',
+                pointerEvents: 'none'
+              }}>
+                <span style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)', display: 'block', lineHeight: 1 }}>
+                  {monthlyTasks.length}
+                </span>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  Activities
+                </span>
+              </div>
             </div>
           </div>
 
@@ -931,24 +987,42 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
                 <p className="card-subheading">Active tasks grouped by primary project trade</p>
               </div>
             </div>
-            <div style={{ height: '220px', width: '100%' }}>
+            <div style={{ height: '230px', width: '100%' }}>
               <Bar 
                 data={phaseChartData}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
                   plugins: {
-                    legend: { display: false }
+                    datalabels: { display: false },
+                    legend: { display: false },
+                    tooltip: {
+                      backgroundColor: 'rgba(7, 59, 76, 0.95)',
+                      titleFont: { family: 'Poppins', size: 13, weight: '700' },
+                      bodyFont: { family: 'Poppins', size: 12 },
+                      padding: 12,
+                      cornerRadius: 8,
+                      callbacks: {
+                        label: (item) => ` Active Activities: ${item.raw}`
+                      }
+                    }
                   },
                   scales: {
                     x: {
                       grid: { display: false },
-                      ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 11 } }
+                      ticks: { 
+                        color: isDark ? '#f1f5f9' : '#0f172a', 
+                        font: { family: 'Poppins', size: 12, weight: '600' } 
+                      }
                     },
                     y: {
                       beginAtZero: true,
                       grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
-                      ticks: { precision: 0, color: isDark ? '#94a3b8' : '#64748b' }
+                      ticks: { 
+                        precision: 0, 
+                        color: isDark ? '#cbd5e1' : '#475569',
+                        font: { family: 'Poppins', size: 11, weight: '600' }
+                      }
                     }
                   }
                 }}
@@ -974,8 +1048,8 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
                 <tr>
                   <th style={{ width: '90px' }}>WBS</th>
                   <th style={{ width: '380px' }}>Activity Description</th>
-                  <th style={{ width: '110px' }}>Schedule Start</th>
-                  <th style={{ width: '110px' }}>Schedule Finish</th>
+                  <th style={{ width: '130px', minWidth: '130px', whiteSpace: 'nowrap' }}>Schedule Start</th>
+                  <th style={{ width: '130px', minWidth: '130px', whiteSpace: 'nowrap' }}>Schedule Finish</th>
                   <th style={{ width: '90px' }}>Days in Month</th>
                   <th style={{ width: '90px' }}>Total Duration</th>
                   <th style={{ width: '150px' }}>Status in Month</th>
@@ -1001,14 +1075,14 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
                       <td className="name-cell" style={{ paddingLeft: `${14 + Math.min(t.outline_level || 1, 4) * 12}px` }}>
                         <span className="task-name-text">{t.name}</span>
                       </td>
-                      <td className="date-cell">
-                        <span className={`date-tag ${t.startsInMonth ? 'tag-highlight' : ''}`}>
-                          {t.start}
+                      <td className="date-cell" style={{ width: '130px', minWidth: '130px', whiteSpace: 'nowrap' }}>
+                        <span className={`date-tag ${t.startsInMonth ? 'tag-highlight' : ''}`} style={{ whiteSpace: 'nowrap' }}>
+                          {formatDateDisplay(t.start)}
                         </span>
                       </td>
-                      <td className="date-cell">
-                        <span className={`date-tag ${t.finishesInMonth ? 'tag-highlight' : ''}`}>
-                          {t.finish}
+                      <td className="date-cell" style={{ width: '130px', minWidth: '130px', whiteSpace: 'nowrap' }}>
+                        <span className={`date-tag ${t.finishesInMonth ? 'tag-highlight' : ''}`} style={{ whiteSpace: 'nowrap' }}>
+                          {formatDateDisplay(t.finish)}
                         </span>
                       </td>
                       <td className="days-cell font-bold text-teal">{t.monthDuration} days</td>

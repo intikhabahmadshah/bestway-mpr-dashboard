@@ -3658,6 +3658,18 @@ body.is-exporting-single-graph .charts-grid {
   color: #2EC4B6;
 }
 
+.date-cell {
+  white-space: nowrap !important;
+}
+
+.date-tag {
+  display: inline-block;
+  white-space: nowrap !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .tag-highlight {
   background: rgba(46, 196, 182, 0.15);
   color: #2EC4B6;

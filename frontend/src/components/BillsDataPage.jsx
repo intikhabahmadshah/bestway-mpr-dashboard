@@ -185,14 +185,14 @@ const BillsDataPage = ({ onNavigate, theme }) => {
   // Refresh & Sync from Drive Function
   const handleRefreshSync = async () => {
     setIsSyncing(true);
-    setSyncToastMsg('Connecting to Google Drive folder & fetching latest documents...');
+    setSyncToastMsg('Connecting to Document Archive & fetching latest records...');
 
     try {
       const result = await fetchLiveGoogleDriveFiles();
       if (result.files && result.files.length > 0) {
         setFiles(result.files);
         localStorage.setItem('mpr_drive_scanned_files_v2', JSON.stringify(result.files));
-        setSyncToastMsg(`Synced with Google Drive! All ${result.files.length} documents up to date.`);
+        setSyncToastMsg(`Synchronized! All ${result.files.length} documents up to date.`);
       } else {
         setSyncToastMsg(`Document Archive synchronized (${files.length} documents).`);
       }
