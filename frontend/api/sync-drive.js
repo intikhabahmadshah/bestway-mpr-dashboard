@@ -1,29 +1,10 @@
-const https = require('https');
+import fs from 'fs';
+import path from 'path';
 
 const GOOGLE_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai?usp=sharing';
 
-function fetchUrl(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9'
-      },
-      timeout: 15000
-    }, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return resolve(fetchUrl(res.headers.location));
-      }
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
-    }).on('error', reject).on('timeout', () => reject(new Error('Request timed out')));
-  });
-}
-
 function parseFilesFromHtml(html) {
-  if (!html) return [];
+  if (!html || typeof html !== 'string') return [];
 
   const match = html.match(/AF_initDataCallback\(\{key:\s*'ds:4'[\s\S]*?data:([\s\S]*?)\}\);<\/script>/);
   let dataStr = '';
@@ -78,50 +59,70 @@ function parseFilesFromHtml(html) {
   return list;
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
   try {
-    const html = await fetchUrl(GOOGLE_DRIVE_FOLDER_URL);
-    const files = parseFilesFromHtml(html);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
 
-    if (files.length > 0) {
-      return res.status(200).json({
-        success: true,
-        count: files.length,
-        source: 'google_drive_live',
-        updatedAt: new Date().toISOString(),
-        files
-      });
-    } else {
-      const fallbackFiles = require('../src/data/scanned_bills.json');
-      return res.status(200).json({
-        success: true,
-        count: fallbackFiles.length,
-        source: 'cached_fallback',
-        files: fallbackFiles
-      });
+    const driveRes = await fetch(GOOGLE_DRIVE_FOLDER_URL, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9'
+      }
+    });
+    clearTimeout(timeout);
+
+    if (driveRes.ok) {
+      const html = await driveRes.text();
+      const files = parseFilesFromHtml(html);
+      if (files && files.length > 0) {
+        return res.status(200).json({
+          success: true,
+          count: files.length,
+          source: 'google_drive_live',
+          updatedAt: new Date().toISOString(),
+          files
+        });
+      }
     }
   } catch (err) {
-    console.error('Error fetching Google Drive folder:', err);
-    try {
-      const fallbackFiles = require('../src/data/scanned_bills.json');
-      return res.status(200).json({
-        success: true,
-        count: fallbackFiles.length,
-        source: 'cached_fallback_on_error',
-        error: err.message,
-        files: fallbackFiles
-      });
-    } catch (e) {
-      return res.status(500).json({ success: false, error: err.message });
-    }
+    console.warn('Live fetch error in sync-drive, falling back:', err.message);
   }
-};
+
+  // Fallback
+  let fallbackFiles = [];
+  try {
+    const candidates = [
+      path.resolve(process.cwd(), 'src/data/scanned_bills.json'),
+      path.resolve(process.cwd(), 'frontend/src/data/scanned_bills.json')
+    ];
+    for (const cand of candidates) {
+      if (fs.existsSync(cand)) {
+        fallbackFiles = JSON.parse(fs.readFileSync(cand, 'utf8'));
+        break;
+      }
+    }
+  } catch (e) {
+    console.error('Error reading fallback json:', e);
+  }
+
+  return res.status(200).json({
+    success: true,
+    count: fallbackFiles.length,
+    source: 'cached_fallback',
+    updatedAt: new Date().toISOString(),
+    files: fallbackFiles
+  });
+}
