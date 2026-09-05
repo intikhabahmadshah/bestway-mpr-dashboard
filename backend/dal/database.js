@@ -16,15 +16,21 @@ const dbName = process.env.DB_NAME || 'defaultdb';
 
 let pool;
 
+function getPool() {
+    if (!pool) {
+        pool = mysql.createPool({
+            ...dbConfig,
+            database: dbName,
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0
+        });
+    }
+    return pool;
+}
+
 async function initDatabase() {
-    // Create pool with Aiven database selected directly
-    pool = mysql.createPool({
-        ...dbConfig,
-        database: dbName,
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0
-    });
+    const p = getPool();
 
     const createTableQuery = `
         CREATE TABLE IF NOT EXISTS MPR (
@@ -40,19 +46,34 @@ async function initDatabase() {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         );
     `;
-    await pool.query(createTableQuery);
-    console.log('Database connection established and MPR table initialized successfully.');
+    await p.query(createTableQuery);
+
+    const createScheduleTableQuery = `
+        CREATE TABLE IF NOT EXISTS ProjectSchedule (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            project_name VARCHAR(255) DEFAULT 'Bestway Tower Project',
+            project_start VARCHAR(50),
+            project_finish VARCHAR(50),
+            total_tasks INT DEFAULT 0,
+            schedule_json LONGTEXT,
+            file_name VARCHAR(255),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        );
+    `;
+    await p.query(createScheduleTableQuery);
+    console.log('Database connection established: MPR and ProjectSchedule tables initialized successfully.');
 }
 
 async function getAllMPRData() {
-    const [rows] = await pool.query('SELECT * FROM MPR ORDER BY duration ASC');
+    const [rows] = await getPool().query('SELECT * FROM MPR ORDER BY duration ASC');
     return rows;
 }
 
 async function insertMPRData(rows) {
     if (!rows || rows.length === 0) return 0;
     
-    const connection = await pool.getConnection();
+    const connection = await getPool().getConnection();
     try {
         await connection.beginTransaction();
         await connection.query('TRUNCATE TABLE MPR');
@@ -85,11 +106,58 @@ async function insertMPRData(rows) {
 }
 
 async function clearMPRData() {
-    await pool.query('TRUNCATE TABLE MPR');
+    await getPool().query('TRUNCATE TABLE MPR');
 }
 
-function getPool() {
-    return pool;
+async function getProjectSchedule() {
+    const [rows] = await getPool().query('SELECT * FROM ProjectSchedule ORDER BY id DESC LIMIT 1');
+    if (rows && rows.length > 0) {
+        const row = rows[0];
+        try {
+            const parsedData = typeof row.schedule_json === 'string' ? JSON.parse(row.schedule_json) : row.schedule_json;
+            return {
+                id: row.id,
+                project_name: row.project_name,
+                project_start: row.project_start,
+                project_finish: row.project_finish,
+                total_tasks: row.total_tasks,
+                file_name: row.file_name,
+                updated_at: row.updated_at,
+                data: parsedData
+            };
+        } catch (e) {
+            console.error('Error parsing schedule_json from database:', e);
+        }
+    }
+    return null;
+}
+
+async function saveProjectSchedule(scheduleData, fileName = 'Uploaded_Schedule.mpp') {
+    const connection = await getPool().getConnection();
+    try {
+        await connection.beginTransaction();
+        const query = `
+            INSERT INTO ProjectSchedule (
+                project_name, project_start, project_finish, total_tasks, schedule_json, file_name
+            ) VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        const totalTasks = scheduleData.tasks ? scheduleData.tasks.length : (scheduleData.total_tasks || 0);
+        const [result] = await connection.query(query, [
+            scheduleData.project_name || 'Bestway Tower Project',
+            scheduleData.project_start || '2026-01-01',
+            scheduleData.project_finish || '2028-09-16',
+            totalTasks,
+            JSON.stringify(scheduleData),
+            fileName
+        ]);
+        await connection.commit();
+        return result.insertId;
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
 }
 
 module.exports = {
@@ -97,5 +165,8 @@ module.exports = {
     getAllMPRData,
     insertMPRData,
     clearMPRData,
+    getProjectSchedule,
+    saveProjectSchedule,
     getPool
 };
+

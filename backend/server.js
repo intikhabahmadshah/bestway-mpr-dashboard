@@ -6,7 +6,16 @@ const csv = require('csv-parser');
 const path = require('path');
 const fs = require('fs');
 const { Readable } = require('stream');
-const { initDatabase, getAllMPRData, insertMPRData, clearMPRData } = require('./dal/database');
+const os = require('os');
+const { 
+    initDatabase, 
+    getAllMPRData, 
+    insertMPRData, 
+    clearMPRData,
+    getProjectSchedule,
+    saveProjectSchedule 
+} = require('./dal/database');
+const { parseMspdiXml } = require('./utils/mppParser');
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -16,11 +25,18 @@ const port = process.env.SERVER_PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Multer config for file upload (memory storage)
+// Multer config for memory and disk upload
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
+const uploadDir = path.join(os.tmpdir(), 'mpp_uploads');
+if (!fs.existsSync(uploadDir)) {
+    try { fs.mkdirSync(uploadDir, { recursive: true }); } catch (e) {}
+}
+const diskUpload = multer({ dest: uploadDir });
 
 // Initialize database
 initDatabase().catch(err => {
@@ -131,6 +147,133 @@ app.delete('/api/mpr', async (req, res) => {
     } catch (error) {
         console.error('Error clearing MPR data:', error);
         res.status(500).json({ success: false, error: 'Failed to clear MPR data' });
+    }
+});
+
+// Schedule endpoints
+app.get('/api/schedule', async (req, res) => {
+    try {
+        const dbSchedule = await getProjectSchedule();
+        if (dbSchedule && dbSchedule.data && Array.isArray(dbSchedule.data.tasks) && dbSchedule.data.tasks.length > 0) {
+            return res.json({
+                success: true,
+                source: 'aiven_database',
+                updated_at: dbSchedule.updated_at,
+                file_name: dbSchedule.file_name,
+                data: dbSchedule.data
+            });
+        }
+        
+        // Fallback to local JSON file
+        const jsonPath = path.join(__dirname, '../frontend/src/data/schedule_tasks.json');
+        if (fs.existsSync(jsonPath)) {
+            const fallbackData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+            return res.json({
+                success: true,
+                source: 'bundled_fallback',
+                data: fallbackData
+            });
+        }
+        res.status(404).json({ success: false, error: 'Schedule data not found' });
+    } catch (error) {
+        console.error('Error fetching schedule data:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch schedule data' });
+    }
+});
+
+app.post('/api/schedule/upload-mpp', diskUpload.single('file'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, error: 'No file uploaded' });
+    }
+
+    const uploadedPath = req.file.path;
+    const originalName = req.file.originalname || 'Project_Schedule.mpp';
+    const ext = path.extname(originalName).toLowerCase();
+    let xmlContent = '';
+    let tempXmlPath = null;
+
+    try {
+        if (ext === '.mpp') {
+            // Convert MPP to XML via mppjs
+            const mppjs = await import('@byteink/mppjs');
+            tempXmlPath = path.join(uploadDir, `converted_${Date.now()}.xml`);
+            await mppjs.convert(uploadedPath, tempXmlPath);
+            xmlContent = fs.readFileSync(tempXmlPath, 'utf8');
+        } else if (ext === '.xml') {
+            xmlContent = fs.readFileSync(uploadedPath, 'utf8');
+        } else if (ext === '.json') {
+            const rawJson = fs.readFileSync(uploadedPath, 'utf8');
+            const parsedSchedule = JSON.parse(rawJson);
+            await saveProjectSchedule(parsedSchedule, originalName);
+            const jsonPath = path.join(__dirname, '../frontend/src/data/schedule_tasks.json');
+            try { fs.writeFileSync(jsonPath, JSON.stringify(parsedSchedule, null, 2), 'utf8'); } catch (e) {}
+            return res.json({
+                success: true,
+                count: parsedSchedule.tasks ? parsedSchedule.tasks.length : 0,
+                message: 'Schedule JSON saved to database and portal successfully!',
+                data: parsedSchedule
+            });
+        } else {
+            return res.status(400).json({ success: false, error: 'Unsupported file format. Please upload a .mpp or .xml file.' });
+        }
+
+        // Parse XML
+        const scheduleData = parseMspdiXml(xmlContent);
+
+        // Save to Database
+        await saveProjectSchedule(scheduleData, originalName);
+
+        // Update local JSON file in frontend/src/data
+        const jsonPath = path.join(__dirname, '../frontend/src/data/schedule_tasks.json');
+        try {
+            fs.writeFileSync(jsonPath, JSON.stringify(scheduleData, null, 2), 'utf8');
+        } catch (e) {
+            console.warn('Could not overwrite frontend schedule_tasks.json:', e.message);
+        }
+
+        return res.json({
+            success: true,
+            count: scheduleData.tasks.length,
+            fileName: originalName,
+            message: `Successfully parsed ${scheduleData.tasks.length} activities from ${originalName} and updated Aiven Database & Portal!`,
+            data: scheduleData
+        });
+
+    } catch (error) {
+        console.error('Error processing MPP/XML file:', error);
+        return res.status(500).json({ 
+            success: false, 
+            error: `Failed to process schedule file: ${error.message}` 
+        });
+    } finally {
+        try { if (fs.existsSync(uploadedPath)) fs.unlinkSync(uploadedPath); } catch (e) {}
+        try { if (tempXmlPath && fs.existsSync(tempXmlPath)) fs.unlinkSync(tempXmlPath); } catch (e) {}
+    }
+});
+
+app.post('/api/schedule', async (req, res) => {
+    try {
+        const { scheduleData, fileName } = req.body || {};
+        if (!scheduleData || !scheduleData.tasks || !Array.isArray(scheduleData.tasks)) {
+            return res.status(400).json({ success: false, error: 'Invalid schedule data format' });
+        }
+
+        await saveProjectSchedule(scheduleData, fileName || 'Manual_Update.mpp');
+
+        // Update local JSON file
+        const jsonPath = path.join(__dirname, '../frontend/src/data/schedule_tasks.json');
+        try {
+            fs.writeFileSync(jsonPath, JSON.stringify(scheduleData, null, 2), 'utf8');
+        } catch (e) {}
+
+        return res.json({
+            success: true,
+            count: scheduleData.tasks.length,
+            message: 'Project Activity Schedule updated successfully in Database!'
+        });
+    } catch (error) {
+        console.error('Error updating schedule:', error);
+        return res.status(500).json({ success: false, error: error.message });
     }
 });
 

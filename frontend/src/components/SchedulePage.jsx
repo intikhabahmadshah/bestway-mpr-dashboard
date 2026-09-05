@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   FiCalendar, 
   FiClock, 
@@ -15,9 +15,11 @@ import {
   FiList, 
   FiZap,
   FiZoomIn,
-  FiZoomOut
+  FiZoomOut,
+  FiUploadCloud
 } from 'react-icons/fi';
 import scheduleData from '../data/schedule_tasks.json';
+import UploadMppModal from './UploadMppModal';
 
 const SchedulePage = ({ onNavigate, theme, showToast }) => {
   const isDark = theme === 'dark';
@@ -29,10 +31,39 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
   const [collapsedWBS, setCollapsedWBS] = useState(new Set());
   const [hoveredTask, setHoveredTask] = useState(null);
   const [zoomScale, setZoomScale] = useState(130); // px per month (90, 130, 190, 260)
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
-  const tasks = useMemo(() => scheduleData.tasks || [], []);
-  const projectStart = new Date(scheduleData.project_start || '2026-01-01');
-  const projectFinish = new Date(scheduleData.project_finish || '2028-09-16');
+  // Active Schedule State (initialized from cache or bundled JSON, updated via DB / MPP upload)
+  const [activeSchedule, setActiveSchedule] = useState(() => {
+    const cached = localStorage.getItem('mpr_project_schedule_cache_v1');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed && Array.isArray(parsed.tasks) && parsed.tasks.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return scheduleData;
+  });
+
+  // Auto-fetch latest schedule from Database on mount
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/schedule')
+      .then(r => r.json())
+      .then(res => {
+        if (isMounted && res.success && res.data && Array.isArray(res.data.tasks) && res.data.tasks.length > 0) {
+          setActiveSchedule(res.data);
+          localStorage.setItem('mpr_project_schedule_cache_v1', JSON.stringify(res.data));
+        }
+      })
+      .catch(err => console.warn('Could not fetch schedule from database:', err));
+
+    return () => { isMounted = false; };
+  }, []);
+
+  const tasks = useMemo(() => activeSchedule.tasks || [], [activeSchedule]);
+  const projectStart = new Date(activeSchedule.project_start || '2026-01-01');
+  const projectFinish = new Date(activeSchedule.project_finish || '2028-09-16');
   const totalProjectDays = Math.max(1, Math.round((projectFinish - projectStart) / (1000 * 60 * 60 * 24)));
 
   // Generate Month Columns for Gantt Timeline (Jan 2026 to Oct 2028)
@@ -192,23 +223,44 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
               MS Project 2026-2028
             </span>
             <span className="phase-pill" style={{ background: 'rgba(17, 138, 178, 0.2)', color: '#118AB2', border: '1px solid rgba(17, 138, 178, 0.4)' }}>
-              <FiDatabase size={12} /> Live Database Sync Active
+              <FiDatabase size={12} /> Live Database Sync Active ({tasks.length} Activities)
             </span>
           </div>
-          <h1 className="schedule-title">Project Activity Schedule (WBS & Gantt)</h1>
+          <h1 className="schedule-title">Project Activity Schedule (WBS &amp; Gantt)</h1>
           <p className="schedule-subtitle">
             Complete construction activity breakdown with horizontal scrolling calendar timeline, critical path analysis, and full task labels.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
           <button 
             className="btn-confirm"
+            onClick={() => setShowUploadModal(true)}
+            style={{ 
+              background: 'linear-gradient(135deg, #2EC4B6 0%, #118AB2 100%)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontWeight: 700
+            }}
+            title="Upload Microsoft Project (.MPP or .XML) file to update database and portal"
+          >
+            <FiUploadCloud size={18} /> Upload .MPP
+          </button>
+
+          <button 
+            className="btn-shortcut"
             onClick={handleExportCSV}
-            style={{ background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)' }}
+            style={{ 
+              padding: '9px 16px',
+              fontSize: '0.84rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
             title="Download Schedule as CSV Spreadsheet"
           >
-            <FiDownload size={16} /> Export CSV
+            <FiDownload size={15} /> Export CSV
           </button>
         </div>
       </div>
@@ -225,22 +277,30 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
         <div className="kpi-card blue">
           <div className="kpi-icon blue"><FiClock /></div>
           <div className="kpi-label">Total Duration</div>
-          <div className="kpi-value">990 Days</div>
-          <div className="kpi-sub"><span>01 Jan 2026 → 16 Sep 2028</span></div>
+          <div className="kpi-value">{totalProjectDays} Days</div>
+          <div className="kpi-sub">
+            <span>
+              {projectStart.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} → {projectFinish.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+            </span>
+          </div>
         </div>
 
         <div className="kpi-card green">
           <div className="kpi-icon green"><FiCheckCircle /></div>
           <div className="kpi-label">Project Start</div>
-          <div className="kpi-value" style={{ fontSize: '1.4rem' }}>01 Jan 2026</div>
-          <div className="kpi-sub"><span>Mobilization & Shoring</span></div>
+          <div className="kpi-value" style={{ fontSize: '1.4rem' }}>
+            {projectStart.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </div>
+          <div className="kpi-sub"><span>Mobilization &amp; Shoring</span></div>
         </div>
 
         <div className="kpi-card amber">
           <div className="kpi-icon amber"><FiCalendar /></div>
           <div className="kpi-label">Target Completion</div>
-          <div className="kpi-value" style={{ fontSize: '1.4rem' }}>16 Sep 2028</div>
-          <div className="kpi-sub"><span>Handover & Finishing</span></div>
+          <div className="kpi-value" style={{ fontSize: '1.4rem' }}>
+            {projectFinish.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </div>
+          <div className="kpi-sub"><span>Handover &amp; Finishing</span></div>
         </div>
 
         <div className="kpi-card red">
@@ -539,6 +599,17 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
           </div>
         )}
       </div>
+
+      {/* Upload MS Project (.MPP / .XML) Modal */}
+      <UploadMppModal 
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onScheduleUpdated={(newSchedule) => {
+          setActiveSchedule(newSchedule);
+          localStorage.setItem('mpr_project_schedule_cache_v1', JSON.stringify(newSchedule));
+        }}
+        showToast={showToast}
+      />
     </div>
   );
 };
