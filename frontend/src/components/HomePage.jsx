@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiBarChart2, FiFileText, FiArrowRight, FiLayers, FiCheckCircle, FiClock, FiGrid, FiDatabase, FiCalendar } from 'react-icons/fi';
+import { FiBarChart2, FiFileText, FiArrowRight, FiLayers, FiCheckCircle, FiClock, FiGrid, FiDatabase, FiCalendar, FiEye } from 'react-icons/fi';
 
 const HomePage = ({ onNavigate, theme }) => {
   const isDark = theme === 'dark';
@@ -133,6 +133,48 @@ const HomePage = ({ onNavigate, theme }) => {
               </div>
               <button className="btn-portal-action cyan" style={{ background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)' }}>
                 Open Schedule <FiArrowRight />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 4: LOOK AT SCHEDULE */}
+        <section className="home-section">
+          <div className="section-header">
+            <div className="section-icon-badge cyan">
+              <FiEye />
+            </div>
+            <div>
+              <h2 className="section-title">Look at Schedule</h2>
+              <p className="section-desc">Monthly look-ahead, daily Gantt scheduling &amp; workload intensity</p>
+            </div>
+          </div>
+
+          <div className="portal-cards-grid">
+            <div 
+              className="portal-card primary-card"
+              onClick={() => onNavigate('look_at_schedule')}
+              style={{ borderTop: '3px solid #2EC4B6' }}
+            >
+              <div className="portal-card-header">
+                <div className="card-icon cyan">
+                  <FiEye />
+                </div>
+                <span className="status-tag active" style={{ background: 'rgba(46, 196, 182, 0.18)', color: '#2EC4B6' }}>
+                  Monthly Focus
+                </span>
+              </div>
+              <h3 className="card-title">Monthly Look-Ahead</h3>
+              <p className="card-description">
+                Day-by-day activity tracking from month start to month end. Features daily-resolution Gantt chart,
+                concurrency workload density analysis, and critical path risk indicators.
+              </p>
+              <div className="card-meta">
+                <span><FiCheckCircle style={{ color: '#2EC4B6' }} /> Day 1 to 30/31 Daily Grid</span>
+                <span><FiClock style={{ color: '#FFD166' }} /> Workload Density &amp; Peak Days</span>
+              </div>
+              <button className="btn-portal-action cyan">
+                Open Look at Schedule <FiArrowRight />
               </button>
             </div>
           </div>

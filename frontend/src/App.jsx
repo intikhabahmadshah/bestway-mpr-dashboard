@@ -7,6 +7,7 @@ import Header from './components/Header';
 import HomePage from './components/HomePage';
 import BillsDataPage from './components/BillsDataPage';
 import SchedulePage from './components/SchedulePage';
+import LookAtSchedulePage from './components/LookAtSchedulePage';
 import ExportDashboardModal from './components/ExportDashboardModal';
 import KPICards from './components/KPICards';
 import ProgressChart from './components/ProgressChart';
@@ -52,7 +53,7 @@ function App() {
 
   const [currentView, setCurrentView] = useState(() => {
     const hash = window.location.hash.replace('#', '');
-    if (['home', 'grey_structure', 'bills_data', 'schedule'].includes(hash)) return hash;
+    if (['home', 'grey_structure', 'bills_data', 'schedule', 'look_at_schedule'].includes(hash)) return hash;
     return 'home';
   });
 
@@ -65,7 +66,7 @@ function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      if (['home', 'grey_structure', 'bills_data', 'schedule'].includes(hash)) {
+      if (['home', 'grey_structure', 'bills_data', 'schedule', 'look_at_schedule'].includes(hash)) {
         setCurrentView(hash);
       }
     };
@@ -202,6 +203,10 @@ function App() {
 
         {currentView === 'schedule' && (
           <SchedulePage onNavigate={navigateTo} theme={theme} showToast={showToast} />
+        )}
+
+        {currentView === 'look_at_schedule' && (
+          <LookAtSchedulePage onNavigate={navigateTo} theme={theme} showToast={showToast} />
         )}
 
         {currentView === 'grey_structure' && (
