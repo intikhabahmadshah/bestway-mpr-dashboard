@@ -54,17 +54,21 @@ const MONTH_NAMES = [
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-// Professional Date Formatter: "25 Sep 2026"
-const formatDateDisplay = (dateStr) => {
-  if (!dateStr) return '—';
-  const parts = String(dateStr).split('-');
+// Standard Date Formatter: "DD-MM-YYYY"
+const formatDateDisplay = (dateVal) => {
+  if (!dateVal) return '—';
+  if (dateVal instanceof Date) {
+    const d = String(dateVal.getDate()).padStart(2, '0');
+    const m = String(dateVal.getMonth() + 1).padStart(2, '0');
+    const y = dateVal.getFullYear();
+    return `${d}-${m}-${y}`;
+  }
+  const parts = String(dateVal).split('T')[0].split('-');
   if (parts.length === 3) {
     const [y, m, d] = parts;
-    const mIdx = parseInt(m, 10) - 1;
-    const monthShort = MONTH_NAMES[mIdx]?.slice(0, 3) || m;
-    return `${parseInt(d, 10)} ${monthShort} ${y}`;
+    return `${d.padStart(2, '0')}-${m.padStart(2, '0')}-${y}`;
   }
-  return dateStr;
+  return String(dateVal);
 };
 
 const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
@@ -482,7 +486,7 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
       <div className="lookahead-date-strip">
         <div className="strip-item">
           <FiCalendar size={16} className="text-teal" />
-          <span><strong>Window:</strong> {monthInfo.startIso} to {monthInfo.endIso} ({monthInfo.totalDays} Calendar Days)</span>
+          <span><strong>Window:</strong> {formatDateDisplay(monthInfo.startIso)} to {formatDateDisplay(monthInfo.endIso)} ({monthInfo.totalDays} Calendar Days)</span>
         </div>
         <div className="strip-item">
           <FiActivity size={16} className="text-cyan" />
@@ -690,7 +694,7 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
                   <div className="task-col-header" style={{ width: '360px', minWidth: '360px' }}>
                     Activity Name &amp; WBS
                   </div>
-                  <div className="meta-col-header" style={{ width: '130px', minWidth: '130px' }}>
+                  <div className="meta-col-header" style={{ width: '190px', minWidth: '190px' }}>
                     Dates
                   </div>
                   <div className="meta-col-header" style={{ width: '85px', minWidth: '85px' }}>
@@ -744,8 +748,10 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
                         </div>
 
                         {/* Schedule Dates Cell */}
-                        <div className="task-cell-dates" style={{ width: '130px', minWidth: '130px' }}>
-                          <span className="date-badge">{t.start?.slice(5)} → {t.finish?.slice(5)}</span>
+                        <div className="task-cell-dates" style={{ width: '190px', minWidth: '190px' }}>
+                          <span className="date-badge" style={{ whiteSpace: 'nowrap', fontSize: '0.73rem', fontWeight: 600 }}>
+                            {formatDateDisplay(t.start)} <span style={{ color: 'var(--text-muted)', margin: '0 2px' }}>→</span> {formatDateDisplay(t.finish)}
+                          </span>
                         </div>
 
                         {/* Month Days Cell */}

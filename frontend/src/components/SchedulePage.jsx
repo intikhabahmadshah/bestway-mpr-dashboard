@@ -21,6 +21,23 @@ import {
 import scheduleData from '../data/schedule_tasks.json';
 import UploadMppModal from './UploadMppModal';
 
+// Standard Date Formatter: "DD-MM-YYYY"
+const formatDateDDMMYYYY = (dateVal) => {
+  if (!dateVal) return '—';
+  if (dateVal instanceof Date) {
+    const d = String(dateVal.getDate()).padStart(2, '0');
+    const m = String(dateVal.getMonth() + 1).padStart(2, '0');
+    const y = dateVal.getFullYear();
+    return `${d}-${m}-${y}`;
+  }
+  const parts = String(dateVal).split('T')[0].split('-');
+  if (parts.length === 3) {
+    const [y, m, d] = parts;
+    return `${d.padStart(2, '0')}-${m.padStart(2, '0')}-${y}`;
+  }
+  return String(dateVal);
+};
+
 const SchedulePage = ({ onNavigate, theme, showToast }) => {
   const isDark = theme === 'dark';
 
@@ -303,7 +320,7 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
           <div className="kpi-value">{totalProjectDays} Days</div>
           <div className="kpi-sub">
             <span>
-              {projectStart.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} → {projectFinish.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+              {formatDateDDMMYYYY(projectStart)} → {formatDateDDMMYYYY(projectFinish)}
             </span>
           </div>
         </div>
@@ -312,7 +329,7 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
           <div className="kpi-icon green"><FiCheckCircle /></div>
           <div className="kpi-label">Project Start</div>
           <div className="kpi-value" style={{ fontSize: '1.4rem' }}>
-            {projectStart.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+            {formatDateDDMMYYYY(projectStart)}
           </div>
           <div className="kpi-sub"><span>Mobilization &amp; Shoring</span></div>
         </div>
@@ -321,7 +338,7 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
           <div className="kpi-icon amber"><FiCalendar /></div>
           <div className="kpi-label">Target Completion</div>
           <div className="kpi-value" style={{ fontSize: '1.4rem' }}>
-            {projectFinish.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+            {formatDateDDMMYYYY(projectFinish)}
           </div>
           <div className="kpi-sub"><span>Handover &amp; Finishing</span></div>
         </div>
@@ -528,8 +545,8 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
                           </div>
                         </td>
                         <td style={{ textAlign: 'center', fontWeight: 600 }}>{t.duration_days}</td>
-                        <td style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{t.start || '—'}</td>
-                        <td style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{t.finish || '—'}</td>
+                        <td style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{formatDateDDMMYYYY(t.start)}</td>
+                        <td style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{formatDateDDMMYYYY(t.finish)}</td>
                         <td style={{ textAlign: 'center', fontWeight: 700 }}>
                           <span style={{ color: t.percent_complete === 100 ? '#2EC4B6' : 'var(--text-primary)' }}>
                             {t.percent_complete}%
