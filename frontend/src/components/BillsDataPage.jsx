@@ -257,6 +257,20 @@ const BillsDataPage = ({ onNavigate, theme }) => {
     );
   });
 
+  // Calculate the latest recording date timestamp among all documents to mark latest uploads
+  const parseDateToTime = (dStr) => {
+    if (!dStr) return 0;
+    const parts = dStr.split('-').map(Number);
+    if (parts.length === 3) {
+      return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+    }
+    return 0;
+  };
+
+  const maxTimestamp = files.length > 0
+    ? Math.max(...files.map(f => parseDateToTime(f.recordingDate)))
+    : 0;
+
   return (
     <div className="bills-page-container">
       {/* Top Navigation & Action Bar */}
@@ -271,7 +285,7 @@ const BillsDataPage = ({ onNavigate, theme }) => {
             onClick={handleRefreshSync}
             disabled={isSyncing}
             style={{ background: 'linear-gradient(135deg, #2EC4B6 0%, #118AB2 100%)' }}
-            title="Refresh &amp; Sync latest files from Document Archive"
+            title="Refresh & Sync latest files from Document Archive"
           >
             <FiRefreshCw className={isSyncing ? 'spinner' : ''} size={16} />
             {isSyncing ? 'Syncing...' : 'Refresh Sync'}
@@ -341,16 +355,16 @@ const BillsDataPage = ({ onNavigate, theme }) => {
       </div>
 
       {/* Files Repository Data Table */}
-      <div className="table-card">
+      <div className="table-card bills-table-card">
         <div className="table-wrapper">
-          <table className="data-table">
+          <table className="data-table bills-data-table">
             <thead>
               <tr>
-                <th style={{ width: '50px' }}>#</th>
-                <th style={{ width: '150px' }}>Recording Date</th>
-                <th>Subject</th>
-                <th style={{ width: '110px' }}>Size</th>
-                <th style={{ width: '200px', textAlign: 'center' }}>Actions</th>
+                <th className="col-index">#</th>
+                <th className="col-date">Recording Date</th>
+                <th className="col-subject">Subject</th>
+                <th className="col-size">Size</th>
+                <th className="col-actions">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -365,37 +379,56 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                   // Direct PDF preview & download URLs
                   const previewUrl = `https://drive.google.com/file/d/${item.fileId}/preview`;
                   const downloadUrl = `https://drive.google.com/uc?export=download&id=${item.fileId}`;
+                  const fileTimestamp = parseDateToTime(item.recordingDate);
+                  const isLatest = maxTimestamp > 0 && fileTimestamp === maxTimestamp;
 
                   return (
-                    <tr key={item.fileId || idx}>
-                      <td style={{ fontWeight: 700 }}>{idx + 1}</td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#2EC4B6', fontWeight: 700 }}>
-                          <FiCalendar size={14} />
-                          <span>{item.recordingDate}</span>
+                    <tr key={item.fileId || idx} className={isLatest ? 'row-latest-bill' : ''}>
+                      <td className="col-index" style={{ fontWeight: 700 }}>{idx + 1}</td>
+                      <td className="col-date">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#2EC4B6', fontWeight: 700 }}>
+                            <FiCalendar size={14} />
+                            <span>{item.recordingDate}</span>
+                          </div>
+                          {isLatest && (
+                            <span className="bill-new-badge" title="Latest Uploaded Document">
+                              <span className="bill-new-beacon">
+                                <span className="bill-new-beacon-wave"></span>
+                                <span className="bill-new-beacon-dot"></span>
+                              </span>
+                              <span className="bill-new-text">NEW</span>
+                            </span>
+                          )}
                         </div>
                       </td>
-                      <td>
+                      <td className="col-subject">
                         <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.92rem' }}>
                           {item.subject}
                         </div>
                       </td>
-                      <td>
+                      <td className="col-size">
                         <span className="chart-card-badge" style={{ background: 'rgba(46, 196, 182, 0.15)', color: '#118AB2', border: '1px solid rgba(46, 196, 182, 0.35)' }}>
                           {item.fileSize || 'PDF'}
                         </span>
                       </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <td className="col-actions">
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
                           {/* Preview Button */}
                           <button
                             className="btn-shortcut"
                             style={{ 
-                              padding: '7px 16px', 
+                              padding: '7px 14px', 
                               fontSize: '0.8rem', 
+                              fontWeight: 600,
                               background: 'rgba(46, 196, 182, 0.18)', 
                               color: '#2EC4B6', 
-                              border: '1px solid rgba(46, 196, 182, 0.4)' 
+                              border: '1px solid rgba(46, 196, 182, 0.4)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              whiteSpace: 'nowrap',
+                              cursor: 'pointer'
                             }}
                             onClick={() => setPreviewModalFile({ ...item, previewUrl })}
                             title="Preview PDF Document in Portal Reader"
@@ -410,13 +443,18 @@ const BillsDataPage = ({ onNavigate, theme }) => {
                             rel="noopener noreferrer"
                             className="btn-confirm"
                             style={{ 
-                              padding: '7px 16px', 
+                              padding: '7px 14px', 
                               fontSize: '0.8rem', 
+                              fontWeight: 600,
                               textDecoration: 'none', 
                               background: 'linear-gradient(135deg, #118AB2 0%, #073B4C 100%)', 
                               color: '#ffffff', 
                               borderRadius: '8px', 
-                              boxShadow: 'none' 
+                              boxShadow: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              whiteSpace: 'nowrap'
                             }}
                             title="Direct Download PDF Document"
                           >
