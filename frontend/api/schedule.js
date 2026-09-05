@@ -35,8 +35,27 @@ function parseDurationDays(durationStr) {
     const minutes = parseFloat(match[2] || 0);
     return Math.round(((hours + (minutes / 60)) / 8) * 10) / 10;
   }
-  const num = parseFloat(durationStr);
-  return isNaN(num) ? 0 : num;
+}
+
+function renumberScheduleTasks(tasks) {
+  if (!Array.isArray(tasks)) return [];
+  return tasks.map((t, idx) => {
+    let wbs = t.wbs;
+    if (wbs) {
+      const parts = String(wbs).split('.');
+      const first = parseInt(parts[0], 10);
+      if (!isNaN(first) && first >= 2) {
+        parts[0] = String(first - 1);
+        wbs = parts.join('.');
+      }
+    }
+    return {
+      ...t,
+      id: idx + 1,
+      wbs: wbs || String(idx + 1),
+      outline_number: wbs || String(idx + 1)
+    };
+  });
 }
 
 function parseMspdiXml(xmlString) {
@@ -124,12 +143,14 @@ function parseMspdiXml(xmlString) {
   if (!projectStart) projectStart = filteredTasks[0]?.start || '2026-01-01';
   if (!projectFinish) projectFinish = filteredTasks[filteredTasks.length - 1]?.finish || '2028-09-16';
 
+  const renumberedTasks = renumberScheduleTasks(filteredTasks);
+
   return {
     project_name: proj.Title || proj.Name || 'Bestway Tower Project',
     project_start: projectStart,
     project_finish: projectFinish,
-    total_tasks: filteredTasks.length,
-    tasks: filteredTasks
+    total_tasks: renumberedTasks.length,
+    tasks: renumberedTasks
   };
 }
 
@@ -150,7 +171,7 @@ export default async function handler(req, res) {
   try {
     const p = getPool();
 
-    // Ensure ProjectSchedule table exists in Aiven MySQL
+    // Ensure ProjectSchedule table exists in Database
     await p.query(`
       CREATE TABLE IF NOT EXISTS ProjectSchedule (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -172,10 +193,11 @@ export default async function handler(req, res) {
         try {
           const parsed = typeof row.schedule_json === 'string' ? JSON.parse(row.schedule_json) : row.schedule_json;
           if (parsed && Array.isArray(parsed.tasks)) {
-            parsed.tasks = parsed.tasks.filter(t => {
+            const filtered = parsed.tasks.filter(t => {
               const name = (t.name || '').trim().toLowerCase();
               return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
             });
+            parsed.tasks = renumberScheduleTasks(filtered);
             parsed.total_tasks = parsed.tasks.length;
           }
           return res.status(200).json({
@@ -201,10 +223,11 @@ export default async function handler(req, res) {
           if (fs.existsSync(c)) {
             fallbackData = JSON.parse(fs.readFileSync(c, 'utf8'));
             if (fallbackData && Array.isArray(fallbackData.tasks)) {
-              fallbackData.tasks = fallbackData.tasks.filter(t => {
+              const filtered = fallbackData.tasks.filter(t => {
                 const name = (t.name || '').trim().toLowerCase();
                 return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
               });
+              fallbackData.tasks = renumberScheduleTasks(filtered);
               fallbackData.total_tasks = fallbackData.tasks.length;
             }
             break;
@@ -292,13 +315,15 @@ export default async function handler(req, res) {
         });
       }
 
-      // Ensure filtered
-      scheduleData.tasks = scheduleData.tasks.filter(t => {
+      // Ensure filtered and renumbered sequentially from 1
+      const filtered = scheduleData.tasks.filter(t => {
         const name = (t.name || '').trim().toLowerCase();
         return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
       });
-      const totalTasks = scheduleData.tasks.length;
-      scheduleData.total_tasks = totalTasks;
+      const renumbered = renumberScheduleTasks(filtered);
+      scheduleData.tasks = renumbered;
+      scheduleData.total_tasks = renumbered.length;
+      const totalTasks = renumbered.length;
 
       const connection = await p.getConnection();
       try {

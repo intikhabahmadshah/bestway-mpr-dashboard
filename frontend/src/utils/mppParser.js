@@ -105,11 +105,30 @@ export function parseMspdiXml(xmlString) {
   if (!projectStart) projectStart = filteredTasks[0]?.start || '2026-01-01';
   if (!projectFinish) projectFinish = filteredTasks[filteredTasks.length - 1]?.finish || '2028-09-16';
 
+  // Renumber tasks starting sequentially from 1 and shift WBS if root was removed
+  const renumberedTasks = filteredTasks.map((t, idx) => {
+    let wbs = t.wbs;
+    if (wbs) {
+      const parts = String(wbs).split('.');
+      const first = parseInt(parts[0], 10);
+      if (!isNaN(first) && first >= 2) {
+        parts[0] = String(first - 1);
+        wbs = parts.join('.');
+      }
+    }
+    return {
+      ...t,
+      id: idx + 1,
+      wbs: wbs || String(idx + 1),
+      outline_number: wbs || String(idx + 1)
+    };
+  });
+
   return {
     project_name: proj.Title || proj.Name || 'Bestway Tower Project',
     project_start: projectStart,
     project_finish: projectFinish,
-    total_tasks: filteredTasks.length,
-    tasks: filteredTasks
+    total_tasks: renumberedTasks.length,
+    tasks: renumberedTasks
   };
 }

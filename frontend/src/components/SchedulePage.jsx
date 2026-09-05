@@ -63,9 +63,26 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
 
   const tasks = useMemo(() => {
     const raw = activeSchedule.tasks || [];
-    return raw.filter(t => {
+    const filtered = raw.filter(t => {
       const name = (t.name || '').trim().toLowerCase();
       return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
+    });
+    return filtered.map((t, idx) => {
+      let wbs = t.wbs;
+      if (wbs) {
+        const parts = String(wbs).split('.');
+        const first = parseInt(parts[0], 10);
+        if (!isNaN(first) && first >= 2) {
+          parts[0] = String(first - 1);
+          wbs = parts.join('.');
+        }
+      }
+      return {
+        ...t,
+        id: idx + 1,
+        wbs: wbs || String(idx + 1),
+        outline_number: wbs || String(idx + 1)
+      };
     });
   }, [activeSchedule]);
   const projectStart = new Date(activeSchedule.project_start || '2026-01-01');
@@ -141,9 +158,9 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
 
       // Phase Filter
       if (selectedPhase !== 'ALL') {
-        if (selectedPhase === 'SHORING' && !task.wbs.startsWith('2')) return false;
-        if (selectedPhase === 'GREY' && !task.wbs.startsWith('3')) return false;
-        if (selectedPhase === 'OTHER' && (task.wbs.startsWith('2') || task.wbs.startsWith('3'))) return false;
+        if (selectedPhase === 'SHORING' && !task.wbs.startsWith('1')) return false;
+        if (selectedPhase === 'GREY' && !task.wbs.startsWith('2')) return false;
+        if (selectedPhase === 'OTHER' && (task.wbs.startsWith('1') || task.wbs.startsWith('2'))) return false;
       }
 
       // Filter Type

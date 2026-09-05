@@ -113,9 +113,26 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
 
   const allTasks = useMemo(() => {
     const raw = activeSchedule.tasks || [];
-    return raw.filter(t => {
+    const filtered = raw.filter(t => {
       const name = (t.name || '').trim().toLowerCase();
       return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
+    });
+    return filtered.map((t, idx) => {
+      let wbs = t.wbs;
+      if (wbs) {
+        const parts = String(wbs).split('.');
+        const first = parseInt(parts[0], 10);
+        if (!isNaN(first) && first >= 2) {
+          parts[0] = String(first - 1);
+          wbs = parts.join('.');
+        }
+      }
+      return {
+        ...t,
+        id: idx + 1,
+        wbs: wbs || String(idx + 1),
+        outline_number: wbs || String(idx + 1)
+      };
     });
   }, [activeSchedule]);
 
