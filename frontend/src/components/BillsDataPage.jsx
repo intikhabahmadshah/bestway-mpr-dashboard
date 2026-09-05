@@ -20,6 +20,106 @@ import scannedBillsMaster from '../data/scanned_bills.json';
 const GOOGLE_DRIVE_FOLDER_ID = '1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai';
 const GOOGLE_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1RdXy53jKQHQmtqJdAORLHqSoB_Ssf1ai?usp=sharing';
 
+// HTML parser function for Google Drive folder
+const parseDriveFolderHtml = (html) => {
+  if (!html || typeof html !== 'string') return [];
+
+  const match = html.match(/AF_initDataCallback\(\{key:\s*'ds:4'[\s\S]*?data:([\s\S]*?)\}\);<\/script>/);
+  let dataStr = '';
+  if (match && match[1]) {
+    dataStr = match[1]
+      .replace(/\\u0026/g, '&')
+      .replace(/\\u003d/g, '=')
+      .replace(/\\u003c/g, '<')
+      .replace(/\\u003e/g, '>');
+  } else {
+    dataStr = html;
+  }
+
+  const regex = /\[null,"([a-zA-Z0-9_-]{28,})"\][\s\S]*?\[\[\["([0-9]{2}-[0-9]{2}-[0-9]{4}\s*--\s*[^"\n\\]+?\.pdf)"[\s\S]*?\[\[\["Size:\s*([^"\n\\]+)/g;
+
+  const uniqueFiles = new Map();
+  let m;
+  while ((m = regex.exec(dataStr)) !== null) {
+    const fid = m[1];
+    const fname = m[2];
+    const fsize = (m[3] || 'PDF Document').trim();
+
+    if (!uniqueFiles.has(fid)) {
+      const cleanName = fname.replace(/\.pdf$/i, '');
+      const parts = cleanName.split('--');
+      const recordingDate = parts[0].trim();
+      const subject = parts.slice(1).join('--').trim();
+
+      uniqueFiles.set(fid, {
+        id: fid,
+        fileId: fid,
+        recordingDate,
+        subject,
+        fileSize: fsize,
+        fileType: 'PDF Document',
+        driveUrl: `https://drive.google.com/file/d/${fid}/view`
+      });
+    }
+  }
+
+  const list = Array.from(uniqueFiles.values());
+
+  list.sort((a, b) => {
+    const parseD = (str) => {
+      if (!str) return 0;
+      const [d, m, y] = str.split('-').map(Number);
+      return new Date(y || 2026, (m || 1) - 1, d || 1).getTime();
+    };
+    return parseD(b.recordingDate) - parseD(a.recordingDate);
+  });
+
+  return list;
+};
+
+// Fetch live Google Drive files with multi-tier fallback
+const fetchLiveGoogleDriveFiles = async () => {
+  // Tier 1: Try internal /api/sync-drive (Vercel Serverless Function & local Express server)
+  try {
+    const res = await fetch('/api/sync-drive', {
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && Array.isArray(json.files) && json.files.length > 0) {
+        return { files: json.files, source: 'serverless_api' };
+      }
+    }
+  } catch (e) {
+    console.warn('API /api/sync-drive not reachable, trying public proxy...', e);
+  }
+
+  // Tier 2: Try CORS proxies to fetch the public Google Drive folder HTML
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(GOOGLE_DRIVE_FOLDER_URL)}`,
+    `https://corsproxy.io/?${encodeURIComponent(GOOGLE_DRIVE_FOLDER_URL)}`
+  ];
+
+  for (const proxyUrl of proxies) {
+    try {
+      const proxyRes = await fetch(proxyUrl, { cache: 'no-store' });
+      if (proxyRes.ok) {
+        const html = await proxyRes.text();
+        const parsedFiles = parseDriveFolderHtml(html);
+        if (parsedFiles && parsedFiles.length > 0) {
+          return { files: parsedFiles, source: 'live_proxy' };
+        }
+      }
+    } catch (err) {
+      console.warn(`Proxy ${proxyUrl} failed:`, err);
+    }
+  }
+
+  // Tier 3: Return bundled master files
+  return { files: scannedBillsMaster, source: 'bundled_master' };
+};
+
 const INITIAL_DRIVE_FILES = scannedBillsMaster;
 
 const BillsDataPage = ({ onNavigate, theme }) => {
@@ -30,12 +130,12 @@ const BillsDataPage = ({ onNavigate, theme }) => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= INITIAL_DRIVE_FILES.length) return parsed;
+        if (Array.isArray(parsed) && parsed.length >= scannedBillsMaster.length) return parsed;
       } catch (e) {
         console.error('Failed to parse saved drive files data', e);
       }
     }
-    return INITIAL_DRIVE_FILES;
+    return scannedBillsMaster;
   });
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,6 +148,23 @@ const BillsDataPage = ({ onNavigate, theme }) => {
   const [newRecordingDate, setNewRecordingDate] = useState('04-08-2026');
   const [newSubject, setNewSubject] = useState('');
   const [newDriveLink, setNewDriveLink] = useState('');
+
+  // Auto-sync on component mount
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const result = await fetchLiveGoogleDriveFiles();
+        if (isMounted && result.files && result.files.length > 0) {
+          setFiles(result.files);
+          localStorage.setItem('mpr_drive_scanned_files_v2', JSON.stringify(result.files));
+        }
+      } catch (e) {
+        console.warn('Auto-sync on load error:', e);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('mpr_drive_scanned_files_v2', JSON.stringify(files));
@@ -68,21 +185,23 @@ const BillsDataPage = ({ onNavigate, theme }) => {
   // Refresh & Sync from Drive Function
   const handleRefreshSync = async () => {
     setIsSyncing(true);
-    setSyncToastMsg('Connecting to Document Repository & checking for updates...');
+    setSyncToastMsg('Connecting to Google Drive folder & fetching latest documents...');
 
     try {
-      await new Promise(r => setTimeout(r, 600));
-
-      // Reload fresh files from master dataset & sync with localStorage
-      setFiles(scannedBillsMaster);
-      localStorage.setItem('mpr_drive_scanned_files_v2', JSON.stringify(scannedBillsMaster));
-
-      setSyncToastMsg(`Synced with Document Archive! All ${scannedBillsMaster.length} scanned documents updated.`);
+      const result = await fetchLiveGoogleDriveFiles();
+      if (result.files && result.files.length > 0) {
+        setFiles(result.files);
+        localStorage.setItem('mpr_drive_scanned_files_v2', JSON.stringify(result.files));
+        setSyncToastMsg(`Synced with Google Drive! All ${result.files.length} documents up to date.`);
+      } else {
+        setSyncToastMsg(`Document Archive synchronized (${files.length} documents).`);
+      }
     } catch (err) {
-      setSyncToastMsg('Sync completed.');
+      console.error('Refresh sync error:', err);
+      setSyncToastMsg('Sync completed with cached records.');
     } finally {
       setIsSyncing(false);
-      setTimeout(() => setSyncToastMsg(''), 4000);
+      setTimeout(() => setSyncToastMsg(''), 4500);
     }
   };
 

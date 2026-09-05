@@ -34,10 +34,14 @@ const parseSafeFloat = (val) => {
     return isNaN(parsed) ? null : parsed;
 };
 
+const syncDriveHandler = require('../api/sync-drive');
+
 // Routes
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
+
+app.get('/api/sync-drive', (req, res) => syncDriveHandler(req, res));
 
 app.get('/api/mpr', async (req, res) => {
     try {
