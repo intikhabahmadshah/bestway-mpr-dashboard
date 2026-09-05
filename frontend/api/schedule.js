@@ -104,20 +104,32 @@ function parseMspdiXml(xmlString) {
     };
   });
 
-  const projectStart = proj.StartDate 
-    ? String(proj.StartDate).split('T')[0] 
-    : (tasks[0]?.start || '2026-01-01');
+  // Calculate project boundary dates
+  let projectStart = proj.StartDate ? String(proj.StartDate).split('T')[0] : null;
+  let projectFinish = proj.FinishDate ? String(proj.FinishDate).split('T')[0] : null;
 
-  const projectFinish = proj.FinishDate 
-    ? String(proj.FinishDate).split('T')[0] 
-    : (tasks[tasks.length - 1]?.finish || '2028-09-16');
+  // Filter out overall Project Timeline root task from activities list
+  const filteredTasks = [];
+  tasks.forEach(t => {
+    const tName = (t.name || '').trim().toLowerCase();
+    const isTimelineRoot = tName === 'project time line' || tName === 'project timeline' || (t.wbs === '1' && tName.includes('project time line'));
+    if (isTimelineRoot) {
+      if (!projectStart && t.start) projectStart = t.start;
+      if (!projectFinish && t.finish) projectFinish = t.finish;
+    } else {
+      filteredTasks.push(t);
+    }
+  });
+
+  if (!projectStart) projectStart = filteredTasks[0]?.start || '2026-01-01';
+  if (!projectFinish) projectFinish = filteredTasks[filteredTasks.length - 1]?.finish || '2028-09-16';
 
   return {
     project_name: proj.Title || proj.Name || 'Bestway Tower Project',
     project_start: projectStart,
     project_finish: projectFinish,
-    total_tasks: tasks.length,
-    tasks
+    total_tasks: filteredTasks.length,
+    tasks: filteredTasks
   };
 }
 
@@ -159,9 +171,16 @@ export default async function handler(req, res) {
         const row = rows[0];
         try {
           const parsed = typeof row.schedule_json === 'string' ? JSON.parse(row.schedule_json) : row.schedule_json;
+          if (parsed && Array.isArray(parsed.tasks)) {
+            parsed.tasks = parsed.tasks.filter(t => {
+              const name = (t.name || '').trim().toLowerCase();
+              return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
+            });
+            parsed.total_tasks = parsed.tasks.length;
+          }
           return res.status(200).json({
             success: true,
-            source: 'aiven_database',
+            source: 'database',
             updated_at: row.updated_at,
             file_name: row.file_name,
             data: parsed
@@ -181,6 +200,13 @@ export default async function handler(req, res) {
         for (const c of candidates) {
           if (fs.existsSync(c)) {
             fallbackData = JSON.parse(fs.readFileSync(c, 'utf8'));
+            if (fallbackData && Array.isArray(fallbackData.tasks)) {
+              fallbackData.tasks = fallbackData.tasks.filter(t => {
+                const name = (t.name || '').trim().toLowerCase();
+                return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
+              });
+              fallbackData.total_tasks = fallbackData.tasks.length;
+            }
             break;
           }
         }
@@ -209,7 +235,14 @@ export default async function handler(req, res) {
 
       // Direct JSON schedule provided
       if (directSchedule && directSchedule.tasks && Array.isArray(directSchedule.tasks)) {
-        scheduleData = directSchedule;
+        scheduleData = {
+          ...directSchedule,
+          tasks: directSchedule.tasks.filter(t => {
+            const name = (t.name || '').trim().toLowerCase();
+            return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
+          })
+        };
+        scheduleData.total_tasks = scheduleData.tasks.length;
       } 
       // Base64 file provided (either .mpp or .xml)
       else if (fileBase64) {
@@ -240,7 +273,15 @@ export default async function handler(req, res) {
             try { if (fs.existsSync(tempXml)) fs.unlinkSync(tempXml); } catch (e) {}
           }
         } else if (ext === '.json') {
-          scheduleData = JSON.parse(buffer.toString('utf8'));
+          const parsedJson = JSON.parse(buffer.toString('utf8'));
+          if (parsedJson && Array.isArray(parsedJson.tasks)) {
+            parsedJson.tasks = parsedJson.tasks.filter(t => {
+              const name = (t.name || '').trim().toLowerCase();
+              return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
+            });
+            parsedJson.total_tasks = parsedJson.tasks.length;
+          }
+          scheduleData = parsedJson;
         }
       }
 
@@ -251,7 +292,14 @@ export default async function handler(req, res) {
         });
       }
 
+      // Ensure filtered
+      scheduleData.tasks = scheduleData.tasks.filter(t => {
+        const name = (t.name || '').trim().toLowerCase();
+        return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
+      });
       const totalTasks = scheduleData.tasks.length;
+      scheduleData.total_tasks = totalTasks;
+
       const connection = await p.getConnection();
       try {
         await connection.beginTransaction();
@@ -274,7 +322,7 @@ export default async function handler(req, res) {
           success: true,
           count: totalTasks,
           fileName: originalName,
-          message: `Successfully synchronized ${totalTasks} activities to Aiven Database & Portal!`,
+          message: `Successfully synchronized ${totalTasks} activities to Project Database & Portal!`,
           data: scheduleData
         });
       } catch (err) {

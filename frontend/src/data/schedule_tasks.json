@@ -2,27 +2,8 @@
   "project_name": "Project2",
   "project_start": "2025-09-01",
   "project_finish": "2028-09-16",
-  "total_tasks": 240,
+  "total_tasks": 239,
   "tasks": [
-    {
-      "id": 1,
-      "unique_id": 1,
-      "name": "Project Time Line",
-      "wbs": "1",
-      "outline_level": 1,
-      "outline_number": "1",
-      "summary": false,
-      "milestone": false,
-      "critical": true,
-      "duration_days": 990,
-      "start": "2026-01-01",
-      "finish": "2028-09-16",
-      "actual_start": null,
-      "actual_finish": null,
-      "percent_complete": 0,
-      "predecessors": [],
-      "resource_names": ""
-    },
     {
       "id": 2,
       "unique_id": 2,

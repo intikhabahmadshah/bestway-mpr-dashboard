@@ -61,7 +61,13 @@ const SchedulePage = ({ onNavigate, theme, showToast }) => {
     return () => { isMounted = false; };
   }, []);
 
-  const tasks = useMemo(() => activeSchedule.tasks || [], [activeSchedule]);
+  const tasks = useMemo(() => {
+    const raw = activeSchedule.tasks || [];
+    return raw.filter(t => {
+      const name = (t.name || '').trim().toLowerCase();
+      return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
+    });
+  }, [activeSchedule]);
   const projectStart = new Date(activeSchedule.project_start || '2026-01-01');
   const projectFinish = new Date(activeSchedule.project_finish || '2028-09-16');
   const totalProjectDays = Math.max(1, Math.round((projectFinish - projectStart) / (1000 * 60 * 60 * 24)));

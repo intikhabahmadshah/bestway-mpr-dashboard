@@ -111,7 +111,13 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
     return () => { isMounted = false; };
   }, []);
 
-  const allTasks = useMemo(() => activeSchedule.tasks || [], [activeSchedule]);
+  const allTasks = useMemo(() => {
+    const raw = activeSchedule.tasks || [];
+    return raw.filter(t => {
+      const name = (t.name || '').trim().toLowerCase();
+      return name !== 'project time line' && name !== 'project timeline' && !(t.wbs === '1' && name.includes('project time line'));
+    });
+  }, [activeSchedule]);
 
   // Available Months Across Project Schedule (for Jump-To Selector)
   const availableMonths = useMemo(() => {

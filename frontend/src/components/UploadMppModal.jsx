@@ -208,7 +208,7 @@ const UploadMppModal = ({ isOpen, onClose, onScheduleUpdated, showToast }) => {
         rawMsg.includes('linux-x64')
       ) {
         setErrorMsg(
-          'Direct binary .MPP conversion Vercel cloud serverless par support nahi hai. Baraye meherbani Microsoft Project se "File ➔ Save As ➔ XML Format (*.xml)" save karke woh .XML file upload karein. (Aapka database pehle hi 240 activities ke sath sync kar diya gaya hai!)'
+          'Direct binary .MPP conversion Vercel cloud serverless par support nahi hai. Baraye meherbani Microsoft Project se "File ➔ Save As ➔ XML Format (*.xml)" save karke woh .XML file upload karein. (Aapka database pehle hi updated schedule activities ke sath sync hai!)'
         );
       } else {
         setErrorMsg(rawMsg || 'Failed to process file. Please ensure it is a valid MS Project file.');

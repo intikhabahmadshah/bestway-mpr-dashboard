@@ -86,19 +86,30 @@ export function parseMspdiXml(xmlString) {
   });
 
   // Calculate project boundary dates
-  const projectStart = proj.StartDate 
-    ? String(proj.StartDate).split('T')[0] 
-    : (tasks[0]?.start || '2026-01-01');
+  let projectStart = proj.StartDate ? String(proj.StartDate).split('T')[0] : null;
+  let projectFinish = proj.FinishDate ? String(proj.FinishDate).split('T')[0] : null;
 
-  const projectFinish = proj.FinishDate 
-    ? String(proj.FinishDate).split('T')[0] 
-    : (tasks[tasks.length - 1]?.finish || '2028-09-16');
+  // Filter out overall Project Timeline root task from activities list
+  const filteredTasks = [];
+  tasks.forEach(t => {
+    const tName = (t.name || '').trim().toLowerCase();
+    const isTimelineRoot = tName === 'project time line' || tName === 'project timeline' || (t.wbs === '1' && tName.includes('project time line'));
+    if (isTimelineRoot) {
+      if (!projectStart && t.start) projectStart = t.start;
+      if (!projectFinish && t.finish) projectFinish = t.finish;
+    } else {
+      filteredTasks.push(t);
+    }
+  });
+
+  if (!projectStart) projectStart = filteredTasks[0]?.start || '2026-01-01';
+  if (!projectFinish) projectFinish = filteredTasks[filteredTasks.length - 1]?.finish || '2028-09-16';
 
   return {
     project_name: proj.Title || proj.Name || 'Bestway Tower Project',
     project_start: projectStart,
     project_finish: projectFinish,
-    total_tasks: tasks.length,
-    tasks
+    total_tasks: filteredTasks.length,
+    tasks: filteredTasks
   };
 }
