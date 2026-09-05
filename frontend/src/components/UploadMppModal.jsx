@@ -100,7 +100,14 @@ const UploadMppModal = ({ isOpen, onClose, onScheduleUpdated, showToast }) => {
           })
         });
 
-        const json = await res.json();
+        const rawResText = await res.text();
+        let json;
+        try {
+          json = JSON.parse(rawResText);
+        } catch (e) {
+          throw new Error(rawResText ? rawResText.slice(0, 150) : 'Server returned empty response');
+        }
+
         if (!res.ok || !json.success) {
           throw new Error(json.error || 'Failed to update schedule in database');
         }
@@ -129,7 +136,14 @@ const UploadMppModal = ({ isOpen, onClose, onScheduleUpdated, showToast }) => {
           })
         });
 
-        const json = await res.json();
+        const rawResText = await res.text();
+        let json;
+        try {
+          json = JSON.parse(rawResText);
+        } catch (e) {
+          throw new Error(rawResText ? rawResText.slice(0, 150) : 'Server returned empty response');
+        }
+
         if (!res.ok || !json.success) {
           throw new Error(json.error || 'Failed to update schedule in database');
         }
@@ -141,26 +155,47 @@ const UploadMppModal = ({ isOpen, onClose, onScheduleUpdated, showToast }) => {
         return;
       }
 
-      // Case 3: Binary .MPP file
-      setProcessingStep('Uploading .MPP to converter engine...');
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
-      const res = await fetch('/api/schedule/upload-mpp', {
-        method: 'POST',
-        body: formData
+      // Case 3: Binary .MPP file (convert to base64 and send to /api/schedule)
+      setProcessingStep('Reading & preparing .MPP file for cloud converter...');
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const res = reader.result;
+          const idx = typeof res === 'string' ? res.indexOf(',') : -1;
+          resolve(idx !== -1 ? res.substring(idx + 1) : res);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(selectedFile);
       });
 
-      const json = await res.json();
+      setProcessingStep('Converting MPP & extracting project activities...');
+      const res = await fetch('/api/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileBase64: base64,
+          fileName: selectedFile.name
+        })
+      });
+
+      const rawResText = await res.text();
+      let json;
+      try {
+        json = JSON.parse(rawResText);
+      } catch (e) {
+        throw new Error(rawResText ? rawResText.slice(0, 150) : 'Server returned an invalid response.');
+      }
 
       if (!res.ok || !json.success) {
         throw new Error(json.error || 'Server error while processing .mpp file');
       }
 
       setProcessingStep('Database updated successfully!');
-      localStorage.setItem('mpr_project_schedule_cache_v1', JSON.stringify(json.data));
-      if (onScheduleUpdated) onScheduleUpdated(json.data);
-      if (showToast) showToast(json.message || `Synchronized ${json.count} activities from ${selectedFile.name}!`, 'success');
+      if (json.data) {
+        localStorage.setItem('mpr_project_schedule_cache_v1', JSON.stringify(json.data));
+        if (onScheduleUpdated) onScheduleUpdated(json.data);
+      }
+      if (showToast) showToast(json.message || `Synchronized ${json.count || ''} activities from ${selectedFile.name}!`, 'success');
       onClose();
 
     } catch (err) {
@@ -346,16 +381,22 @@ const UploadMppModal = ({ isOpen, onClose, onScheduleUpdated, showToast }) => {
           background: 'var(--bg-main)',
           borderRadius: '10px',
           padding: '12px 14px',
-          marginBottom: '24px',
-          fontSize: '0.78rem',
-          color: 'var(--text-muted)',
+          marginBottom: '20px',
+          fontSize: '0.80rem',
+          color: 'var(--text-secondary)',
           display: 'flex',
-          gap: '10px'
+          flexDirection: 'column',
+          gap: '8px'
         }}>
-          <FiDatabase size={16} style={{ flexShrink: 0, color: '#118AB2', marginTop: '2px' }} />
-          <span>
-            Upon upload, tasks, outline levels, critical path flags, and Gantt milestone dates will be automatically updated in <strong>Aiven Cloud MySQL</strong> and reflected instantly in the portal.
-          </span>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <FiDatabase size={16} style={{ flexShrink: 0, color: '#118AB2' }} />
+            <span>
+              Upload hotay hi tasks, WBS hierarchy, critical path flags aur Gantt chart dates <strong>Aiven Cloud MySQL</strong> database aur portal dono mein update ho jayengi.
+            </span>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px dashed var(--border-color)', paddingTop: '6px' }}>
+            💡 <strong>MS Project Tip:</strong> Aap directly <strong>.MPP</strong> file upload kar sakte hain. Iske ilawa Microsoft Project mein <em>File → Save As → 'XML Format (*.xml)'</em> se export kar ke bhi upload kar sakte hain jo instant sync hota hai.
+          </div>
         </div>
 
         {/* Modal Actions */}

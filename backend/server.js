@@ -253,12 +253,39 @@ app.post('/api/schedule/upload-mpp', diskUpload.single('file'), async (req, res)
 
 app.post('/api/schedule', async (req, res) => {
     try {
-        const { scheduleData, fileName } = req.body || {};
-        if (!scheduleData || !scheduleData.tasks || !Array.isArray(scheduleData.tasks)) {
-            return res.status(400).json({ success: false, error: 'Invalid schedule data format' });
+        let { scheduleData, fileName, fileBase64 } = req.body || {};
+        let originalName = fileName || 'Project_Schedule.mpp';
+
+        if (!scheduleData && fileBase64) {
+            const ext = path.extname(originalName).toLowerCase();
+            const buffer = Buffer.from(fileBase64, 'base64');
+
+            if (ext === '.xml') {
+                const xmlContent = buffer.toString('utf8');
+                scheduleData = parseMspdiXml(xmlContent);
+            } else if (ext === '.mpp') {
+                const tempMpp = path.join(uploadDir, `temp_${Date.now()}.mpp`);
+                const tempXml = path.join(uploadDir, `temp_${Date.now()}.xml`);
+                try {
+                    fs.writeFileSync(tempMpp, buffer);
+                    const mppjs = await import('@byteink/mppjs');
+                    await mppjs.convert(tempMpp, tempXml);
+                    const xmlContent = fs.readFileSync(tempXml, 'utf8');
+                    scheduleData = parseMspdiXml(xmlContent);
+                } finally {
+                    try { if (fs.existsSync(tempMpp)) fs.unlinkSync(tempMpp); } catch (e) {}
+                    try { if (fs.existsSync(tempXml)) fs.unlinkSync(tempXml); } catch (e) {}
+                }
+            } else if (ext === '.json') {
+                scheduleData = JSON.parse(buffer.toString('utf8'));
+            }
         }
 
-        await saveProjectSchedule(scheduleData, fileName || 'Manual_Update.mpp');
+        if (!scheduleData || !scheduleData.tasks || !Array.isArray(scheduleData.tasks)) {
+            return res.status(400).json({ success: false, error: 'Invalid schedule data format or file' });
+        }
+
+        await saveProjectSchedule(scheduleData, originalName);
 
         // Update local JSON file
         const jsonPath = path.join(__dirname, '../frontend/src/data/schedule_tasks.json');
@@ -269,7 +296,9 @@ app.post('/api/schedule', async (req, res) => {
         return res.json({
             success: true,
             count: scheduleData.tasks.length,
-            message: 'Project Activity Schedule updated successfully in Database!'
+            fileName: originalName,
+            message: `Successfully synchronized ${scheduleData.tasks.length} activities to Database & Portal!`,
+            data: scheduleData
         });
     } catch (error) {
         console.error('Error updating schedule:', error);

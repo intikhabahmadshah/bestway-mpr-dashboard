@@ -33,5 +33,10 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
     "vite": "^5.2.0"
+  },
+  "optionalDependencies": {
+    "@byteink/mppjs": "^0.1.7",
+    "@byteink/mppjs-linux-x64": "^0.1.7",
+    "@byteink/mppjs-win32-x64": "^0.1.7"
   }
 }
