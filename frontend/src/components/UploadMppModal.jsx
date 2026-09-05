@@ -200,7 +200,19 @@ const UploadMppModal = ({ isOpen, onClose, onScheduleUpdated, showToast }) => {
 
     } catch (err) {
       console.error('Upload schedule error:', err);
-      setErrorMsg(err.message || 'Failed to process file. Please ensure it is a valid MS Project file.');
+      const rawMsg = err.message || '';
+      if (
+        rawMsg.includes('prebuilt binary') || 
+        rawMsg.includes('@byteink/mppjs') || 
+        rawMsg.includes('conversion failed') ||
+        rawMsg.includes('linux-x64')
+      ) {
+        setErrorMsg(
+          'Direct binary .MPP conversion Vercel cloud serverless par support nahi hai. Baraye meherbani Microsoft Project se "File ➔ Save As ➔ XML Format (*.xml)" save karke woh .XML file upload karein. (Aapka database pehle hi 240 activities ke sath sync kar diya gaya hai!)'
+        );
+      } else {
+        setErrorMsg(rawMsg || 'Failed to process file. Please ensure it is a valid MS Project file.');
+      }
     } finally {
       setIsProcessing(false);
       setProcessingStep('');
@@ -334,6 +346,28 @@ const UploadMppModal = ({ isOpen, onClose, onScheduleUpdated, showToast }) => {
                 {parsedPreview.total_tasks || parsedPreview.tasks?.length} Activities
               </span>
             )}
+          </div>
+        )}
+
+        {/* MPP vs XML Tip when .mpp is selected */}
+        {selectedFile && selectedFile.name.toLowerCase().endsWith('.mpp') && (
+          <div style={{
+            background: 'rgba(255, 183, 3, 0.10)',
+            border: '1px solid rgba(255, 183, 3, 0.35)',
+            borderRadius: '10px',
+            padding: '12px 14px',
+            marginBottom: '20px',
+            fontSize: '0.80rem',
+            color: 'var(--text-primary)',
+            lineHeight: 1.5
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#D97706', marginBottom: '4px' }}>
+              <span>💡 Behtareen Aur Guaranteed Sync (XML Format):</span>
+            </div>
+            Cloud server par direct binary .MPP ki jagah Microsoft Project ki <strong>XML format (.xml)</strong> 1-second mein instant database sync ho jati hai.
+            <div style={{ marginTop: '4px', fontSize: '0.77rem', color: 'var(--text-muted)' }}>
+              MS Project ➔ <strong>File ➔ Save As ➔ Save as type: 'XML Format (*.xml)'</strong> save kar ke upload karein.
+            </div>
           </div>
         )}
 
