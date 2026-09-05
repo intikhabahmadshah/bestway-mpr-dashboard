@@ -9,7 +9,6 @@ import {
   FiAlertCircle,
   FiChevronLeft,
   FiChevronRight,
-  FiBarChart2, 
   FiFileText, 
   FiDatabase, 
   FiDownload, 
@@ -20,7 +19,6 @@ import {
   FiZoomOut,
   FiArrowRight,
   FiTrendingUp,
-  FiPieChart,
   FiActivity
 } from 'react-icons/fi';
 import {
@@ -29,14 +27,12 @@ import {
   LinearScale,
   PointElement,
   LineElement,
-  BarElement,
-  ArcElement,
   Title,
   Tooltip,
   Legend,
   Filler
 } from 'chart.js';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import scheduleFallback from '../data/schedule_tasks.json';
 
 // Register ChartJS modules
@@ -45,8 +41,6 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  BarElement,
-  ArcElement,
   Title,
   Tooltip,
   Legend,
@@ -390,68 +384,6 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
     };
   }, [monthInfo.days, dailyWorkload, isDark]);
 
-  // Chart Data 2: Activity Lifecycle Donut
-  const lifecycleChartData = useMemo(() => {
-    const starting = monthlyTasks.filter(t => t.startsInMonth && !t.milestone).length;
-    const finishing = monthlyTasks.filter(t => t.finishesInMonth && !t.milestone).length;
-    const spanning = monthlyTasks.filter(t => t.spansFullMonth).length;
-    const milestones = monthlyTasks.filter(t => t.milestone).length;
-
-    return {
-      labels: ['Starting in Month', 'Finishing in Month', 'Spanning Full Month', 'Milestones'],
-      datasets: [
-        {
-          data: [starting, finishing, spanning, milestones],
-          backgroundColor: [
-            '#2EC4B6', // Teal
-            '#118AB2', // Blue
-            '#7209B7', // Purple
-            '#FFD166'  // Gold
-          ],
-          borderColor: isDark ? '#111827' : '#ffffff',
-          borderWidth: 2,
-          hoverOffset: 6
-        }
-      ]
-    };
-  }, [monthlyTasks, isDark]);
-
-  // Chart Data 3: Major Phase Distribution Bar Chart
-  const phaseChartData = useMemo(() => {
-    const phaseMap = {};
-    monthlyTasks.forEach(t => {
-      const topWbs = t.wbs.split('.')[0];
-      let phaseName = 'General Works';
-      if (topWbs === '1') phaseName = 'Project Timeline';
-      else if (topWbs === '2') phaseName = 'Shoring & Excavation';
-      else if (topWbs === '3') phaseName = 'Grey Structure';
-      else if (topWbs === '4') phaseName = 'Finishing & MEP';
-
-      phaseMap[phaseName] = (phaseMap[phaseName] || 0) + 1;
-    });
-
-    const labels = Object.keys(phaseMap);
-    const data = Object.values(phaseMap);
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: 'Active Tasks',
-          data,
-          backgroundColor: [
-            'rgba(46, 196, 182, 0.85)',
-            'rgba(17, 138, 178, 0.85)',
-            'rgba(255, 209, 102, 0.85)',
-            'rgba(239, 71, 111, 0.85)'
-          ],
-          borderRadius: 8,
-          borderWidth: 0
-        }
-      ]
-    };
-  }, [monthlyTasks]);
-
   const ganttContainerRef = useRef(null);
 
   return (
@@ -625,7 +557,7 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
             className={`view-tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
             onClick={() => setActiveTab('analytics')}
           >
-            <FiPieChart size={16} /> Workload Insights
+            <FiActivity size={16} /> Workload Density
           </button>
           <button 
             className={`view-tab-btn ${activeTab === 'table' ? 'active' : ''}`}
@@ -910,119 +842,6 @@ const LookAtSchedulePage = ({ onNavigate, theme, showToast }) => {
                       beginAtZero: true,
                       grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
                       ticks: { precision: 0, color: isDark ? '#cbd5e1' : '#475569', font: { family: 'Poppins', size: 11, weight: '600' } }
-                    }
-                  }
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Chart 2: Activity Lifecycle Donut */}
-          <div className="analytics-card">
-            <div className="analytics-card-header">
-              <div>
-                <h3 className="card-heading">
-                  <FiPieChart className="text-blue" /> Monthly Activity Status
-                </h3>
-                <p className="card-subheading">Breakdown by initiation, completion &amp; continuous work</p>
-              </div>
-            </div>
-            <div style={{ height: '230px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Doughnut 
-                data={lifecycleChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    datalabels: { display: false },
-                    legend: {
-                      position: 'right',
-                      labels: { 
-                        color: isDark ? '#f1f5f9' : '#0f172a', 
-                        font: { family: 'Poppins', size: 12, weight: '600' },
-                        padding: 14,
-                        usePointStyle: true,
-                        pointStyle: 'circle'
-                      }
-                    },
-                    tooltip: {
-                      backgroundColor: 'rgba(7, 59, 76, 0.95)',
-                      titleFont: { family: 'Poppins', size: 13, weight: '700' },
-                      bodyFont: { family: 'Poppins', size: 12 },
-                      padding: 12,
-                      cornerRadius: 8,
-                      callbacks: {
-                        label: (item) => ` ${item.label}: ${item.raw} activities`
-                      }
-                    }
-                  },
-                  cutout: '72%'
-                }}
-              />
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '32%',
-                transform: 'translate(-50%, -50%)',
-                textAlign: 'center',
-                pointerEvents: 'none'
-              }}>
-                <span style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)', display: 'block', lineHeight: 1 }}>
-                  {monthlyTasks.length}
-                </span>
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  Activities
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Chart 3: Phase Work Allocation */}
-          <div className="analytics-card">
-            <div className="analytics-card-header">
-              <div>
-                <h3 className="card-heading">
-                  <FiBarChart2 className="text-gold" /> Phase Distribution
-                </h3>
-                <p className="card-subheading">Active tasks grouped by primary project trade</p>
-              </div>
-            </div>
-            <div style={{ height: '230px', width: '100%' }}>
-              <Bar 
-                data={phaseChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    datalabels: { display: false },
-                    legend: { display: false },
-                    tooltip: {
-                      backgroundColor: 'rgba(7, 59, 76, 0.95)',
-                      titleFont: { family: 'Poppins', size: 13, weight: '700' },
-                      bodyFont: { family: 'Poppins', size: 12 },
-                      padding: 12,
-                      cornerRadius: 8,
-                      callbacks: {
-                        label: (item) => ` Active Activities: ${item.raw}`
-                      }
-                    }
-                  },
-                  scales: {
-                    x: {
-                      grid: { display: false },
-                      ticks: { 
-                        color: isDark ? '#f1f5f9' : '#0f172a', 
-                        font: { family: 'Poppins', size: 12, weight: '600' } 
-                      }
-                    },
-                    y: {
-                      beginAtZero: true,
-                      grid: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
-                      ticks: { 
-                        precision: 0, 
-                        color: isDark ? '#cbd5e1' : '#475569',
-                        font: { family: 'Poppins', size: 11, weight: '600' }
-                      }
                     }
                   }
                 }}
