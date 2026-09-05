@@ -125,7 +125,7 @@ const MonthlyBarChart = ({ data, theme }) => {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    devicePixelRatio: Math.max((window.devicePixelRatio || 1) * 2, 3),
+    devicePixelRatio: Math.min(Math.max(window.devicePixelRatio || 1, 2), 3),
     layout: {
       padding: { top: 28, bottom: 6, left: 6, right: 10 },
     },

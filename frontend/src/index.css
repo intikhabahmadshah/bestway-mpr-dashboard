@@ -130,8 +130,7 @@ body::before {
 }
 
 canvas {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  image-rendering: auto;
 }
 
 /* Scrollbar */

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -27,6 +27,25 @@ ChartJS.register(
 
 const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
   const beaconRef = useRef(null);
+  const [dpr, setDpr] = useState(() => Math.min(Math.max(window.devicePixelRatio || 1, 2), 3));
+
+  useEffect(() => {
+    const updateDpr = () => {
+      setDpr(Math.min(Math.max(window.devicePixelRatio || 1, 2), 3));
+    };
+    const mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    if (mq && mq.addEventListener) {
+      mq.addEventListener('change', updateDpr);
+    }
+    window.addEventListener('resize', updateDpr);
+    return () => {
+      if (mq && mq.removeEventListener) {
+        mq.removeEventListener('change', updateDpr);
+      }
+      window.removeEventListener('resize', updateDpr);
+    };
+  }, []);
+
   if (!data || data.length === 0) return null;
 
   const isDark = theme === 'dark';
@@ -327,6 +346,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    devicePixelRatio: dpr,
     layout: {
       padding: {
         top: 45,
