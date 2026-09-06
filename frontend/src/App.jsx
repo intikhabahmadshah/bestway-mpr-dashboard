@@ -6,6 +6,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
 import HomePage from './components/HomePage';
 import BillsDataPage from './components/BillsDataPage';
+import BillsAuthGate from './components/BillsAuthGate';
+import AuthRegistryPage from './components/AuthRegistryPage';
 import SchedulePage from './components/SchedulePage';
 import LookAtSchedulePage from './components/LookAtSchedulePage';
 import ExportDashboardModal from './components/ExportDashboardModal';
@@ -53,7 +55,7 @@ function App() {
 
   const [currentView, setCurrentView] = useState(() => {
     const hash = window.location.hash.replace('#', '');
-    if (['home', 'grey_structure', 'bills_data', 'schedule', 'look_at_schedule'].includes(hash)) return hash;
+    if (['home', 'grey_structure', 'bills_data', 'schedule', 'look_at_schedule', 'auth_registry'].includes(hash)) return hash;
     return 'home';
   });
 
@@ -66,7 +68,7 @@ function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      if (['home', 'grey_structure', 'bills_data', 'schedule', 'look_at_schedule'].includes(hash)) {
+      if (['home', 'grey_structure', 'bills_data', 'schedule', 'look_at_schedule', 'auth_registry'].includes(hash)) {
         setCurrentView(hash);
       }
     };
@@ -198,7 +200,13 @@ function App() {
         )}
 
         {currentView === 'bills_data' && (
-          <BillsDataPage onNavigate={navigateTo} theme={theme} />
+          <BillsAuthGate onNavigate={navigateTo} theme={theme}>
+            <BillsDataPage onNavigate={navigateTo} theme={theme} />
+          </BillsAuthGate>
+        )}
+
+        {currentView === 'auth_registry' && (
+          <AuthRegistryPage onNavigate={navigateTo} theme={theme} showToast={showToast} />
         )}
 
         {currentView === 'schedule' && (

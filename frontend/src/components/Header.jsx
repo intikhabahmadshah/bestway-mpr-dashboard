@@ -24,12 +24,19 @@ const Header = ({ theme, toggleTheme, currentView, onNavigate }) => {
                 ? 'Project Management Portal' 
                 : (currentView === 'bills_data' 
                   ? 'Bills Data & Log Files' 
-                  : (currentView === 'schedule' 
-                    ? 'MS Project Activity Schedule' 
-                    : (currentView === 'look_at_schedule'
-                      ? 'Look at Schedule — Monthly Look-Ahead & Daily Gantt'
-                      : 'Monthly Progress Report Dashboard')))}
+                  : (currentView === 'auth_registry'
+                    ? 'Authorized Personnel Registry & Security Control'
+                    : (currentView === 'schedule' 
+                      ? 'MS Project Activity Schedule' 
+                      : (currentView === 'look_at_schedule'
+                        ? 'Look at Schedule — Monthly Look-Ahead & Daily Gantt'
+                        : 'Monthly Progress Report Dashboard'))))}
             </span>
+            {currentView === 'auth_registry' && (
+              <span className="header-phase-badge" style={{ borderColor: 'rgba(239, 71, 111, 0.4)', color: '#EF476F' }}>
+                <FiLayers size={12} /> Confidential Registry
+              </span>
+            )}
             {currentView === 'grey_structure' && (
               <span className="header-phase-badge">
                 <FiLayers size={12} /> Phase: Grey Structure

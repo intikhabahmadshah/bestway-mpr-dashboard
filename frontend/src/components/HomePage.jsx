@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiBarChart2, FiFileText, FiArrowRight, FiLayers, FiCheckCircle, FiClock, FiGrid, FiDatabase, FiCalendar, FiEye } from 'react-icons/fi';
+import { FiBarChart2, FiFileText, FiArrowRight, FiLayers, FiCheckCircle, FiClock, FiGrid, FiDatabase, FiCalendar, FiEye, FiLock, FiShield } from 'react-icons/fi';
 
 const HomePage = ({ onNavigate, theme }) => {
   const isDark = theme === 'dark';
@@ -79,18 +79,20 @@ const HomePage = ({ onNavigate, theme }) => {
                 <div className="card-icon amber">
                   <FiFileText />
                 </div>
-                <span className="status-tag active">Repository Active</span>
+                <span className="status-tag restricted" style={{ background: 'rgba(239, 71, 111, 0.15)', color: '#EF476F', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                  <FiLock size={12} /> Confidential Access
+                </span>
               </div>
               <h3 className="card-title">Bills Data</h3>
               <p className="card-description">
-                Contractor billing records, log files, scanned PO vouchers, and cloud document archive.
+                Confidential contractor billing records, IPC payment logs, scanned PO vouchers, and cloud document archive. Access requires authorized credentials.
               </p>
               <div className="card-meta">
+                <span><FiShield style={{ color: '#EF476F' }} /> Password Protected</span>
                 <span><FiCheckCircle style={{ color: '#FFD166' }} /> Cloud Document Archive</span>
-                <span><FiFileText style={{ color: '#2EC4B6' }} /> Scanned PDF Copies</span>
               </div>
               <button className="btn-portal-action amber">
-                Open Bills Data <FiArrowRight />
+                Access Bills Data <FiArrowRight />
               </button>
             </div>
           </div>
