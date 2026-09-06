@@ -94,7 +94,7 @@ export default async function handler(req, res) {
       if (!username || !password) {
         return res.status(400).json({ 
           success: false, 
-          error: 'Authorized Person (Name/ID) aur Password dono zaroori hain.' 
+          error: 'Both Authorized Person (Name or Username) and Password are required.' 
         });
       }
 
@@ -119,7 +119,7 @@ export default async function handler(req, res) {
             if (user.password === cleanPass) {
               return res.status(200).json({
                 success: true,
-                message: `Khush Amdeed, ${user.person_name}! Access granted.`,
+                message: `Welcome, ${user.person_name}! Access granted.`,
                 user: {
                   id: user.id,
                   username: user.username,
@@ -143,7 +143,7 @@ export default async function handler(req, res) {
       if (match) {
         return res.status(200).json({
           success: true,
-          message: `Khush Amdeed, ${match.person_name}! Access granted.`,
+          message: `Welcome, ${match.person_name}! Access granted.`,
           user: {
             id: match.id,
             username: match.username,
@@ -155,7 +155,7 @@ export default async function handler(req, res) {
 
       return res.status(401).json({
         success: false,
-        error: 'Ghalat credentials ya ghair-tasdeeq shuda fard. Baraye meherbani durust Authorized Person aur Password darj karein.'
+        error: 'Invalid credentials. Please verify your Authorized Person name/ID and password.'
       });
     }
 
@@ -173,7 +173,7 @@ export default async function handler(req, res) {
       if (!username || !person_name || !password) {
         return res.status(400).json({
           success: false,
-          error: 'Authorized Name, Username ID aur Password tamam fields zaroori hain.'
+          error: 'Full Name, Username ID, and Password are all required fields.'
         });
       }
 
@@ -198,7 +198,7 @@ export default async function handler(req, res) {
 
           return res.status(200).json({
             success: true,
-            message: `Authorized Person "${cleanName}" (${cleanUser}) kamyabi se Database mein register ho gaye hain!`,
+            message: `Authorized Person "${cleanName}" (${cleanUser}) registered successfully in the Database!`,
             user: { username: cleanUser, person_name: cleanName, role: cleanRole }
           });
         } catch (err) {
@@ -224,7 +224,7 @@ export default async function handler(req, res) {
         }
         return res.status(200).json({
           success: true,
-          message: `Authorized Person "${cleanName}" register ho gaye hain (Fallback mode)!`,
+          message: `Authorized Person "${cleanName}" registered successfully (Fallback mode)!`,
           user: newObj
         });
       }

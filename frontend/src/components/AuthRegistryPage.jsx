@@ -42,7 +42,7 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
       setMasterKeyError('');
       if (showToast) showToast('Master Security Access Granted!', 'success');
     } else {
-      setMasterKeyError('Ghalat Master Security Key! Access denied.');
+      setMasterKeyError('Invalid Master Security Key! Access denied.');
     }
   };
 
@@ -90,7 +90,7 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!fullName.trim() || !username.trim() || !password.trim()) {
-      setRegisterErrorMsg('Tamam fields (Name, Username, Password) bharna zaroori hain.');
+      setRegisterErrorMsg('All fields (Full Name, Username, and Password) are required.');
       return;
     }
 
@@ -108,8 +108,8 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
       });
 
       if (res.data && res.data.success) {
-        setRegisterSuccessMsg(res.data.message || 'Authorized Person kamyabi se register ho gaye!');
-        if (showToast) showToast(`"${fullName}" kamyabi se register ho gaye!`, 'success');
+        setRegisterSuccessMsg(res.data.message || 'Authorized Person registered successfully!');
+        if (showToast) showToast(`"${fullName}" registered successfully!`, 'success');
         setFullName('');
         setUsername('');
         setPassword('');
@@ -120,7 +120,7 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
     } catch (err) {
       console.error('Registration error:', err);
       const sErr = err.response?.data?.error;
-      setRegisterErrorMsg(sErr || 'Database query failed. Baraye meherbani dobara koshish karein.');
+      setRegisterErrorMsg(sErr || 'Database query failed. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -129,12 +129,12 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
   // Handle delete/revoke user
   const handleDeleteUser = async (userObj) => {
     if (userObj.username === 'admin') {
-      alert('Default primary administrator (admin) ko delete nahi kiya ja sakta.');
+      alert('The primary administrator (admin) cannot be deleted.');
       return;
     }
 
     const confirmRevoke = window.confirm(
-      `Kya aap waqai "${userObj.person_name}" (${userObj.username}) ka access revoke / delete karna chahtay hain?`
+      `Are you sure you want to revoke access for "${userObj.person_name}" (${userObj.username})?`
     );
     if (!confirmRevoke) return;
 
@@ -146,14 +146,14 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
       });
 
       if (res.data && res.data.success) {
-        if (showToast) showToast(`"${userObj.person_name}" ka access revoke ho gaya`, 'info');
+        if (showToast) showToast(`Access revoked for "${userObj.person_name}"`, 'info');
         fetchUsers();
       } else {
-        alert(res.data?.error || 'Access revoke nahi ho saka.');
+        alert(res.data?.error || 'Unable to revoke access.');
       }
     } catch (err) {
       console.error('Delete user error:', err);
-      alert('Delete request fail ho gayi.');
+      alert('Delete request failed.');
     }
   };
 
@@ -181,8 +181,8 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
             </div>
             <h2 className="auth-title">Authorized Personnel Registry</h2>
             <p className="auth-subtitle">
-              Yeh section sensitive security credentials manage karnay k liye hai. 
-              Baraye meherbani Master Security Key darj karein takkay aap Authorized Persons register aur manage kar sakein.
+              This section is restricted for security credentials management. 
+              Please enter the Master Administrator Security Key to register and manage authorized personnel.
             </p>
           </div>
 
@@ -259,8 +259,8 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
           </div>
           <h1>Authorized Personnel Database Registry</h1>
           <p>
-            Yahan se aap un afrad ko register kar saktay hain jinhein Bills Data, payment logs aur sensitive PO vouchers dekhnay ki ijazat hogi.
-            Tamam data cloud database (MySQL) mein save hota hai.
+            Register and manage personnel authorized to view sensitive Bills Data, contractor payment logs, and verified PO vouchers.
+            All records are securely synchronized with the Cloud Database (MySQL).
           </p>
         </div>
 
@@ -312,13 +312,13 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
                   <FiUser className="reg-icon" />
                   <input 
                     type="text" 
-                    placeholder="e.g. intikhab ya qs_officer"
+                    placeholder="e.g. intikhab or qs_officer"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
                   />
                 </div>
-                <small className="field-hint">Bills Data lock screen par yeh username ya full name istemal hoga.</small>
+                <small className="field-hint">This username or full name will be used on the Bills Data login screen.</small>
               </div>
 
               <div className="reg-form-group">
@@ -464,8 +464,8 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
 
             <div className="roster-instructions">
               <p>
-                <strong>Security Policy:</strong> Sirf listed authorized persons hi Bills Data access kar sakain gay. 
-                Naye persons register karnay k baad woh foran Bills Data page par login kar saktay hain.
+                <strong>Security Policy:</strong> Only listed authorized personnel are permitted to access Bills Data. 
+                Once registered, personnel can immediately authenticate and view records on the Bills Data page.
               </p>
             </div>
           </div>

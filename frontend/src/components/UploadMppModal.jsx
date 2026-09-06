@@ -208,7 +208,7 @@ const UploadMppModal = ({ isOpen, onClose, onScheduleUpdated, showToast }) => {
         rawMsg.includes('linux-x64')
       ) {
         setErrorMsg(
-          'Direct binary .MPP conversion Vercel cloud serverless par support nahi hai. Baraye meherbani Microsoft Project se "File ➔ Save As ➔ XML Format (*.xml)" save karke woh .XML file upload karein. (Aapka database pehle hi updated schedule activities ke sath sync hai!)'
+          'Direct binary .MPP parsing is not supported on serverless cloud functions. Please export from MS Project as "File ➔ Save As ➔ XML Format (*.xml)" and upload the .xml file. (Your database is already synchronized with updated schedule activities!)'
         );
       } else {
         setErrorMsg(rawMsg || 'Failed to process file. Please ensure it is a valid MS Project file.');
@@ -362,11 +362,11 @@ const UploadMppModal = ({ isOpen, onClose, onScheduleUpdated, showToast }) => {
             lineHeight: 1.5
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#D97706', marginBottom: '4px' }}>
-              <span>💡 Behtareen Aur Guaranteed Sync (XML Format):</span>
+              <span>💡 Recommended &amp; Guaranteed Sync (XML Format):</span>
             </div>
-            Cloud server par direct binary .MPP ki jagah Microsoft Project ki <strong>XML format (.xml)</strong> 1-second mein instant database sync ho jati hai.
+            For instant 1-second database sync without serverless binary conversion constraints, upload Microsoft Project exported as <strong>XML Format (*.xml)</strong>.
             <div style={{ marginTop: '4px', fontSize: '0.77rem', color: 'var(--text-muted)' }}>
-              MS Project ➔ <strong>File ➔ Save As ➔ Save as type: 'XML Format (*.xml)'</strong> save kar ke upload karein.
+              In MS Project: <strong>File ➔ Save As ➔ Save as type: 'XML Format (*.xml)'</strong>.
             </div>
           </div>
         )}

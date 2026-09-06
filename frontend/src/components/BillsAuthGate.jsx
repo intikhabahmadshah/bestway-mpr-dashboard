@@ -21,7 +21,7 @@ const BillsAuthGate = ({ children, onNavigate, theme }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
-      setErrorMsg('Baraye meherbani Authorized Person (Name ya Username) aur Password dono darj karein.');
+      setErrorMsg('Please enter both Authorized Person (Name or Username) and Password.');
       return;
     }
 
@@ -40,12 +40,12 @@ const BillsAuthGate = ({ children, onNavigate, theme }) => {
         setUser(authUser);
         setErrorMsg('');
       } else {
-        setErrorMsg(res.data?.error || 'Ghalat credentials. Access deny ho gaya.');
+        setErrorMsg(res.data?.error || 'Invalid credentials. Access denied.');
       }
     } catch (err) {
       console.error('Auth login error:', err);
       const serverErr = err.response?.data?.error;
-      setErrorMsg(serverErr || 'Authentication failed: Server ya database se rabta nahi ho saka ya credentials ghalat hain.');
+      setErrorMsg(serverErr || 'Authentication failed: Unable to connect to server or invalid credentials.');
     } finally {
       setSubmitting(false);
     }
@@ -138,7 +138,7 @@ const BillsAuthGate = ({ children, onNavigate, theme }) => {
               <input
                 type="text"
                 className="auth-input"
-                placeholder="e.g. Engr. Intikhab Ahmad Shah ya admin"
+                placeholder="e.g. Engr. Intikhab Ahmad Shah or admin"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoFocus
@@ -189,7 +189,7 @@ const BillsAuthGate = ({ children, onNavigate, theme }) => {
 
         <div className="auth-footer-help">
           <p>
-            Authorized person register karwanay ya manage karnay k liye{' '}
+            To register new credentials or manage authorized personnel, please visit the{' '}
             <a 
               href="#auth_registry" 
               onClick={(e) => {
@@ -199,8 +199,7 @@ const BillsAuthGate = ({ children, onNavigate, theme }) => {
               className="auth-registry-link"
             >
               Authorized Persons Registry Page
-            </a>{' '}
-            par visit karein.
+            </a>.
           </p>
         </div>
       </div>
