@@ -68,7 +68,7 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
       setUsersList([
         {
           id: 1,
-          person_name: 'Engr. Intikhab Ahmad Shah',
+          person_name: 'Project Administrator',
           username: 'admin',
           role: 'Project Administrator',
           status: 'active',
@@ -298,7 +298,7 @@ const AuthRegistryPage = ({ onNavigate, theme, showToast }) => {
                   <FiUser className="reg-icon" />
                   <input 
                     type="text" 
-                    placeholder="e.g. Engr. Intikhab Ahmad Shah"
+                    placeholder="e.g. Project Administrator or Official Name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required

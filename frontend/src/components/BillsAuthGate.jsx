@@ -21,7 +21,7 @@ const BillsAuthGate = ({ children, onNavigate, theme }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
-      setErrorMsg('Please enter both Authorized Person (Name or Username) and Password.');
+      setErrorMsg('Please enter Designation / Official Role and Password.');
       return;
     }
 
@@ -69,8 +69,7 @@ const BillsAuthGate = ({ children, onNavigate, theme }) => {
               <FiShield className="shield-icon" /> CONFIDENTIAL ACCESS
             </span>
             <span className="user-welcome">
-              Authorized Official: <strong>{user.person_name}</strong>
-              <span className="user-role-pill">{user.role || 'Authorized'}</span>
+              Authorized Role: <strong>{user.role || user.person_name}</strong>
             </span>
           </div>
           <div className="ribbon-right">
@@ -132,13 +131,13 @@ const BillsAuthGate = ({ children, onNavigate, theme }) => {
 
         <form onSubmit={handleLogin} className="auth-form">
           <div className="auth-field-group">
-            <label className="auth-label">Authorized Person (Name or Username)</label>
+            <label className="auth-label">Designation / Official Role</label>
             <div className="auth-input-wrap">
               <FiUser className="auth-field-icon" />
               <input
                 type="text"
                 className="auth-input"
-                placeholder="e.g. Engr. Intikhab Ahmad Shah or admin"
+                placeholder="Designation / Official Role"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoFocus

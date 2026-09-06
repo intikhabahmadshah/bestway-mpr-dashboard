@@ -30,7 +30,7 @@ const DEFAULT_AUTHORIZED = [
   {
     id: 1,
     username: 'admin',
-    person_name: 'Engr. Intikhab Ahmad Shah',
+    person_name: 'Project Administrator',
     password: 'bestway#tower2026',
     role: 'Project Administrator',
     status: 'active',
@@ -65,6 +65,17 @@ async function ensureTableAndSeed(p) {
       DEFAULT_AUTHORIZED[0].role,
       'active'
     ]);
+  } else {
+    // Ensure default admin shows 'Project Administrator'
+    try {
+      await p.query(`
+        UPDATE AuthorizedPersons 
+        SET person_name = 'Project Administrator' 
+        WHERE username = 'admin' AND person_name != 'Project Administrator'
+      `);
+    } catch (e) {
+      // ignore
+    }
   }
 }
 
@@ -94,7 +105,7 @@ export default async function handler(req, res) {
       if (!username || !password) {
         return res.status(400).json({ 
           success: false, 
-          error: 'Both Authorized Person (Name or Username) and Password are required.' 
+          error: 'Both Designation / Official Role and Password are required.' 
         });
       }
 
@@ -108,10 +119,10 @@ export default async function handler(req, res) {
           const [rows] = await p.query(
             `SELECT id, username, person_name, password, role, status 
              FROM AuthorizedPersons 
-             WHERE (LOWER(username) = LOWER(?) OR LOWER(person_name) = LOWER(?)) 
+             WHERE (LOWER(username) = LOWER(?) OR LOWER(person_name) = LOWER(?) OR LOWER(role) = LOWER(?)) 
                AND status = 'active' 
              LIMIT 1`,
-            [cleanUser, cleanUser]
+            [cleanUser, cleanUser, cleanUser]
           );
 
           if (rows && rows.length > 0) {
@@ -119,7 +130,7 @@ export default async function handler(req, res) {
             if (user.password === cleanPass) {
               return res.status(200).json({
                 success: true,
-                message: `Welcome, ${user.person_name}! Access granted.`,
+                message: `Welcome, ${user.role || user.person_name}! Access granted.`,
                 user: {
                   id: user.id,
                   username: user.username,
@@ -136,14 +147,16 @@ export default async function handler(req, res) {
 
       // Fallback check against default authorized person
       const match = DEFAULT_AUTHORIZED.find(
-        u => (u.username.toLowerCase() === cleanUser.toLowerCase() || u.person_name.toLowerCase() === cleanUser.toLowerCase()) &&
+        u => (u.username.toLowerCase() === cleanUser.toLowerCase() || 
+              u.person_name.toLowerCase() === cleanUser.toLowerCase() ||
+              (u.role && u.role.toLowerCase() === cleanUser.toLowerCase())) &&
              u.password === cleanPass
       );
 
       if (match) {
         return res.status(200).json({
           success: true,
-          message: `Welcome, ${match.person_name}! Access granted.`,
+          message: `Welcome, ${match.role || match.person_name}! Access granted.`,
           user: {
             id: match.id,
             username: match.username,
@@ -155,7 +168,7 @@ export default async function handler(req, res) {
 
       return res.status(401).json({
         success: false,
-        error: 'Invalid credentials. Please verify your Authorized Person name/ID and password.'
+        error: 'Invalid credentials. Please verify your Designation / Official Role and password.'
       });
     }
 
