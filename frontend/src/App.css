@@ -1070,6 +1070,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 32px;
+  align-items: stretch;
 }
 @media (max-width: 900px) {
   .sections-grid { grid-template-columns: 1fr; }
@@ -1083,6 +1084,10 @@
   backdrop-filter: blur(12px);
   box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
 }
 .home-section:hover {
   border-color: var(--border-glow);
@@ -1096,6 +1101,8 @@
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border-color);
+  min-height: 68px;
+  box-sizing: border-box;
 }
 .section-icon-badge {
   width: 50px;
@@ -1125,6 +1132,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
 }
 
 .portal-card {
@@ -1136,6 +1144,11 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  box-sizing: border-box;
 }
 .portal-card:hover {
   transform: translateY(-4px);
@@ -1147,6 +1160,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  min-height: 44px;
 }
 .card-icon {
   width: 44px;
@@ -1184,12 +1198,17 @@
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 8px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
 }
 .card-description {
   font-size: 0.86rem;
   color: var(--text-secondary);
   line-height: 1.5;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  min-height: 64px;
+  flex-grow: 1;
 }
 .card-meta {
   display: flex;
@@ -1198,6 +1217,8 @@
   color: var(--text-muted);
   margin-bottom: 20px;
   flex-wrap: wrap;
+  min-height: 24px;
+  align-items: center;
 }
 .card-meta span {
   display: flex;
@@ -1208,7 +1229,8 @@
 
 .btn-portal-action {
   width: 100%;
-  padding: 12px;
+  padding: 13px 20px;
+  min-height: 48px;
   border-radius: var(--radius-md);
   border: none;
   font-size: 0.9rem;
@@ -1220,6 +1242,8 @@
   gap: 8px;
   transition: all 0.3s ease;
   font-family: 'Poppins', sans-serif;
+  margin-top: auto;
+  box-sizing: border-box;
 }
 .btn-portal-action.cyan {
   background: linear-gradient(135deg, #2EC4B6 0%, #118AB2 100%);
