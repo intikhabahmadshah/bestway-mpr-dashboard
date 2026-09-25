@@ -1068,11 +1068,11 @@
 
 .sections-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 28px;
   align-items: stretch;
 }
-@media (max-width: 900px) {
+@media (max-width: 800px) {
   .sections-grid { grid-template-columns: 1fr; }
 }
 

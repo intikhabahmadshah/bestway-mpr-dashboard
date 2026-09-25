@@ -9,7 +9,7 @@ import BillsDataPage from './components/BillsDataPage';
 import BillsAuthGate from './components/BillsAuthGate';
 import AuthRegistryPage from './components/AuthRegistryPage';
 import SchedulePage from './components/SchedulePage';
-import LookAtSchedulePage from './components/LookAtSchedulePage';
+// import LookAtSchedulePage from './components/LookAtSchedulePage'; // Temporarily offline
 import ExportDashboardModal from './components/ExportDashboardModal';
 import KPICards from './components/KPICards';
 import ProgressChart from './components/ProgressChart';
@@ -55,7 +55,7 @@ function App() {
 
   const [currentView, setCurrentView] = useState(() => {
     const hash = window.location.hash.replace('#', '');
-    if (['home', 'grey_structure', 'bills_data', 'schedule', 'look_at_schedule', 'auth_registry'].includes(hash)) return hash;
+    if (['home', 'grey_structure', 'bills_data', 'schedule', 'auth_registry'].includes(hash)) return hash;
     return 'home';
   });
 
@@ -68,8 +68,10 @@ function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      if (['home', 'grey_structure', 'bills_data', 'schedule', 'look_at_schedule', 'auth_registry'].includes(hash)) {
+      if (['home', 'grey_structure', 'bills_data', 'schedule', 'auth_registry'].includes(hash)) {
         setCurrentView(hash);
+      } else if (hash === 'look_at_schedule') {
+        setCurrentView('home');
       }
     };
     window.addEventListener('hashchange', handleHashChange);
@@ -211,10 +213,6 @@ function App() {
 
         {currentView === 'schedule' && (
           <SchedulePage onNavigate={navigateTo} theme={theme} showToast={showToast} />
-        )}
-
-        {currentView === 'look_at_schedule' && (
-          <LookAtSchedulePage onNavigate={navigateTo} theme={theme} showToast={showToast} />
         )}
 
         {currentView === 'grey_structure' && (

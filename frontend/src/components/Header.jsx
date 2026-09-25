@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiSun, FiMoon, FiLayers, FiHome, FiTrendingUp, FiFileText, FiCalendar, FiEye } from 'react-icons/fi';
+import { FiSun, FiMoon, FiLayers, FiHome, FiTrendingUp, FiFileText, FiCalendar } from 'react-icons/fi';
 
 const Header = ({ theme, toggleTheme, currentView, onNavigate }) => {
   return (
@@ -28,9 +28,7 @@ const Header = ({ theme, toggleTheme, currentView, onNavigate }) => {
                     ? 'Authorized Personnel Registry & Security Control'
                     : (currentView === 'schedule' 
                       ? 'MS Project Activity Schedule' 
-                      : (currentView === 'look_at_schedule'
-                        ? 'Look at Schedule — Monthly Look-Ahead & Daily Gantt'
-                        : 'Monthly Progress Report Dashboard'))))}
+                      : 'Monthly Progress Report Dashboard')))}
             </span>
             {currentView === 'auth_registry' && (
               <span className="header-phase-badge" style={{ borderColor: 'rgba(239, 71, 111, 0.4)', color: '#EF476F' }}>
@@ -45,11 +43,6 @@ const Header = ({ theme, toggleTheme, currentView, onNavigate }) => {
             {currentView === 'schedule' && (
               <span className="header-phase-badge" style={{ borderColor: 'rgba(17, 138, 178, 0.4)', color: '#2EC4B6' }}>
                 <FiLayers size={12} /> 240 Activities | Live Database
-              </span>
-            )}
-            {currentView === 'look_at_schedule' && (
-              <span className="header-phase-badge" style={{ borderColor: 'rgba(46, 196, 182, 0.4)', color: '#2EC4B6' }}>
-                <FiEye size={12} /> Monthly Look-Ahead &amp; Daily Gantt
               </span>
             )}
           </div>
@@ -97,14 +90,6 @@ const Header = ({ theme, toggleTheme, currentView, onNavigate }) => {
             onClick={() => onNavigate('schedule')}
           >
             <FiCalendar size={15} /> <span>Activity Schedule</span>
-          </button>
-
-          <button 
-            type="button"
-            className={`header-nav-pill ${currentView === 'look_at_schedule' ? 'active' : ''}`}
-            onClick={() => onNavigate('look_at_schedule')}
-          >
-            <FiEye size={15} /> <span>Look at Schedule</span>
           </button>
         </div>
       </div>
