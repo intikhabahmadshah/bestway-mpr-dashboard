@@ -42,8 +42,8 @@ const INDIVIDUAL_GRAPHS = [
   {
     id: 'chart-card-variance',
     index: 4,
-    title: 'Schedule Variance Analysis',
-    filename: '4_Schedule_Variance_Analysis',
+    title: 'Schedule Variance Analysis (Days)',
+    filename: '4_Schedule_Variance_Analysis_Days',
     icon: <FiLayers style={{ color: '#EF476F' }} />
   }
 ];

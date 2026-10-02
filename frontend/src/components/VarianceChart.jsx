@@ -26,29 +26,38 @@ const VarianceChart = ({ data, theme }) => {
 
   const isDark = theme === 'dark';
 
-  const validData = data.filter(d => d.accumulative_actual !== null && d.accumulative_actual !== undefined);
+  const validData = data.filter(d => 
+    (d.variance_days !== null && d.variance_days !== undefined && d.variance_days !== '') ||
+    (d.accumulative_actual !== null && d.accumulative_actual !== undefined)
+  );
   
   const labels = validData.map(d => {
     const date = new Date(d.month_ending);
     return date.toLocaleDateString('default', { month: 'short', year: 'numeric' });
   });
 
-  const variances = validData.map(d => (d.accumulative_actual - d.accumulative_planned) * 100);
+  // Schedule Variance directly controlled by user-entered variance_days
+  const variances = validData.map(d => {
+    if (d.variance_days !== null && d.variance_days !== undefined && d.variance_days !== '') {
+      return Number(d.variance_days);
+    }
+    return 0;
+  });
   
   const minVal = Math.min(...variances, 0);
   const maxVal = Math.max(...variances, 0);
-  const yMin = Math.floor(minVal - 1.5);
-  const yMax = Math.max(Math.ceil(maxVal + 2.0), 2.5);
+  const yMin = Math.floor(Math.min(minVal - 3, -5));
+  const yMax = Math.ceil(Math.max(maxVal + 3, 5));
 
   const backgroundColors = variances.map(v => {
-    if (Math.abs(v) < 0.001) return isDark ? 'rgba(255, 209, 102, 0.8)' : 'rgba(255, 209, 102, 0.7)';
+    if (v === 0) return isDark ? 'rgba(255, 209, 102, 0.8)' : 'rgba(255, 209, 102, 0.7)';
     return v > 0 
       ? (isDark ? 'rgba(46, 196, 182, 0.8)' : 'rgba(46, 196, 182, 0.75)') 
       : (isDark ? 'rgba(239, 71, 111, 0.8)' : 'rgba(239, 71, 111, 0.75)');
   });
 
   const borderColors = variances.map(v => {
-    if (Math.abs(v) < 0.001) return '#FFD166';
+    if (v === 0) return '#FFD166';
     return v > 0 ? '#2EC4B6' : '#EF476F';
   });
 
@@ -56,7 +65,7 @@ const VarianceChart = ({ data, theme }) => {
     labels,
     datasets: [
       {
-        label: 'Schedule Variance %',
+        label: 'Schedule Variance (Days)',
         data: variances,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
@@ -67,7 +76,7 @@ const VarianceChart = ({ data, theme }) => {
           clip: false,
           color: (ctx) => {
             const val = ctx.dataset.data[ctx.dataIndex];
-            if (Math.abs(val) < 0.001) return isDark ? '#FFD166' : '#B45309';
+            if (val === 0) return isDark ? '#FFD166' : '#B45309';
             if (isDark) return val > 0 ? '#5EEAD4' : '#FDA4AF';
             return val > 0 ? '#0F766E' : '#BE123C';
           },
@@ -82,8 +91,8 @@ const VarianceChart = ({ data, theme }) => {
           offset: 6,
           font: { family: 'Poppins', size: 11, weight: 700 },
           formatter: (val) => {
-            if (Math.abs(val) < 0.001) return '0.00% (On Track)';
-            return (val > 0 ? '+' : '') + val.toFixed(2) + '%';
+            if (val === 0) return '0 Days (On Track)';
+            return (val > 0 ? `+${val}` : `${val}`) + ' Days';
           },
         },
       }
@@ -116,8 +125,8 @@ const VarianceChart = ({ data, theme }) => {
         callbacks: {
           label: (context) => {
             const val = context.parsed.y;
-            if (Math.abs(val) < 0.001) return 'Variance: 0.00% (On Track)';
-            return `Variance: ${val > 0 ? '+' : ''}${val.toFixed(2)}%`;
+            if (val === 0) return 'Variance: 0 Days (On Track)';
+            return `Variance: ${val > 0 ? '+' : ''}${val} Days ${val < 0 ? '(Behind Schedule / Delay)' : '(Ahead of Schedule)'}`;
           }
         }
       }
@@ -133,7 +142,7 @@ const VarianceChart = ({ data, theme }) => {
         ticks: {
           color: isDark ? '#64748b' : '#475569',
           font: { family: 'Poppins', size: 11 },
-          callback: (value) => value.toFixed(1) + '%'
+          callback: (value) => `${value > 0 ? '+' : ''}${value} Days`
         }
       },
       x: {

@@ -16,12 +16,11 @@ const KPICards = ({ data, selectedMonth }) => {
   const monthlyActual = activeData.monthly_actual !== null && activeData.monthly_actual !== undefined ? activeData.monthly_actual : null;
   const duration = activeData.duration || 0;
   const formatPercent = (val) => (val !== null && !isNaN(val) ? (val * 100).toFixed(2) + '%' : '—');
+  const hasVarianceDays = activeData.variance_days !== null && activeData.variance_days !== undefined && activeData.variance_days !== '';
+  const varianceDays = hasVarianceDays ? Number(activeData.variance_days) : null;
   const variance = accumActual !== null && !isNaN(accumActual) && !isNaN(accumPlanned) ? accumActual - accumPlanned : null;
   const variancePercentVal = variance !== null ? variance * 100 : null;
-  // Project Schedule Lag in Days (15 Days Lag / Delay as per MS Project tracking)
-  const varianceDays = variance !== null && !isNaN(variance) 
-    ? (Number(activeData.lag_days) || (variance < 0 ? 15 : Math.round(Math.abs(variance) * (Number(duration) || 153)))) 
-    : null;
+  const cardColor = varianceDays === null ? 'amber' : (varianceDays >= 0 ? 'green' : 'red');
   const spi = accumPlanned > 0 && accumActual !== null && !isNaN(accumActual) ? accumActual / accumPlanned : null;
 
   const monthLabel = activeData.month_ending
@@ -63,27 +62,27 @@ const KPICards = ({ data, selectedMonth }) => {
         </div>
       </div>
 
-      <div className={`kpi-card ${variance === null ? 'amber' : (variance >= 0 ? 'green' : 'red')}`}>
-        <div className={`kpi-icon ${variance === null ? 'amber' : (variance >= 0 ? 'green' : 'red')}`}>
+      <div className={`kpi-card ${cardColor}`}>
+        <div className={`kpi-icon ${cardColor}`}>
           <FiActivity />
         </div>
-        <div className="kpi-label">Variance (% &amp; Days)</div>
+        <div className="kpi-label">Schedule Variance (Days)</div>
         <div className="kpi-value" style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-          <span>{variance !== null && !isNaN(variancePercentVal) ? `${variance > 0 ? '+' : ''}${variancePercentVal.toFixed(2)}%` : '—'}</span>
-          {varianceDays !== null && !isNaN(varianceDays) && (
-            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: variance >= 0 ? '#2EC4B6' : '#EF476F' }}>
-              ({variance < 0 ? `-${varianceDays}` : (variance > 0 ? `+${varianceDays}` : '0')} Days)
+          <span>{varianceDays !== null ? (varianceDays > 0 ? `+${varianceDays} Days` : `${varianceDays} Days`) : '—'}</span>
+          {variancePercentVal !== null && !isNaN(variancePercentVal) && (
+            <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+              ({variancePercentVal > 0 ? '+' : ''}{variancePercentVal.toFixed(2)}%)
             </span>
           )}
         </div>
         <div className="kpi-sub">
-          <span className={variance === null ? '' : (variance >= 0 ? 'positive' : 'negative')}>
-            {variance === null 
-              ? 'Pending actual data' 
-              : (variance > 0 
+          <span className={varianceDays === null ? '' : (varianceDays >= 0 ? 'positive' : 'negative')}>
+            {varianceDays === null 
+              ? 'Pending data' 
+              : (varianceDays > 0 
                 ? `Ahead of schedule (+${varianceDays} Days)` 
-                : (variance < 0 
-                  ? `Behind schedule (${varianceDays} Days Delay)` 
+                : (varianceDays < 0 
+                  ? `Behind schedule (${Math.abs(varianceDays)} Days Delay)` 
                   : 'On Track (0 Days Variance)'))}
           </span>
         </div>

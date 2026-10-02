@@ -66,7 +66,14 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
   };
 
   // Gauge 2: Target vs Actual Gap
-  const targetGapColor = Math.abs(varianceVal) < 0.01 ? '#FFD166' : (varianceVal > 0 ? '#2EC4B6' : '#EF476F');
+  const hasVarianceDays = activeData.variance_days !== null && activeData.variance_days !== undefined && activeData.variance_days !== '';
+  const vDays = hasVarianceDays ? Number(activeData.variance_days) : null;
+  const targetGapColor = vDays !== null 
+    ? (vDays === 0 ? '#FFD166' : (vDays > 0 ? '#2EC4B6' : '#EF476F'))
+    : (Math.abs(varianceVal) < 0.01 ? '#FFD166' : (varianceVal > 0 ? '#2EC4B6' : '#EF476F'));
+  const statusLabel = vDays !== null 
+    ? (vDays === 0 ? 'On Track (0 Days)' : (vDays > 0 ? `Ahead (+${vDays} Days)` : `Behind (${Math.abs(vDays)} Days Delay)`))
+    : (Math.abs(varianceVal) < 0.01 ? 'On Track' : (varianceVal > 0 ? 'Ahead' : 'Behind'));
   
   const targetChartData = {
     labels: ['Target Gap', 'Balance'],
@@ -121,7 +128,7 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
         <div className="gauge-footer-text">
           <span style={{ fontWeight: 700, color: '#118AB2' }}>● Target: {accumPlanned.toFixed(1)}%</span>
           <div style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
-            Status: <strong style={{ color: targetGapColor }}>{Math.abs(varianceVal) < 0.01 ? 'On Track' : (varianceVal > 0 ? 'Ahead' : 'Behind')}</strong>
+            Status: <strong style={{ color: targetGapColor }}>{statusLabel}</strong>
           </div>
         </div>
       </div>

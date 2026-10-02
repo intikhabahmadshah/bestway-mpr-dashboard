@@ -36,6 +36,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
           monthly_actual: r.monthly_actual !== null && r.monthly_actual !== undefined ? (Number(r.monthly_actual) * 100).toFixed(2) : '',
           accumulative_planned: r.accumulative_planned !== null && r.accumulative_planned !== undefined ? (Number(r.accumulative_planned) * 100).toFixed(2) : '',
           accumulative_actual: r.accumulative_actual !== null && r.accumulative_actual !== undefined ? (Number(r.accumulative_actual) * 100).toFixed(2) : '',
+          variance_days: r.variance_days !== undefined && r.variance_days !== null && r.variance_days !== '' ? r.variance_days : '',
         }))
       );
     }
@@ -68,7 +69,8 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         monthly_planned: '',
         monthly_actual: '',
         accumulative_planned: '',
-        accumulative_actual: ''
+        accumulative_actual: '',
+        variance_days: ''
       }
     ]);
   };
@@ -150,6 +152,12 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         return num <= 1 && num > 0 ? (num * 100).toFixed(2) : num.toString();
       };
 
+      const parseVarianceDays = (val) => {
+        if (!val || val === '' || val === 'null' || val === 'undefined') return '';
+        const num = parseInt(val, 10);
+        return isNaN(num) ? '' : num.toString();
+      };
+
       parsed.push({
         id: i,
         month: parts[0] || '',
@@ -158,7 +166,8 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         monthly_planned: parsePercentStr(parts[3]),
         monthly_actual: parsePercentStr(parts[4]),
         accumulative_planned: parsePercentStr(parts[5]),
-        accumulative_actual: parsePercentStr(parts[6])
+        accumulative_actual: parsePercentStr(parts[6]),
+        variance_days: parseVarianceDays(parts[7])
       });
     }
     return parsed;
@@ -203,6 +212,12 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         return num > 1 ? num / 100.0 : num;
       };
 
+      const parseVariance = (val) => {
+        if (val === '' || val === null || val === undefined) return null;
+        const num = parseInt(val, 10);
+        return isNaN(num) ? null : num;
+      };
+
       return {
         id: i + 1,
         month: r.month.trim(),
@@ -211,7 +226,8 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         monthly_planned: toDecimal(r.monthly_planned),
         monthly_actual: toDecimal(r.monthly_actual),
         accumulative_planned: toDecimal(r.accumulative_planned),
-        accumulative_actual: toDecimal(r.accumulative_actual)
+        accumulative_actual: toDecimal(r.accumulative_actual),
+        variance_days: parseVariance(r.variance_days)
       };
     });
 
@@ -319,12 +335,12 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
               {/* Helper Action Bar */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  💡 Enter percentage as numbers (e.g. <code>4.70</code> for 4.70%). Leave Actual % empty for future unworked months.
+                  💡 Enter percentage as numbers (e.g. <code>4.70</code>). In <strong>Variance (Days)</strong>, enter exact days (e.g. <code>-15</code> for 15d delay, <code>+5</code> for ahead, <code>0</code> for on track) to fix charts &amp; KPIs.
                 </span>
 
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <button 
-                    type="button"
+                    type="button" 
                     className="btn-shortcut"
                     onClick={handleAutoCalculate}
                     style={{ padding: '6px 14px', fontSize: '0.78rem', background: 'rgba(46, 196, 182, 0.15)', color: '#2EC4B6', border: '1px solid rgba(46, 196, 182, 0.4)' }}
@@ -334,7 +350,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
                   </button>
 
                   <button 
-                    type="button"
+                    type="button" 
                     className="btn-shortcut"
                     onClick={handleAddRow}
                     style={{ padding: '6px 14px', fontSize: '0.78rem' }}
@@ -346,18 +362,19 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
 
               {/* Editable Data Table Grid */}
               <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                <table className="schedule-table" style={{ width: '100%', minWidth: '850px' }}>
+                <table className="schedule-table" style={{ width: '100%', minWidth: '950px' }}>
                   <thead>
                     <tr style={{ background: 'var(--bg-secondary)' }}>
-                      <th style={{ width: '40px', textAlign: 'center' }}>#</th>
-                      <th style={{ width: '120px' }}>Month Start</th>
-                      <th style={{ width: '120px' }}>Month Ending</th>
-                      <th style={{ width: '90px', textAlign: 'center' }}>Duration (Days)</th>
-                      <th style={{ width: '110px', textAlign: 'center' }}>Monthly Planned %</th>
-                      <th style={{ width: '110px', textAlign: 'center' }}>Monthly Actual %</th>
-                      <th style={{ width: '110px', textAlign: 'center' }}>Accum. Planned %</th>
-                      <th style={{ width: '110px', textAlign: 'center' }}>Accum. Actual %</th>
-                      <th style={{ width: '45px', textAlign: 'center' }}></th>
+                      <th style={{ width: '35px', textAlign: 'center' }}>#</th>
+                      <th style={{ width: '110px' }}>Month Start</th>
+                      <th style={{ width: '110px' }}>Month Ending</th>
+                      <th style={{ width: '85px', textAlign: 'center' }}>Duration (Days)</th>
+                      <th style={{ width: '105px', textAlign: 'center' }}>Monthly Planned %</th>
+                      <th style={{ width: '105px', textAlign: 'center' }}>Monthly Actual %</th>
+                      <th style={{ width: '105px', textAlign: 'center' }}>Accum. Planned %</th>
+                      <th style={{ width: '105px', textAlign: 'center' }}>Accum. Actual %</th>
+                      <th style={{ width: '105px', textAlign: 'center' }}>Variance (Days)</th>
+                      <th style={{ width: '40px', textAlign: 'center' }}></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -443,6 +460,30 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
                               style={{ width: '100%', textAlign: 'right', padding: '6px 22px 6px 8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: '#2EC4B6', fontSize: '0.82rem', fontWeight: 700 }}
                             />
                             <span style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.76rem' }}>%</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ position: 'relative' }}>
+                            <input 
+                              type="number" 
+                              step="1"
+                              value={row.variance_days !== undefined && row.variance_days !== null ? row.variance_days : ''} 
+                              placeholder="e.g. -15 or 5"
+                              onChange={e => handleCellChange(index, 'variance_days', e.target.value)}
+                              style={{ 
+                                width: '100%', 
+                                textAlign: 'center', 
+                                padding: '6px 8px', 
+                                borderRadius: '4px', 
+                                border: '1px solid var(--border-color)', 
+                                background: 'var(--bg-card)', 
+                                color: row.variance_days !== '' && Number(row.variance_days) < 0 
+                                  ? '#EF476F' 
+                                  : (Number(row.variance_days) > 0 ? '#2EC4B6' : 'var(--text-primary)'), 
+                                fontSize: '0.82rem', 
+                                fontWeight: 700 
+                              }}
+                            />
                           </div>
                         </td>
                         <td style={{ textAlign: 'center' }}>

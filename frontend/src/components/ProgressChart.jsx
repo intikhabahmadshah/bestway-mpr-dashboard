@@ -70,30 +70,28 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
   const focusPlanned = (activePointData.accumulative_planned || 0) * 100;
   const focusVariance = focusActual !== null ? (focusActual - focusPlanned) / 100 : null;
   const focusVariancePercentVal = focusVariance !== null ? focusVariance * 100 : null;
-  // Project Schedule Lag in Days (15 Days Lag / Delay as per MS Project tracking)
-  const focusVarianceDays = focusVariance !== null && !isNaN(focusVariance) 
-    ? (Number(activePointData.lag_days) || (focusVariance < 0 ? 15 : Math.round(Math.abs(focusVariance) * (Number(activePointData.duration) || 153)))) 
-    : null;
+  const hasVarianceDays = activePointData.variance_days !== null && activePointData.variance_days !== undefined && activePointData.variance_days !== '';
+  const focusVarianceDays = hasVarianceDays ? Number(activePointData.variance_days) : null;
 
   const focusMonthLabel = activePointData.month_ending
     ? new Date(activePointData.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' })
     : activePointData.month;
 
-  const statusText = focusVariance === null 
-    ? 'PLANNED' 
-    : focusVariance > 0 
+  const statusText = focusVarianceDays === null 
+    ? (focusActual !== null ? 'COMPLETED' : 'PLANNED') 
+    : focusVarianceDays > 0 
     ? 'AHEAD OF SCHEDULE' 
-    : focusVariance < 0 
+    : focusVarianceDays < 0 
     ? 'BEHIND SCHEDULE' 
     : 'ON TRACK';
 
-  const statusColor = focusVariance === null 
+  const statusColor = focusVarianceDays === null 
     ? '#118AB2' 
-    : focusVariance > 0 
+    : focusVarianceDays > 0 
     ? '#2EC4B6' 
-    : focusVariance < 0 
+    : focusVarianceDays < 0 
     ? '#EF476F' 
-    : '#118AB2';
+    : '#2EC4B6';
 
   const chartData = {
     labels,
@@ -324,7 +322,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
           ctx.fillStyle = statusColor;
           const varPercentText = focusVariancePercentVal !== null ? `${focusVariancePercentVal > 0 ? '+' : ''}${focusVariancePercentVal.toFixed(2)}%` : '0.00%';
           const varDaysText = focusVarianceDays !== null 
-            ? (focusVariance < 0 ? `${focusVarianceDays} Days Delay` : (focusVariance > 0 ? `+${focusVarianceDays} Days Ahead` : '0 Days'))
+            ? (focusVarianceDays < 0 ? `${Math.abs(focusVarianceDays)} Days Delay` : (focusVarianceDays > 0 ? `+${focusVarianceDays} Days Ahead` : '0 Days (On Track)'))
             : '0 Days';
           ctx.fillText(`${varPercentText} (${varDaysText})`, boxX + (isMobile ? 60 : 78), line2Y);
 

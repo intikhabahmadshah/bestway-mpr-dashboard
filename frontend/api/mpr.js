@@ -52,10 +52,18 @@ export default async function handler(req, res) {
         monthly_actual DECIMAL(10,8),
         accumulative_planned DECIMAL(10,8),
         accumulative_actual DECIMAL(10,8),
+        variance_days INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       );
     `);
+
+    // Ensure variance_days column exists if table was created previously
+    try {
+      await p.query('ALTER TABLE MPR ADD COLUMN variance_days INT DEFAULT 0');
+    } catch (e) {
+      // Column may already exist
+    }
 
     if (req.method === 'GET') {
       const [rows] = await p.query('SELECT * FROM MPR ORDER BY duration ASC');
@@ -80,12 +88,13 @@ export default async function handler(req, res) {
           row.monthly_planned,
           row.monthly_actual,
           row.accumulative_planned,
-          row.accumulative_actual
+          row.accumulative_actual,
+          row.variance_days !== undefined && row.variance_days !== null && row.variance_days !== '' && !isNaN(Number(row.variance_days)) ? parseInt(row.variance_days, 10) : null
         ]);
 
         const query = `
           INSERT INTO MPR (
-            month, month_ending, duration, monthly_planned, monthly_actual, accumulative_planned, accumulative_actual
+            month, month_ending, duration, monthly_planned, monthly_actual, accumulative_planned, accumulative_actual, variance_days
           ) VALUES ?
         `;
 

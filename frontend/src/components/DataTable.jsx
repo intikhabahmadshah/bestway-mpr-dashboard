@@ -45,18 +45,21 @@ const DataTable = ({ data, selectedMonth, onSelectMonth }) => {
   };
 
   const getStatusBadge = (row) => {
-    if (row.accumulative_actual === null || row.accumulative_actual === undefined) {
-      return <span className="status-badge pending">Pending</span>;
+    const hasVarianceDays = row.variance_days !== null && row.variance_days !== undefined && row.variance_days !== '';
+    if (!hasVarianceDays) {
+      if (row.accumulative_actual === null || row.accumulative_actual === undefined) {
+        return <span className="status-badge pending">Pending</span>;
+      }
+      return <span className="status-badge on-track">On Track</span>;
     }
     
-    const variance = (row.accumulative_actual - row.accumulative_planned) * 100;
-    
-    if (Math.abs(variance) <= 0.5) {
-      return <span className="status-badge on-track">On Track</span>;
-    } else if (variance > 0) {
-      return <span className="status-badge ahead">Ahead</span>;
+    const vDays = Number(row.variance_days);
+    if (vDays === 0) {
+      return <span className="status-badge on-track">On Track (0d)</span>;
+    } else if (vDays > 0) {
+      return <span className="status-badge ahead">Ahead (+{vDays}d)</span>;
     } else {
-      return <span className="status-badge behind">Behind</span>;
+      return <span className="status-badge behind">Behind ({vDays}d)</span>;
     }
   };
 
@@ -74,6 +77,7 @@ const DataTable = ({ data, selectedMonth, onSelectMonth }) => {
               <th onClick={() => handleSort('monthly_actual')}>Monthly Actual %</th>
               <th onClick={() => handleSort('accumulative_planned')}>Accum. Planned %</th>
               <th onClick={() => handleSort('accumulative_actual')}>Accum. Actual %</th>
+              <th onClick={() => handleSort('variance_days')} style={{ textAlign: 'center' }}>Variance (Days)</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -97,6 +101,15 @@ const DataTable = ({ data, selectedMonth, onSelectMonth }) => {
                   <td>{formatPercent(row.accumulative_planned)}</td>
                   <td style={{ fontWeight: isSelected ? 800 : 'normal', color: isSelected ? '#10b981' : 'inherit' }}>
                     {formatPercent(row.accumulative_actual)}
+                  </td>
+                  <td style={{ textAlign: 'center', fontWeight: 700 }}>
+                    {row.variance_days !== null && row.variance_days !== undefined && row.variance_days !== '' ? (
+                      <span style={{
+                        color: Number(row.variance_days) < 0 ? '#EF476F' : (Number(row.variance_days) > 0 ? '#2EC4B6' : 'var(--text-muted)')
+                      }}>
+                        {Number(row.variance_days) > 0 ? `+${row.variance_days}` : row.variance_days} Days
+                      </span>
+                    ) : '—'}
                   </td>
                   <td>{getStatusBadge(row)}</td>
                 </tr>
