@@ -36,8 +36,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
           monthly_actual: r.monthly_actual !== null && r.monthly_actual !== undefined ? (Number(r.monthly_actual) * 100).toFixed(2) : '',
           accumulative_planned: r.accumulative_planned !== null && r.accumulative_planned !== undefined ? (Number(r.accumulative_planned) * 100).toFixed(2) : '',
           accumulative_actual: r.accumulative_actual !== null && r.accumulative_actual !== undefined ? (Number(r.accumulative_actual) * 100).toFixed(2) : '',
-          variance_days: r.variance_days !== undefined && r.variance_days !== null && r.variance_days !== '' ? r.variance_days : '',
-          spi: r.spi !== undefined && r.spi !== null && r.spi !== '' ? r.spi : '',
+          variance_days: r.variance_days !== undefined && r.variance_days !== null && r.variance_days !== '' ? r.variance_days : ''
         }))
       );
     }
@@ -71,8 +70,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         monthly_actual: '',
         accumulative_planned: '',
         accumulative_actual: '',
-        variance_days: '',
-        spi: ''
+        variance_days: ''
       }
     ]);
   };
@@ -100,16 +98,12 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         }
 
         let mActVal = '';
-        let calcSpi = r.spi;
 
         if (r.monthly_actual !== '' && r.monthly_actual !== null && r.monthly_actual !== undefined) {
           const mAct = parseFloat(r.monthly_actual);
           if (!isNaN(mAct)) {
             accumAct += mAct;
             mActVal = Math.min(100, accumAct).toFixed(2);
-            if (calcSpi === '' || calcSpi === null || calcSpi === undefined) {
-              calcSpi = accumPlan > 0 ? (parseFloat(mActVal) / accumPlan).toFixed(2) : '1.00';
-            }
           } else {
             actualActive = false;
           }
@@ -120,8 +114,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         return {
           ...r,
           accumulative_planned: isNaN(mPlan) ? r.accumulative_planned : Math.min(100, accumPlan).toFixed(2),
-          accumulative_actual: actualActive ? mActVal : '',
-          spi: calcSpi !== undefined ? calcSpi : ''
+          accumulative_actual: actualActive ? mActVal : ''
         };
       });
     });
@@ -182,8 +175,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         monthly_actual: parsePercentStr(parts[4]),
         accumulative_planned: parsePercentStr(parts[5]),
         accumulative_actual: parsePercentStr(parts[6]),
-        variance_days: parseVarianceDays(parts[7]),
-        spi: parseDecimalStr(parts[8])
+        variance_days: parseVarianceDays(parts[7])
       });
     }
     return parsed;
@@ -234,12 +226,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         return isNaN(num) ? null : num;
       };
 
-      const parseNumber = (val) => {
-        if (val === '' || val === null || val === undefined) return null;
-        const num = parseFloat(val);
-        return isNaN(num) ? null : num;
-      };
-
       return {
         id: i + 1,
         month: r.month.trim(),
@@ -249,8 +235,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         monthly_actual: toDecimal(r.monthly_actual),
         accumulative_planned: toDecimal(r.accumulative_planned),
         accumulative_actual: toDecimal(r.accumulative_actual),
-        variance_days: parseVariance(r.variance_days),
-        spi: parseNumber(r.spi)
+        variance_days: parseVariance(r.variance_days)
       };
     });
 
@@ -358,7 +343,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
               {/* Helper Action Bar */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  💡 Enter percentage as numbers (e.g. <code>4.70</code>). In <strong>Variance (Days)</strong> and <strong>SPI</strong>, enter your custom values to directly fix dashboard charts &amp; KPIs.
+                  💡 Enter percentage as numbers (e.g. <code>4.70</code>). In <strong>Variance (Days)</strong>, enter your custom values to directly fix dashboard charts &amp; KPIs.
                 </span>
 
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -385,7 +370,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
 
               {/* Editable Data Table Grid */}
               <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                <table className="schedule-table" style={{ width: '100%', minWidth: '1050px' }}>
+                <table className="schedule-table" style={{ width: '100%', minWidth: '950px' }}>
                   <thead>
                     <tr style={{ background: 'var(--bg-secondary)' }}>
                       <th style={{ width: '30px', textAlign: 'center' }}>#</th>
@@ -397,7 +382,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
                       <th style={{ width: '90px', textAlign: 'center' }}>Accum. Planned %</th>
                       <th style={{ width: '90px', textAlign: 'center' }}>Accum. Actual %</th>
                       <th style={{ width: '90px', textAlign: 'center' }}>Variance (Days)</th>
-                      <th style={{ width: '80px', textAlign: 'center' }}>SPI</th>
                       <th style={{ width: '35px', textAlign: 'center' }}></th>
                     </tr>
                   </thead>
@@ -509,28 +493,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
                               }}
                             />
                           </div>
-                        </td>
-                        <td>
-                          <input 
-                            type="number" 
-                            step="0.01"
-                            value={row.spi !== undefined && row.spi !== null ? row.spi : ''} 
-                            placeholder="e.g. 1.02"
-                            onChange={e => handleCellChange(index, 'spi', e.target.value)}
-                            style={{ 
-                              width: '100%', 
-                              textAlign: 'center', 
-                              padding: '6px 4px', 
-                              borderRadius: '4px', 
-                              border: '1px solid var(--border-color)', 
-                              background: 'var(--bg-card)', 
-                              color: row.spi !== '' && Number(row.spi) < 1.0 
-                                ? '#EF476F' 
-                                : (Number(row.spi) >= 1.0 ? '#2EC4B6' : 'var(--text-primary)'), 
-                              fontSize: '0.82rem', 
-                              fontWeight: 700 
-                            }}
-                          />
                         </td>
                         <td style={{ textAlign: 'center' }}>
                           <button 

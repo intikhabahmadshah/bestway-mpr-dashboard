@@ -23,10 +23,10 @@ const KPICards = ({ data, selectedMonth }) => {
     : null;
   const cardColor = varianceDays === null ? 'amber' : (varianceDays >= 0 ? 'green' : 'red');
 
-  const hasManualSpi = activeData.spi !== null && activeData.spi !== undefined && activeData.spi !== '';
-  const spi = hasManualSpi 
-    ? Number(activeData.spi) 
-    : (accumPlanned > 0 && accumActual !== null && !isNaN(accumActual) ? accumActual / accumPlanned : null);
+  // Auto-calculate SPI: Uses Earned Schedule Performance Index ((duration + varianceDays) / duration) if varianceDays is provided, or progress ratio (accumActual / accumPlanned)
+  const spi = (varianceDays !== null && duration > 0)
+    ? Number(((duration + varianceDays) / duration).toFixed(2))
+    : (accumPlanned > 0 && accumActual !== null && !isNaN(accumActual) ? Number((accumActual / accumPlanned).toFixed(2)) : null);
 
   const monthLabel = activeData.month_ending
     ? new Date(activeData.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' })
