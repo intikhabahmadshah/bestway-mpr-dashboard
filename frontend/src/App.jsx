@@ -20,26 +20,26 @@ import DataTable from './components/DataTable';
 import UpdateDataModal from './components/UpdateDataModal';
 
 const FALLBACK_DATA = [
-  { month: '3/26/2026', month_ending: '3/31/2026', duration: 6, monthly_planned: 0, monthly_actual: 0, accumulative_planned: 0, accumulative_actual: 0, variance_days: 0, target_diff: 0, spi: 1.0 },
-  { month: '4/26/2026', month_ending: '4/30/2026', duration: 36, monthly_planned: 0.04112, monthly_actual: 0.02832, accumulative_planned: 0.04112, accumulative_actual: 0.02832, variance_days: -5, target_diff: -1.28, spi: 0.69 },
-  { month: '5/26/2026', month_ending: '5/31/2026', duration: 67, monthly_planned: 0.02096, monthly_actual: 0.0328, accumulative_planned: 0.06208, accumulative_actual: 0.06112, variance_days: 0, target_diff: -0.10, spi: 0.98 },
-  { month: '6/26/2026', month_ending: '6/30/2026', duration: 97, monthly_planned: 0.07312, monthly_actual: 0.07988, accumulative_planned: 0.1352, accumulative_actual: 0.141, variance_days: 2, target_diff: 0.58, spi: 1.04 },
-  { month: '7/26/2026', month_ending: '7/31/2026', duration: 128, monthly_planned: 0.0528, monthly_actual: 0.053, accumulative_planned: 0.188, accumulative_actual: 0.194, variance_days: -15, target_diff: 0.60, spi: 1.03 },
-  { month: '8/26/2026', month_ending: '8/31/2026', duration: 159, monthly_planned: 0.067161905, monthly_actual: null, accumulative_planned: 0.255161905, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '9/26/2026', month_ending: '9/30/2026', duration: 189, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.30887619, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '10/26/2026', month_ending: '10/31/2026', duration: 220, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.364380952, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '11/26/2026', month_ending: '11/30/2026', duration: 250, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.418095238, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '12/26/2026', month_ending: '12/31/2026', duration: 281, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.4736, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '1/27/2026', month_ending: '1/31/2027', duration: 312, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.529104762, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '2/27/2026', month_ending: '2/28/2027', duration: 340, monthly_planned: 0.050133333, monthly_actual: null, accumulative_planned: 0.579238095, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '3/27/2026', month_ending: '3/31/2027', duration: 371, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.634742857, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '4/27/2026', month_ending: '4/30/2027', duration: 401, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.688457143, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '5/27/2026', month_ending: '5/31/2027', duration: 432, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.743961905, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '6/27/2026', month_ending: '6/30/2027', duration: 462, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.79767619, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '7/27/2026', month_ending: '7/31/2027', duration: 493, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.853180952, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '8/27/2026', month_ending: '8/31/2027', duration: 524, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.908685714, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '9/27/2026', month_ending: '9/30/2027', duration: 554, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.9624, accumulative_actual: null, variance_days: null, target_diff: null, spi: null },
-  { month: '10/27/2026', month_ending: '10/31/2027', duration: 585, monthly_planned: 0.0376, monthly_actual: null, accumulative_planned: 1, accumulative_actual: null, variance_days: null, target_diff: null, spi: null }
+  { month: '3/26/2026', month_ending: '3/31/2026', duration: 6, monthly_planned: 0, monthly_actual: 0, accumulative_planned: 0, accumulative_actual: 0, variance_days: 0, spi: 1.0 },
+  { month: '4/26/2026', month_ending: '4/30/2026', duration: 36, monthly_planned: 0.04112, monthly_actual: 0.02832, accumulative_planned: 0.04112, accumulative_actual: 0.02832, variance_days: -5, spi: 0.69 },
+  { month: '5/26/2026', month_ending: '5/31/2026', duration: 67, monthly_planned: 0.02096, monthly_actual: 0.0328, accumulative_planned: 0.06208, accumulative_actual: 0.06112, variance_days: 0, spi: 0.98 },
+  { month: '6/26/2026', month_ending: '6/30/2026', duration: 97, monthly_planned: 0.07312, monthly_actual: 0.07988, accumulative_planned: 0.1352, accumulative_actual: 0.141, variance_days: 2, spi: 1.04 },
+  { month: '7/26/2026', month_ending: '7/31/2026', duration: 128, monthly_planned: 0.0528, monthly_actual: 0.053, accumulative_planned: 0.188, accumulative_actual: 0.194, variance_days: -15, spi: 1.03 },
+  { month: '8/26/2026', month_ending: '8/31/2026', duration: 159, monthly_planned: 0.067161905, monthly_actual: null, accumulative_planned: 0.255161905, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '9/26/2026', month_ending: '9/30/2026', duration: 189, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.30887619, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '10/26/2026', month_ending: '10/31/2026', duration: 220, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.364380952, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '11/26/2026', month_ending: '11/30/2026', duration: 250, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.418095238, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '12/26/2026', month_ending: '12/31/2026', duration: 281, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.4736, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '1/27/2026', month_ending: '1/31/2027', duration: 312, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.529104762, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '2/27/2026', month_ending: '2/28/2027', duration: 340, monthly_planned: 0.050133333, monthly_actual: null, accumulative_planned: 0.579238095, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '3/27/2026', month_ending: '3/31/2027', duration: 371, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.634742857, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '4/27/2026', month_ending: '4/30/2027', duration: 401, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.688457143, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '5/27/2026', month_ending: '5/31/2027', duration: 432, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.743961905, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '6/27/2026', month_ending: '6/30/2027', duration: 462, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.79767619, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '7/27/2026', month_ending: '7/31/2027', duration: 493, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.853180952, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '8/27/2026', month_ending: '8/31/2027', duration: 524, monthly_planned: 0.055504762, monthly_actual: null, accumulative_planned: 0.908685714, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '9/27/2026', month_ending: '9/30/2027', duration: 554, monthly_planned: 0.053714286, monthly_actual: null, accumulative_planned: 0.9624, accumulative_actual: null, variance_days: null, spi: null },
+  { month: '10/27/2026', month_ending: '10/31/2027', duration: 585, monthly_planned: 0.0376, monthly_actual: null, accumulative_planned: 1, accumulative_actual: null, variance_days: null, spi: null }
 ];
 
 function App() {
@@ -108,7 +108,6 @@ function App() {
       accumulative_planned: row.accumulative_planned !== null && row.accumulative_planned !== undefined ? parseFloat(row.accumulative_planned) : null,
       accumulative_actual: row.accumulative_actual !== null && row.accumulative_actual !== undefined ? parseFloat(row.accumulative_actual) : null,
       variance_days: row.variance_days !== null && row.variance_days !== undefined && row.variance_days !== '' && !isNaN(Number(row.variance_days)) ? Number(row.variance_days) : null,
-      target_diff: row.target_diff !== null && row.target_diff !== undefined && row.target_diff !== '' && !isNaN(Number(row.target_diff)) ? parseFloat(row.target_diff) : null,
       spi: row.spi !== null && row.spi !== undefined && row.spi !== '' && !isNaN(Number(row.spi)) ? parseFloat(row.spi) : null,
     }));
   };

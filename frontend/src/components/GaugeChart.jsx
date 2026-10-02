@@ -16,10 +16,7 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
   const activeData = selectedMonth || latestDefaultData;
   const accumActual = activeData.accumulative_actual !== null && activeData.accumulative_actual !== undefined ? activeData.accumulative_actual * 100 : 0;
   const accumPlanned = (activeData.accumulative_planned || 0) * 100;
-  
-  // Target Diff (%): Use manual target_diff if entered, otherwise calculate
-  const hasTargetDiff = activeData.target_diff !== null && activeData.target_diff !== undefined && activeData.target_diff !== '';
-  const varianceVal = hasTargetDiff ? Number(activeData.target_diff) : (accumActual !== 0 ? accumActual - accumPlanned : 0);
+  const varianceVal = accumActual - accumPlanned;
   const targetGap = Math.abs(varianceVal);
   
   const monthLabel = activeData.month_ending
@@ -69,14 +66,7 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
   };
 
   // Gauge 2: Target vs Actual Gap
-  const hasVarianceDays = activeData.variance_days !== null && activeData.variance_days !== undefined && activeData.variance_days !== '';
-  const vDays = hasVarianceDays ? Number(activeData.variance_days) : null;
-  const targetGapColor = vDays !== null 
-    ? (vDays === 0 ? '#FFD166' : (vDays > 0 ? '#2EC4B6' : '#EF476F'))
-    : (Math.abs(varianceVal) < 0.01 ? '#FFD166' : (varianceVal > 0 ? '#2EC4B6' : '#EF476F'));
-  const statusLabel = vDays !== null 
-    ? (vDays === 0 ? 'On Track (0 Days)' : (vDays > 0 ? `Ahead (+${vDays} Days)` : `Behind (${Math.abs(vDays)} Days Delay)`))
-    : (Math.abs(varianceVal) < 0.01 ? 'On Track' : (varianceVal > 0 ? 'Ahead' : 'Behind'));
+  const targetGapColor = Math.abs(varianceVal) < 0.01 ? '#FFD166' : (varianceVal > 0 ? '#2EC4B6' : '#EF476F');
   
   const targetChartData = {
     labels: ['Target Gap', 'Balance'],
@@ -121,7 +111,7 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
           <Doughnut data={targetChartData} options={commonOptions} />
           <div className="gauge-center-text">
             <div className="gauge-value" style={{ color: targetGapColor }}>
-              {varianceVal !== null && !isNaN(varianceVal) ? `${varianceVal > 0 ? '+' : ''}${varianceVal.toFixed(1)}%` : '—'}
+              {varianceVal > 0 ? '+' : ''}{varianceVal.toFixed(1)}%
             </div>
             <div className="gauge-label">
               Target Diff
@@ -131,7 +121,7 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
         <div className="gauge-footer-text">
           <span style={{ fontWeight: 700, color: '#118AB2' }}>● Target: {accumPlanned.toFixed(1)}%</span>
           <div style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
-            Status: <strong style={{ color: targetGapColor }}>{statusLabel}</strong>
+            Status: <strong style={{ color: targetGapColor }}>{Math.abs(varianceVal) < 0.01 ? 'On Track' : (varianceVal > 0 ? 'Ahead' : 'Behind')}</strong>
           </div>
         </div>
       </div>

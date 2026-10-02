@@ -26,10 +26,14 @@ const VarianceChart = ({ data, theme }) => {
 
   const isDark = theme === 'dark';
 
+  // Only show up to the month that has actual progress (exclude future unworked months)
   const validData = data.filter(d => 
-    (d.variance_days !== null && d.variance_days !== undefined && d.variance_days !== '') ||
-    (d.accumulative_actual !== null && d.accumulative_actual !== undefined)
+    d.accumulative_actual !== null && 
+    d.accumulative_actual !== undefined && 
+    d.accumulative_actual !== ''
   );
+
+  if (validData.length === 0) return null;
   
   const labels = validData.map(d => {
     const date = new Date(d.month_ending);
@@ -46,18 +50,18 @@ const VarianceChart = ({ data, theme }) => {
   
   const minVal = Math.min(...variances, 0);
   const maxVal = Math.max(...variances, 0);
-  const yMin = Math.floor(Math.min(minVal - 3, -5));
-  const yMax = Math.ceil(Math.max(maxVal + 3, 5));
+  const yMin = Math.floor(Math.min(minVal - 3, -4));
+  const yMax = Math.ceil(Math.max(maxVal + 3, 4));
 
   const backgroundColors = variances.map(v => {
-    if (v === 0) return isDark ? 'rgba(255, 209, 102, 0.8)' : 'rgba(255, 209, 102, 0.7)';
+    if (v === 0) return isDark ? 'rgba(46, 196, 182, 0.4)' : 'rgba(46, 196, 182, 0.35)';
     return v > 0 
-      ? (isDark ? 'rgba(46, 196, 182, 0.8)' : 'rgba(46, 196, 182, 0.75)') 
-      : (isDark ? 'rgba(239, 71, 111, 0.8)' : 'rgba(239, 71, 111, 0.75)');
+      ? (isDark ? 'rgba(46, 196, 182, 0.85)' : 'rgba(46, 196, 182, 0.8)') 
+      : (isDark ? 'rgba(239, 71, 111, 0.85)' : 'rgba(239, 71, 111, 0.8)');
   });
 
   const borderColors = variances.map(v => {
-    if (v === 0) return '#FFD166';
+    if (v === 0) return '#2EC4B6';
     return v > 0 ? '#2EC4B6' : '#EF476F';
   });
 
@@ -71,12 +75,13 @@ const VarianceChart = ({ data, theme }) => {
         borderColor: borderColors,
         borderWidth: 1.5,
         borderRadius: 6,
+        maxBarThickness: 65,
         datalabels: {
           display: true,
           clip: false,
           color: (ctx) => {
             const val = ctx.dataset.data[ctx.dataIndex];
-            if (val === 0) return isDark ? '#FFD166' : '#B45309';
+            if (val === 0) return isDark ? '#5EEAD4' : '#0F766E';
             if (isDark) return val > 0 ? '#5EEAD4' : '#FDA4AF';
             return val > 0 ? '#0F766E' : '#BE123C';
           },
@@ -91,7 +96,7 @@ const VarianceChart = ({ data, theme }) => {
           offset: 6,
           font: { family: 'Poppins', size: 11, weight: 700 },
           formatter: (val) => {
-            if (val === 0) return '0 Days (On Track)';
+            if (val === 0) return '0 Days';
             return (val > 0 ? `+${val}` : `${val}`) + ' Days';
           },
         },

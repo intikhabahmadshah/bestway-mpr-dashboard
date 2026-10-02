@@ -96,13 +96,12 @@ export default async function handler(req, res) {
           row.accumulative_planned,
           row.accumulative_actual,
           row.variance_days !== undefined && row.variance_days !== null && row.variance_days !== '' && !isNaN(Number(row.variance_days)) ? parseInt(row.variance_days, 10) : null,
-          row.target_diff !== undefined && row.target_diff !== null && row.target_diff !== '' && !isNaN(Number(row.target_diff)) ? parseFloat(row.target_diff) : null,
           row.spi !== undefined && row.spi !== null && row.spi !== '' && !isNaN(Number(row.spi)) ? parseFloat(row.spi) : null
         ]);
 
         const query = `
           INSERT INTO MPR (
-            month, month_ending, duration, monthly_planned, monthly_actual, accumulative_planned, accumulative_actual, variance_days, target_diff, spi
+            month, month_ending, duration, monthly_planned, monthly_actual, accumulative_planned, accumulative_actual, variance_days, spi
           ) VALUES ?
         `;
 

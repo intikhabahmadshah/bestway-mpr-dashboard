@@ -68,11 +68,7 @@ const ProgressChart = ({ data, theme, selectedMonth, onSelectMonth }) => {
     ? activePointData.accumulative_actual * 100 
     : null;
   const focusPlanned = (activePointData.accumulative_planned || 0) * 100;
-  const focusVariance = focusActual !== null ? (focusActual - focusPlanned) / 100 : null;
-  const hasManualTargetDiff = activePointData.target_diff !== null && activePointData.target_diff !== undefined && activePointData.target_diff !== '';
-  const focusVariancePercentVal = hasManualTargetDiff 
-    ? Number(activePointData.target_diff) 
-    : (focusVariance !== null ? focusVariance * 100 : null);
+  const focusVariancePercentVal = focusVariance !== null ? focusVariance * 100 : null;
   const hasVarianceDays = activePointData.variance_days !== null && activePointData.variance_days !== undefined && activePointData.variance_days !== '';
   const focusVarianceDays = hasVarianceDays ? Number(activePointData.variance_days) : null;
 

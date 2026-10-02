@@ -37,7 +37,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
           accumulative_planned: r.accumulative_planned !== null && r.accumulative_planned !== undefined ? (Number(r.accumulative_planned) * 100).toFixed(2) : '',
           accumulative_actual: r.accumulative_actual !== null && r.accumulative_actual !== undefined ? (Number(r.accumulative_actual) * 100).toFixed(2) : '',
           variance_days: r.variance_days !== undefined && r.variance_days !== null && r.variance_days !== '' ? r.variance_days : '',
-          target_diff: r.target_diff !== undefined && r.target_diff !== null && r.target_diff !== '' ? r.target_diff : '',
           spi: r.spi !== undefined && r.spi !== null && r.spi !== '' ? r.spi : '',
         }))
       );
@@ -73,7 +72,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         accumulative_planned: '',
         accumulative_actual: '',
         variance_days: '',
-        target_diff: '',
         spi: ''
       }
     ]);
@@ -102,7 +100,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         }
 
         let mActVal = '';
-        let calcDiff = r.target_diff;
         let calcSpi = r.spi;
 
         if (r.monthly_actual !== '' && r.monthly_actual !== null && r.monthly_actual !== undefined) {
@@ -110,9 +107,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
           if (!isNaN(mAct)) {
             accumAct += mAct;
             mActVal = Math.min(100, accumAct).toFixed(2);
-            if (calcDiff === '' || calcDiff === null || calcDiff === undefined) {
-              calcDiff = (parseFloat(mActVal) - accumPlan).toFixed(2);
-            }
             if (calcSpi === '' || calcSpi === null || calcSpi === undefined) {
               calcSpi = accumPlan > 0 ? (parseFloat(mActVal) / accumPlan).toFixed(2) : '1.00';
             }
@@ -127,7 +121,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
           ...r,
           accumulative_planned: isNaN(mPlan) ? r.accumulative_planned : Math.min(100, accumPlan).toFixed(2),
           accumulative_actual: actualActive ? mActVal : '',
-          target_diff: calcDiff !== undefined ? calcDiff : '',
           spi: calcSpi !== undefined ? calcSpi : ''
         };
       });
@@ -190,8 +183,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         accumulative_planned: parsePercentStr(parts[5]),
         accumulative_actual: parsePercentStr(parts[6]),
         variance_days: parseVarianceDays(parts[7]),
-        target_diff: parseDecimalStr(parts[8]),
-        spi: parseDecimalStr(parts[9])
+        spi: parseDecimalStr(parts[8])
       });
     }
     return parsed;
@@ -258,7 +250,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
         accumulative_planned: toDecimal(r.accumulative_planned),
         accumulative_actual: toDecimal(r.accumulative_actual),
         variance_days: parseVariance(r.variance_days),
-        target_diff: parseNumber(r.target_diff),
         spi: parseNumber(r.spi)
       };
     });
@@ -367,7 +358,7 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
               {/* Helper Action Bar */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  💡 Enter percentage as numbers (e.g. <code>4.70</code>). In <strong>Variance (Days)</strong>, <strong>Target Diff %</strong>, and <strong>SPI</strong>, enter your custom values to directly fix dashboard charts &amp; KPIs.
+                  💡 Enter percentage as numbers (e.g. <code>4.70</code>). In <strong>Variance (Days)</strong> and <strong>SPI</strong>, enter your custom values to directly fix dashboard charts &amp; KPIs.
                 </span>
 
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -406,7 +397,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
                       <th style={{ width: '90px', textAlign: 'center' }}>Accum. Planned %</th>
                       <th style={{ width: '90px', textAlign: 'center' }}>Accum. Actual %</th>
                       <th style={{ width: '90px', textAlign: 'center' }}>Variance (Days)</th>
-                      <th style={{ width: '90px', textAlign: 'center' }}>Target Diff %</th>
                       <th style={{ width: '80px', textAlign: 'center' }}>SPI</th>
                       <th style={{ width: '35px', textAlign: 'center' }}></th>
                     </tr>
@@ -518,31 +508,6 @@ const UpdateDataModal = ({ isOpen, onClose, currentData, onUpdateSuccess, showTo
                                 fontWeight: 700 
                               }}
                             />
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ position: 'relative' }}>
-                            <input 
-                              type="number" 
-                              step="0.01"
-                              value={row.target_diff !== undefined && row.target_diff !== null ? row.target_diff : ''} 
-                              placeholder="e.g. -1.2"
-                              onChange={e => handleCellChange(index, 'target_diff', e.target.value)}
-                              style={{ 
-                                width: '100%', 
-                                textAlign: 'right', 
-                                padding: '6px 18px 6px 4px', 
-                                borderRadius: '4px', 
-                                border: '1px solid var(--border-color)', 
-                                background: 'var(--bg-card)', 
-                                color: row.target_diff !== '' && Number(row.target_diff) < 0 
-                                  ? '#EF476F' 
-                                  : (Number(row.target_diff) > 0 ? '#2EC4B6' : 'var(--text-primary)'), 
-                                fontSize: '0.82rem', 
-                                fontWeight: 700 
-                              }}
-                            />
-                            <span style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.7rem' }}>%</span>
                           </div>
                         </td>
                         <td>
