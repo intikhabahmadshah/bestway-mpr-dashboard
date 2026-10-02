@@ -18,10 +18,16 @@ const KPICards = ({ data, selectedMonth }) => {
   const formatPercent = (val) => (val !== null && !isNaN(val) ? (val * 100).toFixed(2) + '%' : '—');
   const hasVarianceDays = activeData.variance_days !== null && activeData.variance_days !== undefined && activeData.variance_days !== '';
   const varianceDays = hasVarianceDays ? Number(activeData.variance_days) : null;
-  const variance = accumActual !== null && !isNaN(accumActual) && !isNaN(accumPlanned) ? accumActual - accumPlanned : null;
-  const variancePercentVal = variance !== null ? variance * 100 : null;
+  const hasTargetDiff = activeData.target_diff !== null && activeData.target_diff !== undefined && activeData.target_diff !== '';
+  const targetDiffVal = hasTargetDiff 
+    ? Number(activeData.target_diff) 
+    : (accumActual !== null && !isNaN(accumActual) && !isNaN(accumPlanned) ? (accumActual - accumPlanned) * 100 : null);
   const cardColor = varianceDays === null ? 'amber' : (varianceDays >= 0 ? 'green' : 'red');
-  const spi = accumPlanned > 0 && accumActual !== null && !isNaN(accumActual) ? accumActual / accumPlanned : null;
+
+  const hasManualSpi = activeData.spi !== null && activeData.spi !== undefined && activeData.spi !== '';
+  const spi = hasManualSpi 
+    ? Number(activeData.spi) 
+    : (accumPlanned > 0 && accumActual !== null && !isNaN(accumActual) ? accumActual / accumPlanned : null);
 
   const monthLabel = activeData.month_ending
     ? new Date(activeData.month_ending).toLocaleDateString('default', { month: 'short', year: 'numeric' })
@@ -69,9 +75,9 @@ const KPICards = ({ data, selectedMonth }) => {
         <div className="kpi-label">Schedule Variance (Days)</div>
         <div className="kpi-value" style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
           <span>{varianceDays !== null ? (varianceDays > 0 ? `+${varianceDays} Days` : `${varianceDays} Days`) : '—'}</span>
-          {variancePercentVal !== null && !isNaN(variancePercentVal) && (
+          {targetDiffVal !== null && !isNaN(targetDiffVal) && (
             <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-              ({variancePercentVal > 0 ? '+' : ''}{variancePercentVal.toFixed(2)}%)
+              ({targetDiffVal > 0 ? '+' : ''}{targetDiffVal.toFixed(2)}% target diff)
             </span>
           )}
         </div>
@@ -88,8 +94,8 @@ const KPICards = ({ data, selectedMonth }) => {
         </div>
       </div>
 
-      <div className={`kpi-card ${spi === null ? 'amber' : (spi >= 1 ? 'green' : 'amber')}`}>
-        <div className={`kpi-icon ${spi === null ? 'amber' : (spi >= 1 ? 'green' : 'amber')}`}>
+      <div className={`kpi-card ${spi === null ? 'amber' : (spi >= 1 ? 'green' : 'red')}`}>
+        <div className={`kpi-icon ${spi === null ? 'amber' : (spi >= 1 ? 'green' : 'red')}`}>
           <FiCompass />
         </div>
         <div className="kpi-label">SPI (Performance Index)</div>

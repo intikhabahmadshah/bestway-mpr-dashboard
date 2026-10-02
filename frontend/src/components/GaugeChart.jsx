@@ -16,7 +16,10 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
   const activeData = selectedMonth || latestDefaultData;
   const accumActual = activeData.accumulative_actual !== null && activeData.accumulative_actual !== undefined ? activeData.accumulative_actual * 100 : 0;
   const accumPlanned = (activeData.accumulative_planned || 0) * 100;
-  const varianceVal = accumActual - accumPlanned;
+  
+  // Target Diff (%): Use manual target_diff if entered, otherwise calculate
+  const hasTargetDiff = activeData.target_diff !== null && activeData.target_diff !== undefined && activeData.target_diff !== '';
+  const varianceVal = hasTargetDiff ? Number(activeData.target_diff) : (accumActual !== 0 ? accumActual - accumPlanned : 0);
   const targetGap = Math.abs(varianceVal);
   
   const monthLabel = activeData.month_ending
@@ -118,7 +121,7 @@ const GaugeChart = ({ data, theme, selectedMonth }) => {
           <Doughnut data={targetChartData} options={commonOptions} />
           <div className="gauge-center-text">
             <div className="gauge-value" style={{ color: targetGapColor }}>
-              {varianceVal > 0 ? '+' : ''}{varianceVal.toFixed(1)}%
+              {varianceVal !== null && !isNaN(varianceVal) ? `${varianceVal > 0 ? '+' : ''}${varianceVal.toFixed(1)}%` : '—'}
             </div>
             <div className="gauge-label">
               Target Diff

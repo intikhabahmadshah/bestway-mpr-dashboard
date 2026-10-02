@@ -78,6 +78,8 @@ const DataTable = ({ data, selectedMonth, onSelectMonth }) => {
               <th onClick={() => handleSort('accumulative_planned')}>Accum. Planned %</th>
               <th onClick={() => handleSort('accumulative_actual')}>Accum. Actual %</th>
               <th onClick={() => handleSort('variance_days')} style={{ textAlign: 'center' }}>Variance (Days)</th>
+              <th onClick={() => handleSort('target_diff')} style={{ textAlign: 'center' }}>Target Diff %</th>
+              <th onClick={() => handleSort('spi')} style={{ textAlign: 'center' }}>SPI</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -108,6 +110,24 @@ const DataTable = ({ data, selectedMonth, onSelectMonth }) => {
                         color: Number(row.variance_days) < 0 ? '#EF476F' : (Number(row.variance_days) > 0 ? '#2EC4B6' : 'var(--text-muted)')
                       }}>
                         {Number(row.variance_days) > 0 ? `+${row.variance_days}` : row.variance_days} Days
+                      </span>
+                    ) : '—'}
+                  </td>
+                  <td style={{ textAlign: 'center', fontWeight: 700 }}>
+                    {row.target_diff !== null && row.target_diff !== undefined && row.target_diff !== '' ? (
+                      <span style={{
+                        color: Number(row.target_diff) < 0 ? '#EF476F' : (Number(row.target_diff) > 0 ? '#2EC4B6' : 'var(--text-muted)')
+                      }}>
+                        {Number(row.target_diff) > 0 ? `+${Number(row.target_diff).toFixed(2)}` : Number(row.target_diff).toFixed(2)}%
+                      </span>
+                    ) : '—'}
+                  </td>
+                  <td style={{ textAlign: 'center', fontWeight: 700 }}>
+                    {row.spi !== null && row.spi !== undefined && row.spi !== '' ? (
+                      <span style={{
+                        color: Number(row.spi) < 1.0 ? '#EF476F' : '#2EC4B6'
+                      }}>
+                        {Number(row.spi).toFixed(2)}
                       </span>
                     ) : '—'}
                   </td>
